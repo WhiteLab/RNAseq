@@ -7,7 +7,7 @@ from subprocess import Popen
 from subprocess import call
 from log import log
 
-def fastqc(fastx_tool,sample,end1,end2):
+def fastqc(fastqc_tool,sample,end1,end2):
     # casual logging - look for a LOGS directory, otherwise assume current dir
     log_dir='./'
     if os.path.isdir('LOGS'):
@@ -16,7 +16,7 @@ def fastqc(fastx_tool,sample,end1,end2):
     loc=log_dir + sample + '.fastqc.log'
     fastqc_cmd='gzip -dc ' + end1 + ' ' + end2 + ' | ' + fastqc_tool + ' stdin --outdir=QC/'
     log(loc,date_time() + fastqc_cmd + "\n")
-    f=Popen(fastx_cmd,shell=True,stdin=None,stdout=None,stderr=None,close_fds=True)
+    f=Popen(fastqc_cmd,shell=True,stdin=None,stdout=None,stderr=None,close_fds=True)
     # check after a minute whether the process is still good - shouldn't take too long to ascertain whether phred score didn't fit
     call('sleep 20s', shell=True)
 

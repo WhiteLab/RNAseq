@@ -9,6 +9,15 @@ def picard_insert_size(java_tool,picard_tool,sample,log_dir):
     picard_insert_size_cmd=java_tool + " -Xmx2g -jar " + picard_tool + " CollectInsertSizeMetrics I=" + sample + ".srt.bam H=" + sample + ".insert_metrics.pdf O=" + sample + ".insert_metrics.hist  > " + log_dir + sample + ".picard.insert_size.log 2>&1"
     log(log_dir + sample + ".picard.insert_size.log",date_time() + picard_insert_size_cmd + "\n")
     call(picard_insert_size_cmd,shell=True)
+    #open file and return insert size
+    fh=open(sample + ".insert_metrics.hist",'r')
+    for i in xrange(0,7,1):
+        skip=next(fh)
+    stats=next(fh)
+    fh.close()
+    stat=stats.split('\t')
+    
+    return(stat[4],stat[5])
 
 if __name__ == "__main__":
     import argparse

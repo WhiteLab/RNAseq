@@ -7,11 +7,11 @@ from log import log
 import subprocess
 
 def bwt2_pe(bwt_tool,bwt_ref,end1,end2,samtools_tool,samtools_ref,sample,log_dir):
-    bwt_cmd="(" + bwt_tool + " --fr -p -l 0 -X 500 -x " + bwt_ref + " -1 " + end1 + " -2 " + end2 + " | " + samtools_tool + " view -bT " + samtools_ref + " - > " + sample + ".bam) > " + log_dir + sample + ".bwt.pe.log 2>&1"
+    bwt_cmd="(" + bwt_tool + " --fr -p 8 -I 0 -X 500 -x " + bwt_ref + " -1 " + end1 + " -2 " + end2 + " | " + samtools_tool + " view -bT " + samtools_ref + " - > " + sample + ".bam) > " + log_dir + sample + ".bwt.pe.log 2>&1"
     loc=log_dir + sample + ".bwt.pe.log"
     log(loc,date_time() + bwt_cmd + "\n")
     try:
-        subprocess.check_output(bwa_cmd,shell=True)
+        call(bwt_cmd,shell=True)
     except:
         exit(1)
     return 0

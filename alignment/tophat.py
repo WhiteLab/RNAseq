@@ -8,7 +8,7 @@ import subprocess
 
 def tophat(tophat_tool,tx,bwt2_ref,end1,end2,x,s,sample,log_dir):
     loc=log_dir + sample + ".tophat.log"
-    tophat_cmd=tophat_tool + " --no-coverage-search  --phred64-quals --mate-inner-dist " + x  + " --mate-std-dev " + s + " --num-threads 8 --no-mixed --no-discordant --library-type fr-firststrand --transcriptome-index " + tx + " -o " + sample + " " + bwt2_ref + " " + end1 + " " + end2 + " 2>> " + loc
+    tophat_cmd=tophat_tool + " --no-coverage-search  --phred64-quals --mate-inner-dist " + x  + " --mate-std-dev " + s + " --num-threads 8 --library-type fr-firststrand --transcriptome-index " + tx + " -o " + sample + " " + bwt2_ref + " " + end1 + " " + end2 + " 2>> " + loc
     log(loc,date_time() + tophat_cmd + "\n")
     try:
         call(tophat_cmd,shell=True)
@@ -18,7 +18,7 @@ def tophat(tophat_tool,tx,bwt2_ref,end1,end2,x,s,sample,log_dir):
 
 if __name__ == "__main__":
     import argparse
-    parser=argparse.ArgumentParser(description='tophat paired-end alignment module.  Typically run first in pipeline.')
+    parser=argparse.ArgumentParser(description='tophat paired-end alignment and transcript assembly module.')
     parser.add_argument('-t','--tophat',action='store',dest='tophat_tool', help='Location of tophat alignment tool.')
     parser.add_argument('-tx','--transcriptome',action='store',dest='tx',help='Location of pre-built transcriptome')
     parser.add_argument('-b','--bwt2_reference',action='store',dest='bwt2_ref',help='Location of bowtie2 reference file')

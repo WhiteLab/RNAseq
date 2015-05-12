@@ -13,12 +13,12 @@
     },
 
     "refs":{
-	"bwt2":"REFS/Homo_sapiens/Ensembl/GRCh37/Sequence/Bowtie2Index/genome",
-	"genome":"REFS/Homo_sapiens/Ensembl/GRCh37/Sequence/WholeGenomeFasta/genome.fa",
-	"gtf":"REFS/Homo_sapiens/Ensembl/GRCh37/Annotation/Archives/archive-2014-05-23-16-03-55/Genes/genes.gtf",
-	"transcriptome":"REFS/Homo_sapiens/Ensembl/GRCh37/Annotation/Archives/archive-2014-05-23-16-03-55/Genes/GRCh37.75_transcriptome/genes",
+	"bwt2":"REFS/GENCODE19/GRCh37.p13.genome",
+	"genome":"REFS/GENCODE19/GRCh37.p13.genome.fa",
+	"gtf":"REFS/GENCODE19/gencode.v19.annotation.gtf",
+	"transcriptome":"REFS/GENCODE19/transcriptome_data/gencode.v19.annotation",
 	"cont":"PANCAN",
 	"obj":"ALIGN",
-	"config":"/home/ubuntu/TOOLS/Scripts/utility/hg19_pe_config.json"
+	"config":"/home/ubuntu/TOOLS/Scripts/utility/GENCODE19_config.json"
     }
 }

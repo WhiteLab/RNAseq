@@ -1,6 +1,6 @@
-DNAseq Paired End pipeline
+RNAseq Paired End pipeline
 ===========================
-Adapted from Jason Grundstad's pipeline to run on PDC by Miguel Brown, 2015 Februrary
+Adapted from Xiyao's pipeline to run on PDC by Miguel Brown, 2015 May
 
 ## UTILITY:
 
@@ -134,26 +134,11 @@ optional arguments:
   -f FN, --file FN  qc_stats.json document list
 
 ## ALIGNMENT:
-
-### pipeline_wrapper.py 
-usage: pipeline_wrapper.py [-h] [-f FN] [-j CONFIG]
-
-Pipeline wrapper script to process multiple paired end set serially.
-
-optional arguments:
-  -h, --help            show this help message and exit
-  -f FN, --file FN      File with bionimbus ID, seqtype and sample lane list
-  -j CONFIG, --json CONFIG
-                        JSON config file with tool locations, reference
-                        locations, and data staging informationlane list
-  -m REF_MNT, --mount REF_MNT
-                        Reference drive mount location. Example would be
-                        /mnt/cinder/REFS_XXX
-
-#### pipeline.py
+#### pipeline.py 
 usage: pipeline.py [-h] [-f1 END1] [-f2 END2] [-t SEQTYPE] [-j CONFIG_FILE]
+                   [-m REF_MNT]
 
-DNA alignment paired-end QC pipeline
+RNA alignment paired-end QC pipeline
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -161,62 +146,36 @@ optional arguments:
                         First fastq file
   -f2 END2, --file2 END2
                         Second fastq file
-  -t SEQTYPE, --seqtype SEQTYPE
-                        Type of sequencing peformed. Likely choices are
-                        genome, exome, and capture
   -j CONFIG_FILE, --json CONFIG_FILE
                         JSON config file containing tool and reference
                         locations
   -m REF_MNT, --mount REF_MNT
                         Drive mount location. Example would be
                         /mnt/cinder/REFS_XXX
-
 ##### Runs the following submodules in order:
-1. fastx
-2. bwa_mem_pe
-3. novosort_sort_pe
-(picard_sort_pe - deprecated in favor of novosort, but still avaialable)
-4. picard_rmdup
-5. flagstats
-6. picard_insert_size 
-7. coverage
-8. upload_to_swift
+1. bwt2_pe
+2. novosort_sort_pe
+3. fastqc
+4. picard_insert_size 
+5. tophat
+6. align_stats
+7. cufflinks
+8. report
 
 ## Pipeline submodule descriptions:
-#### fastx.py
-usage: fastx.py [-h] [-f FASTX_TOOL] [-sa SAMPLE] [-f1 END1] [-f2 END2]
+#### bwt2_pe.py 
+usage: bwt2_pe.py [-h] [-b BWT_TOOL] [-br BWT_REF] [-f1 END1] [-f2 END2]
+                  [-s SAMTOOLS_TOOL] [-sr SAMTOOLS_REF] [-sa SAMPLE]
+                  [-l LOG_DIR]
 
-FASTX quality stats module. Provides quality stats for fastq file and is
-independent of alignment.
-
-optional arguments:
-  -h, --help            show this help message and exit
-  -f FASTX_TOOL, --fastx FASTX_TOOL
-                        Location of fastx_quality_stats tool. Version 0.0.13.2
-                        preferred.
-  -sa SAMPLE, --sample SAMPLE
-                        Sample/location name prefix
-  -f1 END1, --file1 END1
-                        First of paired-end fastq file
-  -f2 END2, --file2 END2
-                        Second of paired-end fastq file
-
-#### bwa_mem_pe.py
-usage: bwa_mem_pe.py [-h] [-b BWA_TOOL] [-rg RGRP] [-br BWA_REF] [-f1 END1]
-                     [-f2 END2] [-s SAMTOOLS_TOOL] [-sr SAMTOOLS_REF]
-                     [-sa SAMPLE] [-l LOG_DIR]
-
-BWA paired-end alignment module. Typically run first in pipeline.
+Bowtie2 paired-end alignment module. Typically run first in pipeline.
 
 optional arguments:
   -h, --help            show this help message and exit
-  -b BWA_TOOL, --bwa BWA_TOOL
-                        Location of bwa alignment tool. Version 0.7.8
-                        preferred.
-  -rg RGRP, --RGRP RGRP
-                        SAM header read group string
-  -br BWA_REF, --bwa_reference BWA_REF
-                        Location of bwa reference file
+  -b BWT_TOOL, --bwt BWT_TOOL
+                        Location of bowtie2 alignment tool.
+  -br BWT_REF, --bwt_reference BWT_REF
+                        Location of bwt reference file
   -f1 END1, --file1 END1
                         First of paired-end fastq file
   -f2 END2, --file2 END2
@@ -229,6 +188,7 @@ optional arguments:
                         Sample/project name prefix
   -l LOG_DIR, --log LOG_DIR
                         LOG directory location
+
 #### novosort_sort_pe.py 
 usage: novosort_sort_pe.py [-h] [-n NOVOSORT] [-sa SAMPLE] [-l LOG_DIR]
 
@@ -243,57 +203,22 @@ optional arguments:
   -l LOG_DIR, --log LOG_DIR
                         LOG directory location
 
-##### picard_sort_pe.py - available, but deprecated in favor of novosort
-usage: picard_sort_pe.py [-h] [-j JAVA_TOOL] [-p PICARD_TOOL] [-pt PICARD_TMP]
-                         [-sa SAMPLE] [-l LOG_DIR]
+#### fastqc.py
+usage: fastqc.py [-h] [-f FASTQC_TOOL] [-sa SAMPLE] [-f1 END1] [-f2 END2]
 
-Picard tools to sort BAM module.
-
-optional arguments:
-  -h, --help            show this help message and exit
-  -j JAVA_TOOL, --java JAVA_TOOL
-                        Java location directory, version jdk1.7.0_45 preferred
-  -p PICARD_TOOL, --picard PICARD_TOOL
-                        Picard jar file location
-  -pt PICARD_TMP, --picard_temp PICARD_TMP
-                        Picard temp folder location to create
-  -sa SAMPLE, --sample SAMPLE
-                        Sample/project name prefix
-  -l LOG_DIR, --log LOG_DIR
-                        LOG directory location
-
-#### picard_rmdup.py
-usage: picard_rmdup.py [-h] [-j JAVA_TOOL] [-p PICARD_TOOL] [-pt PICARD_TMP]
-                       [-sa SAMPLE] [-l LOG_DIR]
-
-Picard tools remove duplicate module. Removes duplicates from BAM file, run
-after sorting BAM.
+fastqc module. Provides quality stats for fastq file and is independent of
+alignment.
 
 optional arguments:
   -h, --help            show this help message and exit
-  -j JAVA_TOOL, --java JAVA_TOOL
-                        Java location directory, version jdk1.7.0_45 preferred
-  -p PICARD_TOOL, --picard PICARD_TOOL
-                        Picard jar file location
-  -pt PICARD_TMP, --picard_temp PICARD_TMP
-                        Picard temp folder location to create
+  -f FASTQC_TOOL, --fastqc FASTQC_TOOL
+                        Location of fastqc tool.
   -sa SAMPLE, --sample SAMPLE
-                        Sample/project name prefix
-  -l LOG_DIR, --log LOG_DIR
-                        LOG directory location
-
-#### flagstats.py
-usage: flagstats.py [-h] [-s SAMTOOLS_TOOL] [-sa SAMPLE]
-
-Flag stats from samtools module. Assumes bwa alignent and picard tools have
-been run to sort bam and remove duplicates.
-
-optional arguments:
-  -h, --help            show this help message and exit
-  -s SAMTOOLS_TOOL, --samtools SAMTOOLS_TOOL
-                        Location of samtools tool. Version 1.19 preferred.
-  -sa SAMPLE, --sample SAMPLE
-                        Sample/project name prefix
+                        Sample/location name prefix
+  -f1 END1, --file1 END1
+                        First of paired-end fastq file
+  -f2 END2, --file2 END2
+                        Second of paired-end fastq file
 
 #### picard_insert_size.py
 usage: picard_insert_size.py [-h] [-j JAVA_TOOL] [-p PICARD_TOOL] [-sa SAMPLE]
@@ -313,167 +238,73 @@ optional arguments:
   -l LOG_DIR, --log LOG_DIR
                         LOG directory location
 
-#### coverage.py 
-usage: coverage.py [-h] [-bt BEDTOOLS2_TOOL] [-sa SAMPLE] [-c COVERAGE]
-                   [-bf BED_FILE]
+#### tophat.py
+usage: tophat.py [-h] [-t TOPHAT_TOOL] [-tx TX] [-b BWT2_REF] [-f1 END1]
+                 [-f2 END2] [-x X] [-sd S] [-sa SAMPLE] [-l LOG_DIR]
 
-Bedtools coverage calculation module. Typically run last in pipeline. See
-coverage parameter.
+tophat paired-end alignment and transcript assembly module.
 
 optional arguments:
   -h, --help            show this help message and exit
-  -bt BEDTOOLS2_TOOL, --bedtools BEDTOOLS2_TOOL
-                        Location of bedtools2 tool.
+  -t TOPHAT_TOOL, --tophat TOPHAT_TOOL
+                        Location of tophat alignment tool.
+  -tx TX, --transcriptome TX
+                        Location of pre-built transcriptome
+  -b BWT2_REF, --bwt2_reference BWT2_REF
+                        Location of bowtie2 reference file
+  -f1 END1, --file1 END1
+                        First of paired-end fastq file
+  -f2 END2, --file2 END2
+                        Second of paired-end fastq file
+  -x X, --mean X        Mean insert size
+  -sd S, --standard_deviation S
+                        Standard deviation of insert size
   -sa SAMPLE, --sample SAMPLE
                         Sample/project name prefix
-  -c COVERAGE, --coverage COVERAGE
-                        Name of submodule to run. Choose from genome, exome,
-                        capture or all.
-  -bf BED_FILE, --bed_file BED_FILE
-                        Bedfile list. If running all, list as string in order
-                        format 'exome,genome,capture'. Else, just list the one
-                        bed file
+  -l LOG_DIR, --log LOG_DIR
+                        LOG directory location
 
-#### merge_qc_stats.py 
-usage: merge_qc_stats.py [-h] [-o OBJ] [-c CONT] [-l LANE_LIST]
+#### align_stats.py
+usage: align_stats.py [-h] [-sa SAMPLE]
 
-Uses pipeline lane list to create a summary table of qc stats
+Alignment summary report. Converts tophat alignment summary to a table format
 
 optional arguments:
   -h, --help            show this help message and exit
-  -o OBJ, --object OBJ  Swift object name, i.e. PANCAN
-  -c CONT, --container CONT
-                        Swift container prefix, i.e. RAW/2015-1234
-  -l LANE_LIST, --lane_list LANE_LIST
-                        Original lane list used to run pipeline
+  -sa SAMPLE, --sample SAMPLE
+                        Sample/location name prefix
 
-#### novosort_merge_pe.py 
-usage: novosort_merge_pe.py [-h] [-sl SAMPLE_LIST] [-j CONFIG_FILE] [-w WAIT]
+#### cufflinks.py 
+usage: cufflinks.py [-h] [-c CUFFLINKS_TOOL] [-e ENS_REF] [-g GENOME]
+                    [-sa SAMPLE] [-l LOG_DIR]
 
-novosort tool to merge BAM files module.
+tophat paired-end alignment module. Typically run first in pipeline.
 
 optional arguments:
   -h, --help            show this help message and exit
-  -sl SAMPLE_LIST, --sample_list SAMPLE_LIST
-                        Sample/project name prefix list
-  -j CONFIG_FILE, --json CONFIG_FILE
-                        JSON config file with tool and ref locations
-  -w WAIT, --wait WAIT  Wait time to download bam files. 900 (seconds)
-                        recommended
+  -c CUFFLINKS_TOOL, --cufflinks CUFFLINKS_TOOL
+                        Location of cufflinks tool.
+  -e ENS_REF, --ensembl_reference ENS_REF
+                        Location of ensembl reference file
+  -g GENOME, --genome GENOME
+                        Location of genome reference file
+  -sa SAMPLE, --sample SAMPLE
+                        Sample/project name prefix
+  -l LOG_DIR, --log LOG_DIR
+                        LOG directory location
 
-#### picard_ksort.py 
-usage: picard_ksort.py [-h] [-b BAM_LIST] [-j CONFIG_FILE] [-o FLAG]
-                       [-r REF_MNT]
+#### report.py 
+usage: report.py [-h] [-sa SAMPLE] [-r REF_GTF] [-c TX_GTF]
 
-Picard tool to reorder BAM file by karyotypic order, necessary for running
-muTect.
-
-optional arguments:
-  -h, --help            show this help message and exit
-  -b BAM_LIST, --bam_list BAM_LIST
-                        BAM file list
-  -j CONFIG_FILE, --json CONFIG_FILE
-                        JSON config file with tool and ref locations
-  -o FLAG, --overwrite FLAG
-                        Enter 'y' or 'n.' Flag to overwrite original after
-                        reordering or not.
-  -r REF_MNT, --reference REF_MNT
-                        Directory references are mounted, i.e.
-                        /mnt/cinder/REFS_XXX
- 
-#### parse_qc.pl - run at end of pipeline to gather qc stats
-
-## ANALYSIS:
-
-### variant_annot_pipe.py 
-usage: variant_annot_pipe.py [-h] [-sp SAMPLE_PAIRS] [-j CONFIG_FILE]
-                             [-w WAIT] [-k KFLAG] [-r REF_MNT]
-
-Pipeline for variant calls and annotation using mutect and snpEff
+Transcript annotation summart report. Parses cufflinks trnascripts.gtf and
+adds gene symbols and transcript biotype
 
 optional arguments:
   -h, --help            show this help message and exit
-  -sp SAMPLE_PAIRS, --sample-pairs SAMPLE_PAIRS
-                        Tumor/normal sample pair list
-  -j CONFIG_FILE, --json CONFIG_FILE
-                        JSON config file with tool and ref locations
-  -w WAIT, --wait WAIT  Wait time to download bam files. 900 (seconds)
-                        recommended
-  -k KFLAG, --karyo KFLAG
-                        Flag to perform karyotypic reordering of BAM files.
-                        Only need if original reference used wasn't sorted in
-                        the manner. 'y' to do so
-  -r REF_MNT, --reference REF_MNT
-                        Directory references are mounted, i.e.
-                        /mnt/cinder/REFS_XXX
-  -wg WG, --whole-genome WG
-                        'y' or 'n' flag if whole genome or not. will determine
-                        whether to flag for on/off target
-
-Runs the following modules:
-1. novosort_merge_pe
-2. mutect_pipe
-3. mutect_merge_sort
-4. snpeff_pipe
-5. upload_variants_to_swift
-
-#### mutect_pipe.py 
-usage: mutect_pipe.py [-h] [-j CONFIG_FILE] [-sp SAMPLE_PAIRS] [-r REF_MNT]
-
-muTect pipleine for variant calling. Need BAM and bai files ahead of time.
-
-optional arguments:
-  -h, --help            show this help message and exit
-  -j CONFIG_FILE, --json CONFIG_FILE
-                        JSON config file with tool and reference locations
-  -sp SAMPLE_PAIRS, --sample_pairs SAMPLE_PAIRS
-                        Sample tumor/normal pairs
-  -r REF_MNT, --ref_mnt REF_MNT
-                        Reference drive path - i.e. /mnt/cinder/REFS_XXXX
-
-#### mutect_merge_sort.py 
-usage: mutect_merge_sort.py [-h] [-j CONFIG_FILE] [-sp SAMPLE_PAIRS]
-                            [-r REF_MNT]
-
-Merge and sort output from mutect variant caller.
-
-optional arguments:
-  -h, --help            show this help message and exit
-  -j CONFIG_FILE, --json CONFIG_FILE
-                        JSON config file with tool and reference locations
-  -sp SAMPLE_PAIRS, --sample_pairs SAMPLE_PAIRS
-                        Sample tumor/normal pairs
-  -r REF_MNT, --ref_mnt REF_MNT
-                        Reference drive path - i.e. /mnt/cinder/REFS_XXXX
-
-## ANNOTATION:
-
-#### snpeff_pipe.py
-usage: snpeff_pipe.py [-h] [-j CONFIG_FILE] [-sp SAMPLE_PAIRS]
-
-muTect pipleine for variant calling. Need BAM and bai files ahead of time.
-
-optional arguments:
-  -h, --help            show this help message and exit
-  -j CONFIG_FILE, --json CONFIG_FILE
-                        JSON config file with tool and reference locations
-  -sp SAMPLE_PAIRS, --sample_pairs SAMPLE_PAIRS
-                        Sample tumor/normal pairs
-  -f CFLAG, --flag CFLAG
-                        'y' if whole genome,, 'n' if custom capture to mark
-                        on/off target
-
-#### report.py
-usage: report.py [-h] [-i INFILE] [-f]
-
-parse snpEff annotated output into a digestable report.
-
-optional arguments:
-  -h, --help            show this help message and exit
-  -i INFILE, --infile INFILE
-                        snpEff annotated variant file
-  -c C, --custom C      bed file to mark whether hit was on or off-target. if
-                        not desired, enter 'n'
-  -f, --filter_missense_nonsense_only
-                        Apply a filter that only reports NONSENSE and MISSENSE
-                        vars
+  -sa SAMPLE, --sample SAMPLE
+                        Sample/location name prefix
+  -r REF_GTF, --reference REF_GTF
+                        Reference gtf file used to annotate - preferably
+                        GENCODE with gene name and genetype
+  -c TX_GTF, --cufflinks TX_GTF
+                        Cufflinks transcript output file

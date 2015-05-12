@@ -12,9 +12,8 @@ def fastqc(fastqc_tool,sample,end1,end2):
     log_dir='./'
     if os.path.isdir('LOGS'):
         log_dir='LOGS/'
-    # assumes phred 64, try phred 33 if it fails
     loc=log_dir + sample + '.fastqc.log'
-    fastqc_cmd='gzip -dc ' + end1 + ' ' + end2 + ' | ' + fastqc_tool + ' stdin --outdir=QC/'
+    fastqc_cmd=fastqc_tool + ' -t 8 -o QC/ ' + end1 + ' ' + end2
     log(loc,date_time() + fastqc_cmd + "\n")
     f=Popen(fastqc_cmd,shell=True,stdin=None,stdout=None,stderr=None,close_fds=True)
     # check after a minute whether the process is still good - shouldn't take too long to ascertain whether phred score didn't fit

@@ -7,11 +7,12 @@ import re
 from date_time import date_time
 from fastqc import fastqc
 from bwt2_pe import bwt2_pe
-#from picard_sort_pe import picard_sort_pe
 from novosort_sort_pe import novosort_sort_pe
 from picard_insert_size import picard_insert_size
 from tophat import tophat
+from align_stats import align_stats
 from cufflinks import cufflinks
+from report import report
 from subprocess import call
 import subprocess
 import json
@@ -19,11 +20,10 @@ from log import log
 import pdb
 
 class Pipeline():
-    def __init__(self,end1,end2,seqtype,json_config,ref_mnt):
+    def __init__(self,end1,end2,json_config,ref_mnt):
         self.json_config = json_config
         self.end1=end1
         self.end2=end2
-        self.seqtype=seqtype
         self.status=0
         self.ref_mnt=ref_mnt
         self.parse_config()
@@ -39,20 +39,21 @@ class Pipeline():
         self.loc='LOGS/' + self.sample + '.pipe.log'
         HGACID=self.sample.split("_")
         self.bid=HGACID[0]
-        self.fastx_tool=self.config_data['tools']['fastx']
+        self.fastqc_tool=self.config_data['tools']['fastqc']
         self.bwt2_tool=self.config_data['tools']['bwt2']
-        self.bwa_ref=self.ref_mnt + '/' + self.config_data['refs']['bwa']
+        self.bwt2_ref=self.ref_mnt + '/' + self.config_data['refs']['bwt2']
         self.samtools_tool=self.config_data['tools']['samtools']
-        self.samtools_ref=self.ref_mnt + '/' + self.config_data['refs']['samtools']
+        self.genome_ref=self.ref_mnt + '/' + self.config_data['refs']['genome']
         self.java_tool=self.config_data['tools']['java']
         self.picard_tool=self.config_data['tools']['picard']
         self.novosort=self.config_data['tools']['novosort']
         self.picard_tmp='picard_tmp'
-        self.tophat=self.config_data['tools']['tophat']
-        self.cufflinks=self.config_data['tools']['cufflinks']
+        self.tophat_tool=self.config_data['tools']['tophat']
+        self.cufflinks_tool=self.config_data['tools']['cufflinks']
         self.htseq_count=self.config_data['tools']['htseq-count']
-        self.bedtools2_tool=self.config_data['tools']['bedtools']
-        self.bed_ref=self.ref_mnt + '/' + self.config_data['refs'][self.seqtype]
+        self.bwt2_ref=self.ref_mnt + '/' + self.config_data['refs']['bwt2']
+        self.gtf_ref=self.ref_mnt + '/' + self.config_data['refs']['gtf']
+        self.tx=self.ref_mnt + '/' + self.config_data['refs']['transcriptome']
         self.obj=self.config_data['refs']['obj']
         self.cont=self.config_data['refs']['cont']
         self.pipeline()
@@ -81,38 +82,45 @@ class Pipeline():
         SAMPLES[self.sample]={}
         SAMPLES[self.sample]['f1']=self.end1
         SAMPLES[self.sample]['f2']=self.end2
-        RGRP="@RG\\tID:" + self.sample + "\\tLB:" + self.bid + "\\tSM:" + self.bid + "\\tPL:illumina"
         
         # use subset of fastq files to get insert size estimate
-        end_ss1=sample + '_1.subset.fastq'
-        end_ss2=sample + '_2.subset.fastq'
-        ss_cmd='gunzip -c ' + end1 + ' > ' + end_ss1
+        end_ss1=self.sample + '_1.subset.fastq'
+        end_ss2=self.sample + '_2.subset.fastq'
+        subset=self.sample + '_subset'
+        ss_cmd='gunzip -c ' + self.end1 + ' | head -n 40000 > ' + end_ss1
         subprocess.call(ss_cmd,shell=True)
-        ss_cmd='gunzip -c ' + end2 + ' > ' + end_ss2
+        ss_cmd='gunzip -c ' + self.end2 + ' | head -n 40000 > ' + end_ss2
         subprocess.call(ss_cmd,shell=True)
         # check certain key processes
-        check=bwt2_pe(self.bwa_tool,RGRP,self.bwa_ref,end_ss1,end_ss2,self.samtools_tool,self.samtools_ref,self.sample,log_dir) # rest won't run until completed
+        check=bwt2_pe(self.bwt2_tool,self.bwt2_ref,end_ss1,end_ss2,self.samtools_tool,self.samtools_ref,subset,log_dir) # rest won't run until completed
         if(check != 0):
             log(self.loc,date_time() + 'Bowtie2 failure for ' + self.sample + '\n')
             exit(1)
-        check=novosort_sort_pe(self.novosort,self.sample,log_dir) # rest won't run until completed
+        check=novosort_sort_pe(self.novosort,subset,log_dir) # rest won't run until completed
         if(check != 0):
             log(self.loc,date_time() + 'novosort sort failure for ' + self.sample + '\n')
             exit(1)
         # start fastqc, will run while insert size being calculated
+        
         log(self.loc,date_time() + 'Running qc on fastq file\n')
-        fastqc(self.fastqc_tool,self.sample,self.end1,self.end2) # flag determines whether to run independently or hold up the rest of the pipe until completion
+        fastqc(self.fastqc_tool,self.sample,self.end1,self.end2)
         log(self.loc,date_time() + 'Calculating insert sizes\n')
-        (x,s)=picard_insert_size(self.java_tool,self.picard_tool,self.sample,log_dir) # get insert size metrics, use for tophat. 
+        (x,s)=picard_insert_size(self.java_tool,self.picard_tool,subset,log_dir) # get insert size metrics, use for tophat. 
+        x=str(int(float(x)))
+        s=str(int(float(s)))
+        sys.stderr.write('Insert size mean estimate ' + x + ' std dev ' + s + '\n')
         log(self.loc,date_time() + 'Performing tophat alignment ' + self.sample + '\n')
-        tophat(self.tophat_tool,self.ens_ref,self.bwt2_ref,self.end1,self,end2,x,s,self.sample,log_dir)
+        tophat(self.tophat_tool,self.tx,self.bwt2_ref,self.end1,self.end2,x,s,self.sample,log_dir)
+        align_stats(sample)
+        cout='transcripts.gtf'
+        cufflinks(self.cufflinks_tool,self.gtf_ref,self.genome_ref,self.sample,log_dir)
+        report(self.sample,self.gtf_ref,cout)
 
 def main():
     import argparse
     parser=argparse.ArgumentParser(description='RNA alignment paired-end QC pipeline')
     parser.add_argument('-f1','--file1',action='store',dest='end1',help='First fastq file')
     parser.add_argument('-f2','--file2',action='store',dest='end2',help='Second fastq file')
-    parser.add_argument('-t','--seqtype',action='store',dest='seqtype',help='Type of sequencing peformed.  Likely choices are genome, exome, and capture')
     parser.add_argument('-j','--json',action='store',dest='config_file',help='JSON config file containing tool and reference locations')
     parser.add_argument('-m','--mount',action='store',dest='ref_mnt',help='Drive mount location.  Example would be /mnt/cinder/REFS_XXX')
     if len(sys.argv)==1:

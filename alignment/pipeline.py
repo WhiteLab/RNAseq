@@ -52,6 +52,7 @@ class Pipeline():
         self.cufflinks_tool=self.config_data['tools']['cufflinks']
         self.htseq_count=self.config_data['tools']['htseq-count']
         self.bwt2_ref=self.ref_mnt + '/' + self.config_data['refs']['bwt2']
+        self.samtools_ref=self.config_data['refs']['samtools']
         self.gtf_ref=self.ref_mnt + '/' + self.config_data['refs']['gtf']
         self.tx=self.ref_mnt + '/' + self.config_data['refs']['transcriptome']
         self.obj=self.config_data['refs']['obj']
@@ -131,9 +132,8 @@ def main():
 
     end1=inputs.end1
     end2=inputs.end2
-    seqtype=inputs.seqtype
     config_file=inputs.config_file
     ref_mnt=inputs.ref_mnt
-    Pipeline(end1,end2,seqtype,config_file,ref_mnt)
+    Pipeline(end1,end2,config_file,ref_mnt)
 if __name__ == "__main__":
     main()

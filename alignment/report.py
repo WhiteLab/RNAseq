@@ -22,10 +22,10 @@ def report(sample,ref_gtf,tx_gtf):
         if line[0:2] == '##':
             continue
         attr=line.split('\t')
-        m=re.search('gene_biotype "(\S+)";.*transcript_id "(\S+)"; transcript_name "(\S+)";',attr[-1])
-        #m=re.search('transcript_id "(\S+)"; gene_type "(\S+)";.* gene_name "(\S+)";',attr[-1])
-        #(bio,tx_id,name)=(m.group(2),m.group(1),m.group(3))
-        (bio,tx_id,name)=(m.group(1),m.group(2),m.group(3))
+        #m=re.search('gene_biotype "(\S+)";.*transcript_id "(\S+)"; transcript_name "(\S+)";',attr[-1])
+        m=re.search('transcript_id "(\S+)"; gene_type "(\S+)";.* gene_name "(\S+)";',attr[-1])
+        (bio,tx_id,name)=(m.group(2),m.group(1),m.group(3))
+        #(bio,tx_id,name)=(m.group(1),m.group(2),m.group(3))
         if tx_id not in ref:
             ref[tx_id]={}
             ref[tx_id]['type']=bio

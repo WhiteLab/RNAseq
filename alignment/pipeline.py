@@ -52,7 +52,7 @@ class Pipeline():
         self.cufflinks_tool=self.config_data['tools']['cufflinks']
         self.htseq_count=self.config_data['tools']['htseq-count']
         self.bwt2_ref=self.ref_mnt + '/' + self.config_data['refs']['bwt2']
-        self.samtools_ref=self.config_data['refs']['samtools']
+        self.samtools_ref=self.ref_mnt + '/' + self.config_data['refs']['samtools']
         self.gtf_ref=self.ref_mnt + '/' + self.config_data['refs']['gtf']
         self.tx=self.ref_mnt + '/' + self.config_data['refs']['transcriptome']
         self.obj=self.config_data['refs']['obj']
@@ -88,12 +88,14 @@ class Pipeline():
         end_ss1=self.sample + '_1.subset.fastq'
         end_ss2=self.sample + '_2.subset.fastq'
         subset=self.sample + '_subset'
+
         ss_cmd='gunzip -c ' + self.end1 + ' | head -n 40000 > ' + end_ss1
         subprocess.call(ss_cmd,shell=True)
         ss_cmd='gunzip -c ' + self.end2 + ' | head -n 40000 > ' + end_ss2
         subprocess.call(ss_cmd,shell=True)
         # check certain key processes
-        check=bwt2_pe(self.bwt2_tool,self.bwt2_ref,end_ss1,end_ss2,self.samtools_tool,self.samtools_ref,subset,log_dir) # rest won't run until completed
+        #        check=bwt2_pe(self.bwt2_tool,self.bwt2_ref,end_ss1,end_ss2,self.samtools_tool,self.samtools_ref,subset,log_dir)
+        check=bwt2_pe(self.bwt2_tool,self.tx,end_ss1,end_ss2,self.samtools_tool,self.samtools_ref,subset,log_dir)
         if(check != 0):
             log(self.loc,date_time() + 'Bowtie2 failure for ' + self.sample + '\n')
             exit(1)
@@ -110,13 +112,15 @@ class Pipeline():
         x=str(int(float(x)))
         s=str(int(float(s)))
         sys.stderr.write('Insert size mean estimate ' + x + ' std dev ' + s + '\n')
+        
         log(self.loc,date_time() + 'Performing tophat alignment ' + self.sample + '\n')
         tophat(self.tophat_tool,self.tx,self.bwt2_ref,self.end1,self.end2,x,s,self.sample,log_dir)
-        align_stats(sample)
+        #align_stats(self.sample)
+
         cout='transcripts.gtf'
         cufflinks(self.cufflinks_tool,self.gtf_ref,self.genome_ref,self.sample,log_dir)
         report(self.sample,self.gtf_ref,cout)
-
+        
 def main():
     import argparse
     parser=argparse.ArgumentParser(description='RNA alignment paired-end QC pipeline')

@@ -8,6 +8,7 @@ from date_time import date_time
 from subprocess import Popen
 from subprocess import call
 from log import log
+import pdb
 
 def report(sample,ref_gtf,tx_gtf):
     # casual logging - look for a LOGS directory, otherwise assume current dir
@@ -22,10 +23,22 @@ def report(sample,ref_gtf,tx_gtf):
         if line[0:2] == '##':
             continue
         attr=line.split('\t')
-        #m=re.search('gene_biotype "(\S+)";.*transcript_id "(\S+)"; transcript_name "(\S+)";',attr[-1])
-        m=re.search('transcript_id "(\S+)"; gene_type "(\S+)";.* gene_name "(\S+)";',attr[-1])
-        (bio,tx_id,name)=(m.group(2),m.group(1),m.group(3))
-        #(bio,tx_id,name)=(m.group(1),m.group(2),m.group(3))
+        (bio,tx_id,name)=('','','')
+        # might have mixed type between gencode and ensenmbl, test
+#        pdb.set_trace()
+        if re.search('gene_biotype "(\S+)";',attr[-1]):
+            m=re.search('gene_biotype "(\S+)";.*transcript_id "(\S+)"; transcript_name "(\S+)";',attr[-1])
+            
+            try:
+                (bio,tx_id,name)=(m.group(1),m.group(2),m.group(3))
+            except:
+                sys.stderr.write('Pattern failed for line ' + line)
+                m=re.search('gene_biotype "(\S+)";.*transcript_id "(\S+)"; transcript_name (\S+);',attr[-1])
+#                exit(1)
+        else:
+            m=re.search('transcript_id "(\S+)"; gene_type "(\S+)";.* gene_name "(\S+)";',attr[-1])
+            (bio,tx_id,name)=(m.group(2),m.group(1),m.group(3))
+
         if tx_id not in ref:
             ref[tx_id]={}
             ref[tx_id]['type']=bio
@@ -52,7 +65,7 @@ def report(sample,ref_gtf,tx_gtf):
             if float(fields['FPKM']) > 0.0:
                 rpt.write('\t'.join([anno[0],anno[6],anno[3],anno[4],anno[5]]) + '\t')
 #                pdb.set_trace()
-                sys.stdout.write(fields['gene_id'] + '\t'+  fields['transcript_id'] + '\t')
+                rpt.write(fields['gene_id'] + '\t'+  fields['transcript_id'] + '\t')
                 if fields['transcript_id'] in ref:
                     rpt.write(ref[fields['transcript_id']]['name'] + '\t' + ref[fields['transcript_id']]['type'])
                 else:

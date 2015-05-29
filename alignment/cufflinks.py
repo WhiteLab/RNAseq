@@ -8,12 +8,13 @@ import subprocess
 
 def cufflinks(cufflinks_tool,ens_ref,genome,sample,log_dir):
     loc=log_dir + sample + ".cufflinks.log"
-    cufflinks_cmd=cufflinks_tool + " " + sample + "/accepted_hits.bam -g " + ens_ref + " -p 8 --library-type fr-firststrand -b " + genome + " -u --upper-quartile-norm --pre-mrna-fraction -o " + sample + " 2>> " + loc
+    cufflinks_cmd=cufflinks_tool + " " + sample + "/accepted_hits.bam -g " + ens_ref + " -p 8 --library-type fr-secondstrand -b " + genome + " -u --upper-quartile-norm --pre-mrna-fraction -o " + sample + " 2>> " + loc
     log(loc,date_time() + cufflinks_cmd + "\n")
     try:
         subprocess.check_output(cufflinks_cmd,shell=True)
     except:
         exit(1)
+    
     return 0
 
 if __name__ == "__main__":

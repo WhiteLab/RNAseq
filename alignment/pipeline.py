@@ -164,7 +164,7 @@ class Pipeline():
         call(mv_rpt,shell=True)
         org_mv='mv TOPHAT_OUT QC CUFFLINKS REPORTS LOGS ../'
         call(org_mv,shell=True)
-        os.chdir('../')
+        os.chdir('../../')
         log(self.loc,date_time() + 'Uploading results for ' + self.sample + '\n')
         check=upload_to_swift(self.cont,self.obj)
         if(check != 0):

@@ -118,9 +118,9 @@ class Pipeline():
         end_ss2=self.sample + '_2.subset.fastq'
         subset=self.sample + '_subset'
 
-        ss_cmd='gunzip -c ' + self.end1 + ' | head -n 40000 > ' + end_ss1
+        ss_cmd='gunzip -c ../' + self.end1 + ' | head -n 40000 > ' + end_ss1
         subprocess.call(ss_cmd,shell=True)
-        ss_cmd='gunzip -c ' + self.end2 + ' | head -n 40000 > ' + end_ss2
+        ss_cmd='gunzip -c ../' + self.end2 + ' | head -n 40000 > ' + end_ss2
         subprocess.call(ss_cmd,shell=True)
         # check certain key processes
 

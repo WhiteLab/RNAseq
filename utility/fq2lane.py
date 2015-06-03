@@ -10,7 +10,8 @@ def fq2lane(fq_list,seqtype):
     cur={}
     for line in fh:
         line=line.rstrip('\n')
-        f1=re.match('^(\d+-\d+)_(\S+)_\d+_sequence.txt.gz$',line)
+        fn=os.path.basename(line)
+        f1=re.match('^(\d+-\d+)_(\S+)_\d+_sequence.txt.gz$',fn)
         bid=''
         lane=''
         if f1:

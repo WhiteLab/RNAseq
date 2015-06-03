@@ -108,7 +108,7 @@ for line in fh:
             # if pipeline fails, abandon process as a larger error might come up
         log(loc,date_time() + 'Running pipeline process for lane ' + lane + '\n')
         #check class status flag
-        p=Pipeline(end1,end2,seqtype,pipe_cfg,ref_mnt)
+        p=Pipeline(end1,end2,pipe_cfg,ref_mnt)
         if p.status != 0:
             log(loc,date_time() + "Pipeline process for sample lane " + lane + " failed with status " + str(p.status) + " \n")
             lane_status[lane]='Pipeline return status failed'
@@ -117,9 +117,9 @@ for line in fh:
         # change back to parent directory so that new sequencing files can be downloaded in same place
         os.chdir(cwd)
         # clean out files for next run
-        cleanup='rm -rf ' + cur_dir + '/BAM ' + cur_dir + '/QC'
+        cleanup='rm -rf ' + cur_dir
         subprocess.call(cleanup,shell=True)
-        lane_status[lane]='Pipeline run and data uplaoded'
+        lane_status[lane]='Pipeline run and data uploaded'
         log(loc,date_time() + lane + '\t' + lane_status[lane] + '\n')
-    os.chdir(cur_dir)
+    os.chdir(cwd)
 sys.stderr.write(date_time() + "Process complete.  Check logs for any errors\n")

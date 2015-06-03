@@ -6,9 +6,9 @@ from subprocess import call
 from log import log
 import subprocess
 
-def tophat(tophat_tool,tx,bwt2_ref,end1,end2,x,s,sample,log_dir):
+def tophat(tophat_tool,tx,bwt2_ref,end1,end2,x,s,sample,log_dir,th):
     loc=log_dir + sample + ".tophat.log"
-    tophat_cmd=tophat_tool + " --no-coverage-search  --phred64-quals --mate-inner-dist " + x  + " --mate-std-dev " + s + " --num-threads 8 --library-type fr-firststrand --transcriptome-index " + tx + " -o " + sample + " " + bwt2_ref + " " + end1 + " " + end2 + " 2>> " + loc
+    tophat_cmd=tophat_tool + " --no-coverage-search  --phred64-quals --mate-inner-dist " + x  + " --mate-std-dev " + s + " --num-threads " + th + " --library-type fr-firststrand --transcriptome-index " + tx + " -o " + sample + " " + bwt2_ref + " " + end1 + " " + end2 + " 2>> " + loc
     log(loc,date_time() + tophat_cmd + "\n")
     try:
         call(tophat_cmd,shell=True)
@@ -28,11 +28,12 @@ if __name__ == "__main__":
     parser.add_argument('-sd','--standard_deviation',action='store',dest='s',help='Standard deviation of insert size')
     parser.add_argument('-sa','--sample',action='store',dest='sample',help='Sample/project name prefix')
     parser.add_argument('-l','--log',action='store',dest='log_dir',help='LOG directory location')
+    parser.add_argument('-th','--threads',action='store',dest='th',help='Number of threads')
 
     if len(sys.argv)==1:
         parser.print_help()
         sys.exit(1)
     
     inputs=parser.parse_args()
-    (tophat_tool,tx,bwt2_ref,end1,end2,x,s,sample,log_dir)=(inputs.tophat_tool,inputs.tx,inputs.bwt2_ref,inputs.end1,inputs.end2,inputs.x,inputs.s,inputs.sample,inputs.log_dir)
-    tophat(tophat_tool,tx,bwt2_ref,end1,end2,x,s,sample,log_dir)
+    (tophat_tool,tx,bwt2_ref,end1,end2,x,s,sample,log_dir,th)=(inputs.tophat_tool,inputs.tx,inputs.bwt2_ref,inputs.end1,inputs.end2,inputs.x,inputs.s,inputs.sample,inputs.log_dir,inputs.th)
+    tophat(tophat_tool,tx,bwt2_ref,end1,end2,x,s,sample,log_dir,th)

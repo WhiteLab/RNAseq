@@ -82,7 +82,7 @@ JSON configuration parameters for creating a pipeline vm and attaching reference
 #### unmount.sh
 Command cleanup.py uses to unmount a reference from a vm.
 
-#### ownload_from_swift.py 
+#### download_from_swift.py 
 usage: download_from_swift.py [-h] [-c CONT] [-o OBJ]
 
 Simple download module to get files from swift. Can use prefix or whole object
@@ -153,22 +153,43 @@ optional arguments:
                         Drive mount location. Example would be
                         /mnt/cinder/REFS_XXX
 ##### Runs the following submodules in order:
-1. bwt2_pe
-2. novosort_sort_pe
-3. fastqc
-4. picard_insert_size 
-5. tophat
-6. align_stats
-7. cufflinks
-8. report
+1. cutadapter
+2. bwt2_pe
+3. novosort_sort_pe
+4. fastqc
+5. picard_insert_size 
+6. tophat
+7. align_stats
+8. cufflinks
+9. report
+
 
 ## Pipeline submodule descriptions:
+
+#### cutadapter.py [-h] [-sa SAMPLE] [-f1 END1] [-f2 END2] [-j CONFIG_FILE]
+
+cutadapt module. Removes 3' adapters and trims bases if necessary.Also can
+enforce minimum read length - 15 recommended
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -sa SAMPLE, --sample SAMPLE
+                        Sample/location name prefix
+  -f1 END1, --file1 END1
+                        First of paired-end fastq file
+  -f2 END2, --file2 END2
+                        Second of paired-end fastq file
+  -j CONFIG_FILE, --json CONFIG_FILE
+                        JSON config file containing tool and reference
+                        locations
+
 #### bwt2_pe.py 
 usage: bwt2_pe.py [-h] [-b BWT_TOOL] [-br BWT_REF] [-f1 END1] [-f2 END2]
-                  [-s SAMTOOLS_TOOL] [-sr SAMTOOLS_REF] [-sa SAMPLE]
+                  [-s SAMTOOLS_TOOL] [-sr SAMTOOLS_REF] [-sa SAMPLE] [-t T]
                   [-l LOG_DIR]
 
-Bowtie2 paired-end alignment module. Typically run first in pipeline.
+Bowtie2 paired-end alignment module. Used for insert size estimation toward
+beginning using read subset.
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -186,11 +207,13 @@ optional arguments:
                         Location of samtools reference
   -sa SAMPLE, --sample SAMPLE
                         Sample/project name prefix
+  -t T, --threads T     Number of threads
   -l LOG_DIR, --log LOG_DIR
                         LOG directory location
 
 #### novosort_sort_pe.py 
-usage: novosort_sort_pe.py [-h] [-n NOVOSORT] [-sa SAMPLE] [-l LOG_DIR]
+usage: novosort_sort_pe.py [-h] [-n NOVOSORT] [-sa SAMPLE] [-l LOG_DIR] [-t T]
+                           [-m MEM]
 
 novosort tool to sort BAM module.
 
@@ -202,6 +225,8 @@ optional arguments:
                         Sample/project name prefix
   -l LOG_DIR, --log LOG_DIR
                         LOG directory location
+  -t T, --threads T     Number of threads
+  -m MEM, --memory MEM  Memory - in GB
 
 #### fastqc.py
 usage: fastqc.py [-h] [-f FASTQC_TOOL] [-sa SAMPLE] [-f1 END1] [-f2 END2]
@@ -240,7 +265,7 @@ optional arguments:
 
 #### tophat.py
 usage: tophat.py [-h] [-t TOPHAT_TOOL] [-tx TX] [-b BWT2_REF] [-f1 END1]
-                 [-f2 END2] [-x X] [-sd S] [-sa SAMPLE] [-l LOG_DIR]
+                 [-f2 END2] [-x X] [-sd S] [-sa SAMPLE] [-l LOG_DIR] [-th TH]
 
 tophat paired-end alignment and transcript assembly module.
 
@@ -263,6 +288,7 @@ optional arguments:
                         Sample/project name prefix
   -l LOG_DIR, --log LOG_DIR
                         LOG directory location
+  -th TH, --threads TH  Number of threads
 
 #### align_stats.py
 usage: align_stats.py [-h] [-sa SAMPLE]
@@ -276,9 +302,9 @@ optional arguments:
 
 #### cufflinks.py 
 usage: cufflinks.py [-h] [-c CUFFLINKS_TOOL] [-e ENS_REF] [-g GENOME]
-                    [-sa SAMPLE] [-l LOG_DIR]
+                    [-sa SAMPLE] [-l LOG_DIR] [-t T]
 
-tophat paired-end alignment module. Typically run first in pipeline.
+Annotation and fpkm estimation. Run after tophat.
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -292,6 +318,7 @@ optional arguments:
                         Sample/project name prefix
   -l LOG_DIR, --log LOG_DIR
                         LOG directory location
+  -t T, --threads T     Number of threads
 
 #### report.py 
 usage: report.py [-h] [-sa SAMPLE] [-r REF_GTF] [-c TX_GTF]

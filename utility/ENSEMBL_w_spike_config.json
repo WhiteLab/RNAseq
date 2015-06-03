@@ -1,5 +1,6 @@
 {
     "tools":{
+	"cutadapt":"cutadapt",
 	"fastqc":"fastqc",
 	"bwt2":"/home/ubuntu/TOOLS/bowtie2-2.2.3/bowtie2",
 	"samtools":"/home/ubuntu/TOOLS/tophat-2.0.14.Linux_x86_64/samtools_0.1.18",
@@ -16,10 +17,19 @@
 	"bwt2":"REFS/ENS_custom/Genome/genome_plus_spike",
 	"genome":"REFS/ENS_custom/Genome/genome_plus_spike.fa",
 	"samtools":"REFS/ENS_custom/Genome/genome_plus_spike.fa",
-	"gtf":"REFS/ENS_custom/Transcriptome/genes_plus_spike.gtf",
-	"transcriptome":"REFS/ENS_custom/Transcriptome/transcriptome_data/genes_plus_spike",
+	"gtf":"REFS/ENS_custom/Transcriptome/genome_plus_spike.gtf",
+	"transcriptome":"REFS/ENS_custom/Transcriptome/transcriptome_data/genome_plus_spike",
 	"cont":"PsychENCODE",
 	"obj":"ALIGN",
-	"config":"/home/ubuntu/TOOLS/Scripts/utility/hg19_pe_config.json"
+	"config":"/home/ubuntu/TOOLS/Scripts/utility/ENSEMBL_w_spike_config.json"
+    },
+    "params":{
+	"r1adapt":"AGATCGGAAGAGCACACGTCTGAACTCCAGTCA",
+	"r2adapt":"AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT",
+	"r1trim":"-1",
+	"r2trim":"1",
+	"minlen":"15",
+	"threads":"8",
+	"ram":"24"
     }
 }

@@ -6,8 +6,8 @@ from subprocess import call
 import subprocess
 from log import log
 
-def novosort_sort_pe(novosort,sample,log_dir):
-    novosort_sort_pe_cmd='mkdir novosort_tmp;' + novosort + " --threads 8 --ram 28G --tmpdir novosort_tmp --output " + sample + ".srt.bam --index  " + sample + ".bam > " + log_dir + sample + ".novosort.sort.pe.log 2>&1"
+def novosort_sort_pe(novosort,sample,log_dir,t,mem):
+    novosort_sort_pe_cmd='mkdir novosort_tmp;' + novosort + " --threads " + t + " --ram " + mem + "G --tmpdir novosort_tmp --output " + sample + ".srt.bam --index  " + sample + ".bam > " + log_dir + sample + ".novosort.sort.pe.log 2>&1"
     log(log_dir + sample + ".novosort.sort.pe.log",date_time() + novosort_sort_pe_cmd + "\n")
     f=0
     try:
@@ -25,11 +25,13 @@ if __name__ == "__main__":
     parser.add_argument('-n','--novosort',action='store',dest='novosort',help='novosort binary location')
     parser.add_argument('-sa','--sample',action='store',dest='sample',help='Sample/project name prefix')
     parser.add_argument('-l','--log',action='store',dest='log_dir',help='LOG directory location')
+    parser.add_argument('-t','--threads',action='store',dest='t',help='Number of threads')
+    parser.add_argument('-m','--memory',action='store',dest='mem',help='Memory - in GB')
 
     if len(sys.argv)==1:
         parser.print_help()
         sys.exit(1)
 
     inputs=parser.parse_args()
-    (novosort,sample,log_dir)=(inputs.novosort,inputs.sample,inputs.log_dir)    
-    novosort_sort_pe(novosort,sample,log_dir)
+    (novosort,sample,log_dir,t,mem)=(inputs.novosort,inputs.sample,inputs.log_dir,inputs.t,inputs.mem)
+    novosort_sort_pe(novosort,sample,log_dir,t,mem)

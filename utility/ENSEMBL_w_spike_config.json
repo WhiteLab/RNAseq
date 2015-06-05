@@ -28,7 +28,7 @@
 	"r2adapt":"AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT",
 	"r1trim":"-1",
 	"r2trim":"1",
-	"minlen":"15",
+	"minlen":"20",
 	"threads":"8",
 	"ram":"24"
     }

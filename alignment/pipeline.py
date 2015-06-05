@@ -165,13 +165,13 @@ class Pipeline():
         org_mv='mv TOPHAT_OUT QC CUFFLINKS REPORTS LOGS ../'
         call(org_mv,shell=True)
         os.chdir('../../')
-        log(self.loc,date_time() + 'Uploading results for ' + self.sample + '\n')
+        sys.stderr.write(date_time() + 'Uploading results for ' + self.sample + '\n')
         check=upload_to_swift(self.cont,self.obj)
         if(check != 0):
-            log(self.loc,date_time() + 'Upload failure for ' + self.sample + '\n')
+            sys,stderr,write(date_time() + 'Upload failure for ' + self.sample + '\n')
             self.status=1
             exit(1)
-        log(self.loc,date_time() + 'Pipeline complete for ' + self.sample + '\n')
+        sys.stderr.write(date_time() + 'Pipeline complete for ' + self.sample + '\n')
         self.status=0
 def main():
     import argparse

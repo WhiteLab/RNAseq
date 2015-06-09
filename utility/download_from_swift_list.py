@@ -11,6 +11,7 @@ def download_from_swift_list(cont,fn):
     deproxy='unset http_proxy; unset https_proxy;'
     fh=open(fn,'r')
     for obj in fh:
+        obj=obj.rstrip('\n')
         swift_cmd=deproxy + src_cmd + "swift download " + cont + " --skip-identical " + obj + " > dl_log.txt"
         sys.stderr.write(date_time() + swift_cmd + "\n")
         call(swift_cmd,shell=True)

@@ -7,6 +7,7 @@ from subprocess import check_output
 import subprocess 
 
 def download_from_swift(cont,obj):
+    obj=obj.rstrip('\n')
     src_cmd=". /home/ubuntu/.novarc;"
     swift_cmd=src_cmd + "swift download " + cont + " --skip-identical --prefix " + obj
     sys.stderr.write(date_time() + swift_cmd + "\n")

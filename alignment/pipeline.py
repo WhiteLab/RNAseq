@@ -10,12 +10,8 @@ import json
 from log import log
 from cutadapter import cutadapter
 from fastqc import fastqc
-from bwt2_pe import bwt2_pe
-from novosort_sort_pe import novosort_sort_pe
-from picard_insert_size import picard_insert_size
-from tophat import tophat
 from align_stats import align_stats
-from cufflinks import cufflinks
+from star import star
 from report import report
 from upload_to_swift import upload_to_swift
 from subprocess import call
@@ -42,19 +38,9 @@ class Pipeline():
         HGACID=self.sample.split("_")
         self.bid=HGACID[0]
         self.fastqc_tool=self.config_data['tools']['fastqc']
-        self.bwt2_tool=self.config_data['tools']['bwt2']
-        self.bwt2_ref=self.ref_mnt + '/' + self.config_data['refs']['bwt2']
-        self.samtools_tool=self.config_data['tools']['samtools']
+        self.star_tool=self.config_data['tools']['star']
         self.genome_ref=self.ref_mnt + '/' + self.config_data['refs']['genome']
-        self.java_tool=self.config_data['tools']['java']
-        self.picard_tool=self.config_data['tools']['picard']
-        self.novosort=self.config_data['tools']['novosort']
-        self.picard_tmp='picard_tmp'
-        self.tophat_tool=self.config_data['tools']['tophat']
-        self.cufflinks_tool=self.config_data['tools']['cufflinks']
         self.htseq_count=self.config_data['tools']['htseq-count']
-        self.bwt2_ref=self.ref_mnt + '/' + self.config_data['refs']['bwt2']
-        self.samtools_ref=self.ref_mnt + '/' + self.config_data['refs']['samtools']
         self.gtf_ref=self.ref_mnt + '/' + self.config_data['refs']['gtf']
         self.tx=self.ref_mnt + '/' + self.config_data['refs']['transcriptome']
         self.obj=self.config_data['refs']['obj']
@@ -79,9 +65,8 @@ class Pipeline():
         call(mv_fq,shell=True)
         log(self.loc,date_time() + 'Changed into ' + fq_dir + " and moved log directory there\n")
         # create TOPHAT_OUT, QC, and CUFFLINKS_RES directories if they don't exist already
-        to_dir='TOPHAT_OUT/'
+        to_dir='STAR_OUT/'
         qc_dir='QC/'
-        cl_dir='CUFFLINKS'
         rpt_dir='REPORTS'
         if os.path.isdir(to_dir) == False:
             mk_to_dir='mkdir ' + to_dir
@@ -91,10 +76,6 @@ class Pipeline():
             mk_qc_dir='mkdir ' + qc_dir
             call(mk_qc_dir,shell=True)
             log(self.loc,date_time() + 'Made qc directory ' + qc_dir + "\n")
-        if os.path.isdir(cl_dir) == False:
-            mk_cl_dir='mkdir ' + cl_dir
-            call(mk_cl_dir,shell=True)
-            log(self.loc,date_time() + 'Made cufflinks directory ' + cl_dir + "\n")
         if os.path.isdir(rpt_dir) == False:
             mk_rpt_dir='mkdir ' + rpt_dir
             call(mk_rpt_dir,shell=True)
@@ -116,47 +97,13 @@ class Pipeline():
         rm_fq='rm ../' + self.end1 + ' ../' + self.end2
         log(self.loc,date_time() + 'deleting untrimmed fastqs, no longer needed\n' + rm_fq + '\n')
         call(rm_fq,shell=True)
-        # use subset of fastq files to get insert size estimate
-        end_ss1=self.sample + '_1.subset.fastq'
-        end_ss2=self.sample + '_2.subset.fastq'
-        subset=self.sample + '_subset'
-
-        ss_cmd='gunzip -c ../' + self.end1 + ' | head -n 40000 > ' + end_ss1
-        subprocess.call(ss_cmd,shell=True)
-        ss_cmd='gunzip -c ../' + self.end2 + ' | head -n 40000 > ' + end_ss2
-        subprocess.call(ss_cmd,shell=True)
-        # check certain key processes
-
-        check=bwt2_pe(self.bwt2_tool,self.tx,end_ss1,end_ss2,self.samtools_tool,self.samtools_ref,subset,self.threads,log_dir)
-        if(check != 0):
-            log(self.loc,date_time() + 'Bowtie2 failure for ' + self.sample + '\n')
-            self.status=1
-            exit(1)
-        check=novosort_sort_pe(self.novosort,subset,log_dir,self.threads,self.ram) # rest won't run until completed
-        if(check != 0):
-            log(self.loc,date_time() + 'novosort sort failure for ' + self.sample + '\n')
-            self.status=1
-            exit(1)
         # start fastqc, will run while insert size being calculated
         
         log(self.loc,date_time() + 'Running qc on fastq file\n')
         fastqc(self.fastqc_tool,self.sample,self.end1,self.end2,self.threads)
-        log(self.loc,date_time() + 'Calculating insert sizes\n')
-        (x,s)=picard_insert_size(self.java_tool,self.picard_tool,subset,log_dir) # get insert size metrics, use for tophat. 
-        x=str(int(float(x)))
-        s=str(int(float(s)))
-        sys.stderr.write('Insert size mean estimate ' + x + ' std dev ' + s + '\n')
-        
-        log(self.loc,date_time() + 'Performing tophat alignment ' + self.sample + '\n')
-        tophat(self.tophat_tool,self.tx,self.bwt2_ref,self.end1,self.end2,x,s,self.sample,log_dir,self.threads)
+        log(self.loc,date_time() + 'Performing star alignment ' + self.sample + '\n')
+        star(self.star_tool,self.genome,self.end1,self.end2,self.sample,log_dir,self.threads)
         align_stats(self.sample)
-        
-        cout='transcripts.gtf'
-        # fix to have cufflinks run on 2 fewer threads if current is gte 6
-        c_t=self.threads
-        if int(self.threads) >=6:
-            c_t=str(int(self.threads)-2)
-        cufflinks(self.cufflinks_tool,self.gtf_ref,self.genome_ref,self.sample,log_dir,c_t)
         report(self.sample,self.gtf_ref,cout)
         
         # move outputs to correct directories and upload
@@ -169,7 +116,7 @@ class Pipeline():
         call(mv_cuff,shell=True)
         mv_rpt='mv *.txt REPORTS/'
         call(mv_rpt,shell=True)
-        org_mv='mv TOPHAT_OUT QC CUFFLINKS REPORTS LOGS ../'
+        org_mv='mv STAR_OUT QC REPORTS LOGS ../'
         call(org_mv,shell=True)
         os.chdir('../../')
         sys.stderr.write(date_time() + 'Uploading results for ' + self.sample + '\n')

@@ -8,18 +8,19 @@
 	"novosort":"/home/ubuntu/TOOLS/nova/novosort",
 	"bedtools":"/home/ubuntu/TOOLS/bedtools2/bin/bedtools",
 	"tophat":"/home/ubuntu/TOOLS/tophat-2.0.14.Linux_x86_64/tophat",
+	"star":"/home/ubuntu/TOOLS/STAR-STAR_2.4.2a/bin/Linux_x86_64_static/STAR",
 	"cufflinks":"/home/ubuntu/TOOLS/cufflinks-2.2.1.Linux_x86_64/cufflinks",
 	"htseq-count":"htseq-count"
     },
 
     "refs":{
 	"bwt2":"REFS/GENCODE19/GRCh37.p13.genome_plus_spike",
-	"genome":"REFS/GENCODE19/GRCh37.p13.genome_plus_spike.fa",
+	"genome":"/REFS/GENCODE19/Genome",
 	"samtools":"REFS/GENCODE19/GRCh37.p13.genome_plus_spike.fa",
-	"gtf":"REFS/GENCODE19/gencode.v19.annotation_plus_spike.gtf",
+	"gtf":"REFS/GENCODE19/Transcriptome/gencode.v19_w_spike_rRNArc.gtf",
 	"transcriptome":"REFS/GENCODE19/transcriptome_plus_spike_data/GRCh37.p13.genome_plus_spike",
-	"cont":"PANCAN",
+	"cont":"PsychENCODE",
 	"obj":"ALIGN",
-	"config":"/home/ubuntu/TOOLS/Scripts/utility/GENCODE19_custom_config.json"
+	"config":"/home/ubuntu/TOOLS/Scripts/utility/GENCODE19_config.json"
     }
 }

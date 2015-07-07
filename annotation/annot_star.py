@@ -1,18 +1,21 @@
 #!/usr/bin/python
 import sys
 import re
+import pdb
 
 htseq=open(sys.argv[1],'r')
 hdict={}
 for line in htseq:
     line=line.rstrip('\n')
     data=line.split('\t')
+#    if data[0][0:2]=='DQ':
+#        pdb.set_trace()
     hdict[data[0]]={}
     hdict[data[0]]['ct']='\t'.join(data[1:])
     hdict[data[0]]['f']=0
 htseq.close()
 gtf=open(sys.argv[2],'r')
-sys.stdout.write('name\tid\ttype\tcount\n')
+sys.stdout.write('name\tid\ttype\tunstranded\tfirst_strand\tsecond_strand\n')
 for line in gtf:
     if line[0] == '#':
         continue
@@ -21,10 +24,12 @@ for line in gtf:
     try:
         m=re.search('gene_id "(\S+)"; transcript_id "(\S+)";.*transcript_type "(\S+)";.*transcript_name "(\S+)";',cols[-1])
         (gid,tid,ty,tn)=(m.group(1),m.group(2),m.group(3),m.group(4))
+#        if gid[0:2]=='DQ':
+#            pdb.set_trace()
     except:
         sys.stderr.write('Regex failed, skipping!\n')
         continue
-    if gid in hdict and hdict[gid]['f'] and hdict[gid]['f']==0:
+    if gid in hdict and hdict[gid]['f']==0:
         sys.stdout.write(tn + '\t' + gid + '\t' + ty + '\t' + hdict[gid]['ct'] + '\n')
         hdict[gid]['f']=1
     else:

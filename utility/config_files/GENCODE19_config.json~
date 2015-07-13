@@ -1,6 +1,5 @@
 {
     "tools":{
-	"cutadapt":"cutadapt",
 	"fastqc":"fastqc",
 	"bwt2":"/home/ubuntu/TOOLS/bowtie2-2.2.3/bowtie2",
 	"samtools":"/home/ubuntu/TOOLS/tophat-2.0.14.Linux_x86_64/samtools_0.1.18",

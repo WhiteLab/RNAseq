@@ -30,10 +30,19 @@ src_cmd='. ~/.novarc;'
 ref_mnt=inputs.ref_mnt
 def parse_config(config_file):
     config_data=json.loads(open(config_file, 'r').read())
-    return (config_data['refs']['cont'],config_data['refs']['obj'],config_data['refs']['config'])
+    return (config_data['refs']['cont'],config_data['refs']['obj'],config_data['refs']['config'],config_data['tools']['star'],config_data['refs']['genome'])
 
-(cont,obj,pipe_cfg)=parse_config(inputs.config_file)
-
+(cont,obj,pipe_cfg,star,genome)=parse_config(inputs.config_file)
+genome = ref_mnt + '/' + genome
+# loads genome reference to make all subsequent runs quicker
+"""
+load_genome=star + ' --genomeLoad LoadAndExit --genomeDir ' + genome
+sys.stderr.write(date_time() + "Loading genome into memory\n" + load_genome + '\n')
+try:
+    subprocess.call(load_genome,shell=True)
+except:
+    sys.stderr.write(date_time() + 'Loading genome failed.  Check location and command\n')
+"""
 for line in fh:
     line=line.rstrip('\n')
     (bid,seqtype,lane_csv)=line.split('\t')
@@ -122,4 +131,9 @@ for line in fh:
         lane_status[lane]='Pipeline run and data uploaded'
         log(loc,date_time() + lane + '\t' + lane_status[lane] + '\n')
     os.chdir(cwd)
+"""
+unload_genome=star + ' --genomeLoad Remove --genomeDir ' + genome
+sys.stderr.write(date_time() + "Purging genome from memory\n")
+subprocess.call(unload_genome, shell=True)
+"""
 sys.stderr.write(date_time() + "Process complete.  Check logs for any errors\n")

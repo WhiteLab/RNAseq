@@ -21,12 +21,10 @@ for line in gtf:
     try:
         m=re.search('gene_id "(\S+)"; transcript_id "(\S+)";.*transcript_type "(\S+)";.*transcript_name "(\S+)";',cols[-1])
         (gid,tid,ty,tn)=(m.group(1),m.group(2),m.group(3),m.group(4))
-        if tn[0:3] == 'MT-' and ty[0:2] != 'Mt':
-            ty='Mt_' + ty
     except:
         sys.stderr.write('Regex failed, skipping!\n')
         continue
-    if gid in hdict and hdict[gid]['f']==0:
+    if gid in hdict and hdict[gid]['f'] and hdict[gid]['f']==0:
         sys.stdout.write(tn + '\t' + gid + '\t' + ty + '\t' + hdict[gid]['ct'] + '\n')
         hdict[gid]['f']=1
     else:

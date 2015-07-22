@@ -15,6 +15,9 @@ if len(sys.argv) != 4:
 usr=getpass.getpass('Username: ')
 password=getpass.getpass('Password: ')
 sys.stderr.write(date_time() + 'Authenticating...\n')
+
+setproxy='export http_proxy=http://cloud-proxy:3128; export https_proxy=http://cloud-proxy:3128; export no_proxy="rados-bionimbus-pdc.opensciencedatacloud.org"'
+subprocess.call(setproxy,shell=True)
 syn = synapseclient.login(usr, password)
 
 sys.stderr.write(date_time() + 'Authentication completed.\n')
@@ -35,13 +38,13 @@ cont = sys.argv[3]
 head=next(tbl)
 head = head.rstrip('\n')
 lbl = head.split('\t')
-src_cmd='. ~/.novarc;'
+src_cmd='unset http_proxy; unset https_proxy;. ~/.novarc;'
 for line in tbl:
     line=line.rstrip('\n')
     cols=line.split('\t')
     # create new file name
     # consortium_study_group_tissueTypeAbrv_dataType_(dataSubType)*_platform_(sampleID)*
-    fn='_'.join(fixed_vals[0:2]) + '_' + '_'.join((cols[7],fixed_vals[4],cols[6],cols[0]))
+    fn='_'.join(fixed_vals[0:3]) + '_' + '_'.join((cols[5],fixed_vals[3],cols[6],cols[0]))
     fa=fn + '_aligned.bam'
     fu=fn + '_unaligned.bam'
     try:
@@ -53,7 +56,7 @@ for line in tbl:
         continue
     swift_cmd=src_cmd + 'swift download ' + cont + ' ' + cols[-1] + ' --output ' + fu
     try:
-        swift_cmd=src_cmd + 'swift download ' + cont + ' ' + cols[-2] + ' --output ' + fa
+        swift_cmd=src_cmd + 'swift download ' + cont + ' ' + cols[-1] + ' --output ' + fu
         sys.stderr.write(date_time() + swift_cmd + '\nDownloading unaligned file ' + cols[-1])
         check=subprocess.check_output(swift_cmd,shell=True,stderr=subprocess.PIPE)
     except:
@@ -64,15 +67,16 @@ for line in tbl:
     #    ln_fu='ln -s ' + cols[-1] + ' ' + fu
     #    subprocess.call(ln_fa,shell=True)
     #    subprocess.call(ln_fu,shell=True)
-    sys.stderr.write('Created links ' + ln_fa + ' ' + ln_fu + '\n')
-
+    #sys.stderr.write('Created links ' + ln_fa + ' ' + ln_fu + '\n')
+    setproxy='export http_proxy=http://cloud-proxy:3128; export https_proxy=http://cloud-proxy:3128; export no_proxy="rados-bionimbus-pdc.opensciencedatacloud.org"'
+    subprocess.call(setproxy,shell=True)
     fao=File(fa,parent=syn_id)
     fuo=File(fu,parent=syn_id)
     for i in xrange(0,len(fixed_keys),1):
         setattr(fao,fixed_keys[i],fixed_vals[i])
         setattr(fuo,fixed_keys[i],fixed_vals[i])
         sys.stderr.write(fixed_keys[i] + '\t' + fixed_vals[i] + '\n')
-    for i in xrange(2,7,1):
+    for i in xrange(2,8,1):
         setattr(fao,lbl[i],cols[i])
         setattr(fuo,lbl[i],cols[i])
         sys.stderr.write(lbl[i] + '\t' + cols[i] + '\n')

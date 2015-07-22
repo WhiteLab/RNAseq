@@ -18,7 +18,7 @@ def star(STAR,genome,end1,end2,sample,log_dir,th):
 
 if __name__ == "__main__":
     import argparse
-    parser=argparse.ArgumentParser(description='tophat paired-end alignment and transcript assembly module.')
+    parser=argparse.ArgumentParser(description='star paired-end alignment module.')
     parser.add_argument('-s','--star',action='store',dest='star', help='Location of star aligner.')
     parser.add_argument('-g','--genome',action='store',dest='genome',help='Location of directory contaning genome built by STAR')
     parser.add_argument('-f1','--file1',action='store',dest='end1',help='First of paired-end fastq file')

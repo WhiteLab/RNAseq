@@ -54,7 +54,7 @@ optional arguments:
   -ip VIP, --ip_add VIP
                         VM IP address
 
-##### hg19_pe_config.json
+##### config_files/GENCODE19_config.json
 JSON config file with standard references and tools locations
 
 #### mount.sh
@@ -133,6 +133,10 @@ optional arguments:
   -h, --help        show this help message and exit
   -f FN, --file FN  qc_stats.json document list
 
+#### synapse_upload.py
+#####Script to upload data for PSYCHencode project.  Could be repurposed or used as as template.
+Usage:  ./synapse_upload.py {fixed fields list}{variable fields table}{container}
+
 ## ALIGNMENT:
 #### pipeline.py 
 usage: pipeline.py [-h] [-f1 END1] [-f2 END2] [-t SEQTYPE] [-j CONFIG_FILE]
@@ -158,10 +162,7 @@ optional arguments:
 3. novosort_sort_pe
 4. fastqc
 5. picard_insert_size 
-6. tophat
-7. align_stats
-8. cufflinks
-9. report
+6. star
 
 
 ## Pipeline submodule descriptions:
@@ -263,6 +264,28 @@ optional arguments:
   -l LOG_DIR, --log LOG_DIR
                         LOG directory location
 
+####star.py 
+usage: star.py [-h] [-s STAR] [-g GENOME] [-f1 END1] [-f2 END2] [-sa SAMPLE]
+               [-l LOG_DIR] [-th TH]
+
+star paired-end alignment module.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -s STAR, --star STAR  Location of star aligner.
+  -g GENOME, --genome GENOME
+                        Location of directory containing genome built by STAR
+  -f1 END1, --file1 END1
+                        First of paired-end fastq file
+  -f2 END2, --file2 END2
+                        Second of paired-end fastq file
+  -sa SAMPLE, --sample SAMPLE
+                        Sample/project name prefix
+  -l LOG_DIR, --log LOG_DIR
+                        LOG directory location
+  -th TH, --threads TH  Number of threads
+
+### Scripts from tophat-cufflinks pipeline - can be used, but are not run in this pipeline script
 #### tophat.py
 usage: tophat.py [-h] [-t TOPHAT_TOOL] [-tx TX] [-b BWT2_REF] [-f1 END1]
                  [-f2 END2] [-x X] [-sd S] [-sa SAMPLE] [-l LOG_DIR] [-th TH]
@@ -335,3 +358,14 @@ optional arguments:
                         GENCODE with gene name and genetype
   -c TX_GTF, --cufflinks TX_GTF
                         Cufflinks transcript output file
+
+## ANNOTATION
+#####Rough scripts to add gene names and RNA type to read counting and transcript quantification scripts.  
+
+####annot_htseq.py
+
+####annot_star.py
+
+####gtf2index.py
+
+####kout2ann.py

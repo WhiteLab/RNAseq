@@ -10,7 +10,7 @@ def star(STAR,genome,end1,end2,sample,log_dir,th):
     loc=log_dir + sample + "star.log"
     meta=sample.split('_')
     epoch=150409
-    star_cmd=STAR + " --runMode alignReads --outFileNamePrefix " + sample + " --runThreadN " + th + " --genomeDir " + genome + " --readFilesIn " + end1 + " " + end2 + " --readFilesCommand zcat --quantMode TranscriptomeSAM GeneCounts --outSAMtype BAM Unsorted --outFilterType BySJout --outFilterMultimapNmax 20 --alignSJoverhangMin 8 --alignSJDBoverhangMin 1 --outFilterMismatchNmax 8 --alignIntronMin 20 --alignIntronMax 1000000 --alignMatesGapMax 1000000 2>> " + loc
+    star_cmd=STAR + " --runMode alignReads --twopassMode --outFileNamePrefix " + sample + " --runThreadN " + th + " --genomeDir " + genome + " --readFilesIn " + end1 + " " + end2 + " --readFilesCommand zcat --quantMode TranscriptomeSAM GeneCounts --outSAMtype BAM Unsorted --outFilterType BySJout --outFilterMultimapNmax 20 --alignSJoverhangMin 8 --alignSJDBoverhangMin 1 --outFilterMismatchNmax 8 --alignIntronMin 20 --alignIntronMax 1000000 --alignMatesGapMax 1000000 2>> " + loc
     
     log(loc,date_time() + star_cmd + "\n")
     call(star_cmd,shell=True)

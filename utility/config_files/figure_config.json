@@ -1,0 +1,19 @@
+{
+    "transform":{
+	"power":"2",
+	"min":"-22",
+    },
+    "cmap":{
+	"cluster":"RdBu_r",
+	"var1":"Greys",
+    },
+    "params":{
+	"r1adapt":"AGATCGGAAGAGCACACGTCTGAACTCCAGTCA",
+	"r2adapt":"AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT",
+	"r1trim":"-1",
+	"r2trim":"1",
+	"minlen":"20",
+	"threads":"16",
+	"ram":"60"
+    }
+}

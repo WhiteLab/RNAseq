@@ -9,7 +9,7 @@ import subprocess
 import json
 from log import log
 from cutadapter import cutadapter
-from fastqc import fastqc
+from fastqc_mod import fastqc
 from upload_to_swift import upload_to_swift
 from subprocess import call
 import pdb
@@ -36,8 +36,6 @@ class Pipeline():
         self.bid=HGACID[0]
         self.fastqc_tool=self.config_data['tools']['fastqc']
         self.java_tool=self.config_data['tools']['java']
-        self.gtf_ref=self.ref_mnt + '/' + self.config_data['refs']['gtf']
-        self.tx=self.ref_mnt + '/' + self.config_data['refs']['transcriptome']
         self.obj=self.config_data['refs']['obj']
         self.cont=self.config_data['refs']['cont']
         self.threads=self.config_data['params']['threads']
@@ -79,16 +77,17 @@ class Pipeline():
             log(self.loc,date_time() + 'cutadapt failure for ' + self.sample + '\n')
             exit(1)
         
-        # use subset of fastq files to get insert size estimate
         # start fastqc, will run while insert size being calculated
         
         log(self.loc,date_time() + 'Running qc on fastq file\n')
         fastqc(self.fastqc_tool,self.sample,self.end1,self.end2,self.threads)
-        log(self.loc,date_time() + 'Calculating insert sizes\n')
         # move outputs to correct directories and upload
         log(self.loc,date_time() + 'Organizing outputs\n')
         rm_fq='rm ../' + self.end1 + ' ../' + self.end2
         call(rm_fq,shell=True)
+        log(self.loc,date_time() + rm_fq + '\n')
+        mv_results = 'mv ' +  qc_dir + ' ' + log_dir + ' ../' 
+        call(mv_results,shell=True)
         os.chdir('../../')
         sys.stderr.write(date_time() + 'Uploading results for ' + self.sample + '\n')
         check=upload_to_swift(self.cont,self.obj)

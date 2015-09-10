@@ -21,16 +21,18 @@
 	"gtf":"REFS/GENCODE19/Transcriptome/gencode.v19_w_spike_rRNArc.gtf",
 	"transcriptome":"REFS/GENCODE19/Transcriptome/transcriptome_data/gencode19_custom",
 	"cont":"PsychENCODE",
-	"obj":"ALIGN",
+	"obj":"PREQC",
 	"config":"/home/ubuntu/TOOLS/Scripts/utility/config_files/GENCODE19_config.json"
     },
     "params":{
 	"r1adapt":"AGATCGGAAGAGCACACGTCTGAACTCCAGTCA",
 	"r2adapt":"AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT",
-	"r1trim":"-1",
+	"r1trim":"0",
 	"r2trim":"1",
+	"qual":"33",
+	"mqual":"30",
 	"minlen":"20",
-	"threads":"16",
-	"ram":"60"
+	"threads":"8",
+	"ram":"28"
     }
 }

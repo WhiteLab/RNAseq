@@ -1,9 +1,22 @@
 #!/usr/bin/python
+"""
+Usage: annot_star.py <ct_file> <gtf>
+
+Arguments:
+<ct_file> read count file from htseq or STAR
+<gtf>     gtf reference file
+
+Options:
+-h
+"""
+from docopt import docopt
+args = docopt(__doc__)
+
 import sys
 import re
 import pdb
 
-htseq=open(sys.argv[1],'r')
+htseq=open(args['<ct_file>'],'r')
 hdict={}
 for line in htseq:
     line=line.rstrip('\n')
@@ -14,7 +27,7 @@ for line in htseq:
     hdict[data[0]]['ct']='\t'.join(data[1:])
     hdict[data[0]]['f']=0
 htseq.close()
-gtf=open(sys.argv[2],'r')
+gtf=open(args['<gtf>'],'r')
 sys.stdout.write('name\tid\ttype\tunstranded\tfirst_strand\tsecond_strand\n')
 for line in gtf:
     if line[0] == '#':

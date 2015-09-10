@@ -10,7 +10,7 @@ from log import log
 
 def parse_config(config_file):
     config_data=json.loads(open(config_file, 'r').read())
-    (cutadapt_tool,minlen,r1adapt,r2adapt,r1trim,r2trim,qual,mqual)=(config_data['tools']['cutadapt'],config_data['params']['minlen'],config_data['params']['r1adapt'],config_data['params']['r1adapt'],config_data['params']['r1trim'],config_data['params']['r2trim'],config_data['params']['qual'],config_data['params']['mqual'])
+    (cutadapt_tool,minlen,r1adapt,r2adapt,r1trim,r2trim,qual,mqual)=(config_data['tools']['cutadapt'],config_data['params']['minlen'],config_data['params']['r1adapt'],config_data['params']['r2adapt'],config_data['params']['r1trim'],config_data['params']['r2trim'],config_data['params']['qual'],config_data['params']['mqual'])
     return(cutadapt_tool,minlen,r1adapt,r2adapt,r1trim,r2trim,qual,mqual)
 
 def cutadapter(sample,end1,end2,config_file):

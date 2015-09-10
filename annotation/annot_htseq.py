@@ -1,8 +1,22 @@
 #!/usr/bin/python
+
+"""
+Usage: annot_htseq.py (<htseq>) (<gtf>)
+
+Arguments:
+<htseq> htseq counts file
+<gtf>   gtf file
+
+Options:
+-h
+
+"""
 import sys
 import re
+from docopt import docopt
+args = docopt(__doc__)
 
-htseq=open(sys.argv[1],'r')
+htseq=open(args['<htseq>'],'r')
 hdict={}
 for line in htseq:
     line=line.rstrip('\n')
@@ -11,7 +25,7 @@ for line in htseq:
     hdict[data[0]]['ct']='\t'.join(data[1:])
     hdict[data[0]]['f']=0
 htseq.close()
-gtf=open(sys.argv[2],'r')
+gtf=open(args['<gtf>'],'r')
 sys.stdout.write('name\tid\ttype\tcount\n')
 for line in gtf:
     if line[0] == '#':

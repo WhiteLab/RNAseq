@@ -1,8 +1,8 @@
 #!/usr/bin/python
-"""Clustermap generator.
+"""Heatmap generator.
 
 Usage: 
-    clust_data.py (-t TABLE) (-o OUTPUT) [-l LOGNORM] [-z ZERO] [-c CMAP] [-d DESCRIPTIVE]
+    heatmap.py (-t TABLE) (-o OUTPUT) [-l LOGNORM] [-z ZERO] [-c CMAP] [-d DESCRIPTIVE]
 
 Options:
     -h, --help
@@ -28,8 +28,6 @@ import re
 args=docopt(__doc__)
 tbl = open(args['-t'],'r')
 out = args['-o']
-center = 'weighted'
-cluster = 'euclidean'
 
 if '-l' in args:
     norm,zero = (args['-l'],args['-z'])
@@ -60,7 +58,7 @@ def annotate(ann,ccols,ocols,clust,c):
     head = head.rstrip('\n')
     bids = head.split('\t')
     Cols = bids[1:]
-    maps =('Greys','Reds','Blues','Greens')
+    maps =('Reds','Greys','Blues','Greens')
     k=0
     for line in to_add:
         line = line.rstrip('\n')
@@ -136,7 +134,7 @@ except NameError:
 df = DataFrame(data, index=Rows, columns=Cols)
 mpl.rcParams['font.family'] = 'cmss10'
 mpl.rcParams['font.size'] = '8'
-sys.stderr.write('Clustering and drawing figures\n')
+sys.stderr.write('Drawing figures\n')
 # set shape so that text labels are readable
 (r,c)=data.shape
 if r > 6:
@@ -145,6 +143,7 @@ if c > 6:
     c=math.ceil(c/6)
 sys.stderr.write('Dimensions set as width ' + str(c) + ' height ' + str(r) + '\n')
 # if custom colormap supplied, use it
+res, cur = plt.subplots()
 if args['-c'] != None:
     ccmap=[]
     cval = open(args['-c'],'r')
@@ -154,12 +153,14 @@ if args['-c'] != None:
         cols = val.split('\t')
         cols = map(float, cols)
         ccmap.append(cols)
-
     usermap = mpl.colors.ListedColormap(ccmap)
-    res = sns.clustermap(df,method=center,cmap=usermap,metric=cluster,figsize=(c, r),rasterized=True)
-else:
-    res = sns.clustermap(df,method=center,cmap='Blues',metric=cluster,figsize=(c, r),rasterized=True)
+    cur = sns.heatmap(df, cmap=usermap, rasterized=True)
 
+else:
+    cur = sns.heatmap(df, cmap='Blues', rasterized=True)
+res.set_figheight(r+1)
+res.set_figwidth(c+4)
+res.set_dpi(600)
 res.savefig(out)
 #plt.show(res)
 # create second table for annotation - for now will be drawn as a second table to concatenate in post

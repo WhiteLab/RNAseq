@@ -359,6 +359,36 @@ optional arguments:
   -c TX_GTF, --cufflinks TX_GTF
                         Cufflinks transcript output file
 
+## ANALYSIS
+#### ./merge_tables.py -h
+Merges tables based on a single column, column denoted array-style. Designed for variant output - will merge gene, position, and base change as name for row
+
+Usage: ./merge_tables.py (<list> <col> <hflag> <tflag>) [<suffix>]
+
+Arguments:
+<list>   list of tables
+<col>    index of column to merge, array style
+<hflag>  1 if tables have header, 0 if not
+<tflag>  1 if showing on-target only
+<suffix> if given, will omit from column name.  otherwise file name used as column header
+
+#### ./clust_data.py -h
+Clustermap generator.
+
+Usage: 
+    clust_data.py (-t TABLE) (-o OUTPUT) [-l LOGNORM] [-z ZERO] [-c CMAP] [-d DESCRIPTIVE]
+
+Options:
+    -h, --help
+    -t TABLE         table name
+    -o OUTPUT        output file name
+    -l LOGNORM       set id data is to be log transformed
+    -z ZERO          zero value to use when log transforming
+    -c CMAP          hex colormap to import, otherwise default used
+    -d DESCRIPTIVE   add second table with descriptive data to create
+                     seperate heatmaps clustered based on data. Ids should be in rows, with header for each row in first column 
+
+
 ## ANNOTATION
 #####Rough scripts to add gene names and RNA type to read counting and transcript quantification scripts.  
 

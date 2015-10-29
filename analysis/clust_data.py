@@ -11,7 +11,8 @@ Options:
     -l LOGNORM       set id data is to be log transformed
     -z ZERO          zero value to use when log transforming
     -c CMAP          hex colormap to import, otherwise default used
-    -d DESCRIPTIVE   add second table with descriptive data to create seprate heatmaps clustered based on data
+    -d DESCRIPTIVE   add second table with descriptive data to create
+                     seperate heatmaps clustered based on data. Ids should be in rows, with header for each row in first column 
 """
 from docopt import docopt
 

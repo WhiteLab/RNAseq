@@ -18,7 +18,7 @@ from docopt import docopt
 
 args = docopt(__doc__)
 fh = open(args['<table>'], 'r')
-bflag = args['<flag>']
+bflag = args['<bflag>']
 
 head = next(fh)
 head = head.rstrip('\n')

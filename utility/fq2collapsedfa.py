@@ -12,6 +12,7 @@ Options:
 -h
 """
 from docopt import docopt
+
 args = docopt(__doc__)
 import sys
 import gzip
@@ -33,9 +34,9 @@ for line in fq:
     seq_dict[seq] += 1
     skip = next(fq)
     skip = next(fq)
-    x+=1
+    x += 1
 fq.close()
-i=1
+i = 1
 for seq in sorted(seq_dict, key=seq_dict.get, reverse=True):
     sys.stdout.write('>seq' + str(i) + '|' + str(seq_dict[seq]) + '\n' + seq + '\n')
     i += 1

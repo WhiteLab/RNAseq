@@ -1,34 +1,33 @@
 #!/usr/bin/python
 
 import sys
-import re
-import os
+
 sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
 from date_time import date_time
 
-flist=open(sys.argv[1],'r')
-data={}
-bids=[]
+flist = open(sys.argv[1], 'r')
+data = {}
+bids = []
 for fn in flist:
     fn = fn.rstrip('\n')
     sys.stderr.write(date_time() + 'Processing file ' + fn + '\n')
     parts = fn.split('/')
     bid = parts[1]
     bids.append(bid)
-    cur=open(fn,'r')
+    cur = open(fn, 'r')
     head = next(cur)
     for line in cur:
         line = line.rstrip('\n')
-        datum  = line.split('\t')
+        datum = line.split('\t')
         # will only bother outputting transcripts with values > 0
         tx = datum[4]
         val = datum[9]
         if tx == '-':
-            tx=datum[6]
-        if float(val) > 0:    
+            tx = datum[6]
+        if float(val) > 0:
             if tx not in data:
-                data[tx]={}
-            data[tx][bid]=val
+                data[tx] = {}
+            data[tx][bid] = val
     sys.stderr.write(date_time() + 'Completed processing file ' + fn + '\n')
     cur.close()
 flist.close()

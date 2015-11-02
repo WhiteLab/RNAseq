@@ -13,8 +13,8 @@ Arguments:
 
 Options:
 -h
--s  SUFFIX  if given, will omit from column name.  otherwise file name used as column header
--a  ACCEPT  if given, a list of acceptable effects - i.e. NON_SYNONYMOUS
+-s SUFFIX  if given, will omit from column name.  otherwise file name used as column header
+-a ACCEPT  if given, a list of acceptable effects - i.e. NON_SYNONYMOUS
 """
 import os
 import sys

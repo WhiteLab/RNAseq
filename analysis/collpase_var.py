@@ -11,8 +11,8 @@ Arguments:
 Options:
 -h
 """
-import sys
 import re
+import sys
 
 from docopt import docopt
 
@@ -29,19 +29,21 @@ genes = {}
 for line in fh:
     line = line.rstrip('\n')
     data = line.split('\t')
-    m = re.search('(\S+)_chr.*',data[0])
+    m = re.search('(\S+)_chr.*', data[0])
     gene = m.group(1)
     if gene not in genes:
         genes[gene] = {}
-    for i in xrange(1,len(data),1):
+    for i in xrange(1, len(data), 1):
         if bflag == 1 and int(data[i]) > 0:
             genes[gene][hlist[i]] = 1
         else:
+            if hlist[i] not in genes[gene]:
+                genes[gene][hlist[i]] = 1
             genes[gene][hlist[i]] += int(data[i])
 fh.close()
 for gene in sorted(genes.keys()):
     sys.stdout.write(gene)
-    for i in xrange(1,len(hlist),1):
+    for i in xrange(1, len(hlist), 1):
         if hlist[i] in genes[gene]:
             sys.stdout.write('\t' + str(genes[gene][hlist[i]]))
         else:

@@ -3,7 +3,7 @@
 Merges tables based on a single column, column denoted array-style. Designed for variant output - will merge gene,
 position, and base change as name for row
 
-Usage: ./merge_tables.py (<list> <col> <hflag> <tflag>) [-a|-s]
+Usage: ./merge_tables.py (<list> <col> <hflag> <tflag>) [options]
 
 Arguments:
 <list>   list of tables

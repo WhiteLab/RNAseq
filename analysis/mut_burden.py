@@ -37,7 +37,7 @@ for line in fh:
     if gene not in genes:
         genes[gene] = {}
     for i in xrange(1, len(data), 1):
-        if data[i] > 0:
+        if int(data[i]) > 0:
             if hlist[i] not in genes[gene]:
                 genes[gene][hlist[i]] = 0
             genes[gene][hlist[i]] += 1

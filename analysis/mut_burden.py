@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 """
-Collapses tables based on a gene name - can choose to make values binary
+Collapses tables to gene level based on variant name and counts number of variant in that gene
+Format of variant names is gene_chr_pos_nt-nt
 
-Usage: ./merge_tables.py (<table> <bflag>)
+Usage: ./mut_burden.py (<table>)
 
 Arguments:
 <table>    table
-<bflag>    1 to make values binary, 0 to sum
 
 Options:
 -h
@@ -18,7 +18,6 @@ from docopt import docopt
 
 args = docopt(__doc__)
 fh = open(args['<table>'], 'r')
-bflag = args['<bflag>']
 
 head = next(fh)
 head = head.rstrip('\n')
@@ -38,12 +37,9 @@ for line in fh:
     if gene not in genes:
         genes[gene] = {}
     for i in xrange(1, len(data), 1):
-        if bflag == '1' and int(data[i]) > 0:
-            genes[gene][hlist[i]] = 1
-        else:
-            if hlist[i] not in genes[gene]:
-                genes[gene][hlist[i]] = 0
-            genes[gene][hlist[i]] += int(data[i])
+        if hlist[i] not in genes[gene]:
+            genes[gene][hlist[i]] = 0
+        genes[gene][hlist[i]] += 1
 fh.close()
 for gene in sorted(genes.keys()):
     sys.stdout.write(gene)

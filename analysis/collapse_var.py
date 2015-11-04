@@ -2,7 +2,7 @@
 """
 Collapses tables based on a gene name - can choose to make values binary
 
-Usage: ./merge_tables.py (<table> <bflag>)
+Usage: ./collapse_var.py (<table> <bflag>)
 
 Arguments:
 <table>    table

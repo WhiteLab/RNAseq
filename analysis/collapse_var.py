@@ -30,7 +30,11 @@ for line in fh:
     line = line.rstrip('\n')
     data = line.split('\t')
     m = re.search('(\S+)_chr.*', data[0])
-    gene = m.group(1)
+    try:
+        gene = m.group(1)
+    except:
+        sys.stderr.write('Failed to find gene while processing ' + line + '\n')
+        exit(1)
     if gene not in genes:
         genes[gene] = {}
     for i in xrange(1, len(data), 1):

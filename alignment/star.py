@@ -18,8 +18,11 @@ def star(STAR, genome, end1, end2, sample, log_dir, th):
                --alignIntronMin 20 --alignIntronMax 1000000 --alignMatesGapMax 1000000 2>> " + loc
 
     log(loc, date_time() + star_cmd + "\n")
-    call(star_cmd, shell=True)
-    return 0
+    check = call(star_cmd, shell=True)
+    if check == 0:
+        return 0
+    else:
+        return 1
 
 
 if __name__ == "__main__":

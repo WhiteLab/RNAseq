@@ -143,9 +143,13 @@ class Pipeline():
         log(self.loc, date_time() + 'Running qc on fastq file\n')
         fastqc(self.fastqc_tool, self.sample, self.end1, self.end2, self.threads)
         log(self.loc, date_time() + 'Performing star alignment ' + self.sample + '\n')
-        star(self.star_tool, self.genome_ref, self.end1, self.end2, (self.sample + '.'), log_dir, self.threads)
+        check = star(self.star_tool, self.genome_ref, self.end1, self.end2, (self.sample + '.'), log_dir, self.threads)
         #        align_stats(self.sample)
         #        report(self.sample,self.gtf_ref,cout)
+        if (check != 0):
+            log(self.loc, date_time() + 'star alignment failure for ' + self.sample + '\n')
+            self.status = 1
+            exit(1)
 
         # move outputs to correct directories and upload
         log(self.loc, date_time() + 'Organizing outputs\n')

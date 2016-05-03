@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 import sys
 
 sys.path.append('/home/ubuntu/TOOLS/Scripts/alignment')
@@ -121,9 +121,9 @@ class Pipeline():
         end_ss2 = self.sample + '_2.subset.fastq'
         subset = self.sample + '_subset'
 
-        ss_cmd = 'gunzip -c ' + self.end1 + ' | head -n 40000 > ' + end_ss1
+        ss_cmd = 'gunzip -c ' + self.end1 + ' | head -n 400000 > ' + end_ss1
         subprocess.call(ss_cmd, shell=True)
-        ss_cmd = 'gunzip -c ' + self.end2 + ' | head -n 40000 > ' + end_ss2
+        ss_cmd = 'gunzip -c ' + self.end2 + ' | head -n 400000 > ' + end_ss2
         subprocess.call(ss_cmd, shell=True)
         # check certain key processes
 
@@ -164,7 +164,7 @@ class Pipeline():
         sys.stderr.write(date_time() + 'Uploading results for ' + self.sample + '\n')
         check = upload_to_swift(self.cont, self.obj)
         if (check != 0):
-            sys, stderr, write(date_time() + 'Upload failure for ' + self.sample + '\n')
+            sys.stderr.write(date_time() + 'Upload failure for ' + self.sample + '\n')
             self.status = 1
             exit(1)
         sys.stderr.write(date_time() + 'Pipeline complete for ' + self.sample + '\n')

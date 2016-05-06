@@ -60,6 +60,7 @@ class Pipeline():
         self.cont = self.config_data['refs']['cont']
         self.threads = self.config_data['params']['threads']
         self.ram = self.config_data['params']['ram']
+        self.sf = self.config_data['params']['stranded']
         self.pipeline()
 
     def pipeline(self):
@@ -143,7 +144,8 @@ class Pipeline():
         log(self.loc, date_time() + 'Running qc on fastq file\n')
         fastqc(self.fastqc_tool, self.sample, self.end1, self.end2, self.threads)
         log(self.loc, date_time() + 'Performing star alignment ' + self.sample + '\n')
-        check = star(self.star_tool, self.genome_ref, self.end1, self.end2, (self.sample + '.'), log_dir, self.threads)
+        check = star(self.star_tool, self.genome_ref, self.end1, self.end2, (self.sample + '.'), log_dir, self.threads,
+                     self.sf)
         #        align_stats(self.sample)
         #        report(self.sample,self.gtf_ref,cout)
         if (check != 0):

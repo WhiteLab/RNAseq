@@ -7,7 +7,7 @@ from subprocess import call
 from log import log
 
 
-def star(STAR, genome, end1, end2, sample, log_dir, th):
+def star(STAR, genome, end1, end2, sample, log_dir, th, sf):
     loc = log_dir + sample + "star.log"
     meta = sample.split('_')
     epoch = 150409
@@ -15,7 +15,11 @@ def star(STAR, genome, end1, end2, sample, log_dir, th):
                + th + " --genomeDir " + genome + " --readFilesIn " + end1 + " " + end2 + " --readFilesCommand zcat \
                --quantMode TranscriptomeSAM GeneCounts --outSAMtype BAM Unsorted --outFilterType BySJout \
                --outFilterMultimapNmax 20 --alignSJoverhangMin 8 --alignSJDBoverhangMin 1 --outFilterMismatchNmax 8 \
-               --alignIntronMin 20 --alignIntronMax 1000000 --alignMatesGapMax 1000000 2>> " + loc
+               --alignIntronMin 20 --alignIntronMax 1000000 --alignMatesGapMax 1000000"
+    if sf == 'N':
+        # add XS tag is input is not stranded
+        star_cmd += ' --outSAMattributes NH HI AS nM XS'
+    star_cmd += ' 2>> ' + loc
 
     log(loc, date_time() + star_cmd + "\n")
     check = call(star_cmd, shell=True)
@@ -37,12 +41,13 @@ if __name__ == "__main__":
     parser.add_argument('-sa', '--sample', action='store', dest='sample', help='Sample/project name prefix')
     parser.add_argument('-l', '--log', action='store', dest='log_dir', help='LOG directory location')
     parser.add_argument('-th', '--threads', action='store', dest='th', help='Number of threads')
+    parser.add_argument('-sf', '--stranded', action='store', dest='sf', help='Flag whether data is stranded')
 
     if len(sys.argv) == 1:
         parser.print_help()
         sys.exit(1)
 
     inputs = parser.parse_args()
-    (STAR, genome, end1, end2, sample, log_dir, th) = (inputs.star, inputs.genome, inputs.end1, inputs.end2,
-                                                       inputs.sample, inputs.log_dir, inputs.th)
-    star(STAR, genome, end1, end2, sample, log_dir, th)
+    (STAR, genome, end1, end2, sample, log_dir, th, sf) = (inputs.star, inputs.genome, inputs.end1, inputs.end2,
+                                                       inputs.sample, inputs.log_dir, inputs.th, inputs.sf)
+    star(STAR, genome, end1, end2, sample, log_dir, th, sf)

@@ -8,11 +8,15 @@ from log import log
 import subprocess
 
 
-def cufflinks(cufflinks_tool, ens_ref, genome, sample, log_dir, t):
+def cufflinks(cufflinks_tool, ens_ref, genome, sample, log_dir, t, st):
     loc = log_dir + sample + ".cufflinks.log"
-    cufflinks_cmd = cufflinks_tool + " " + sample + "/accepted_hits.bam -g " + ens_ref + " -p " + t\
+    if st == 'Y':
+        cufflinks_cmd = cufflinks_tool + " " + sample + "/accepted_hits.bam -g " + ens_ref + " -p " + t\
                     + " --library-type fr-firststrand -b " + genome + " -u --upper-quartile-norm -o "\
                     + sample + " 2>> " + loc
+    else:
+        cufflinks_cmd = cufflinks_tool + " " + sample + "/accepted_hits.bam -g " + ens_ref + " -p " + t\
+                    + "  -b " + genome + " -u --upper-quartile-norm -o " + sample + " 2>> " + loc
 
     log(loc, date_time() + cufflinks_cmd + "\n")
     try:
@@ -34,12 +38,13 @@ if __name__ == "__main__":
     parser.add_argument('-sa', '--sample', action='store', dest='sample', help='Sample/project name prefix')
     parser.add_argument('-l', '--log', action='store', dest='log_dir', help='LOG directory location')
     parser.add_argument('-t', '--threads', action='store', dest='t', help='Number of threads')
+    parser.add_argument('-st', '--stranded', action='store', dest='st', help='Is stranded flag')
 
     if len(sys.argv) == 1:
         parser.print_help()
         sys.exit(1)
 
     inputs = parser.parse_args()
-    (cufflinks_tool, ens_ref, genome, sample, log_dir, t) = (
-    inputs.cufflinks_tool, inputs.ens_ref, inputs.genome, inputs.sample, inputs.log_dir, inputs.t)
-    cufflinks(cufflinks_tool, ens_ref, genome, sample, log_dir, t)
+    (cufflinks_tool, ens_ref, genome, sample, log_dir, t, st) = (
+    inputs.cufflinks_tool, inputs.ens_ref, inputs.genome, inputs.sample, inputs.log_dir, inputs.t, inputs.st)
+    cufflinks(cufflinks_tool, ens_ref, genome, sample, log_dir, t, st)

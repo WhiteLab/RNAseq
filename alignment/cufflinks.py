@@ -1,6 +1,6 @@
 #!/usr/bin/python
 import sys
-
+import os
 sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
 from date_time import date_time
 from subprocess import call
@@ -10,12 +10,16 @@ import subprocess
 
 def cufflinks(cufflinks_tool, ens_ref, genome, sample, log_dir, t, st):
     loc = log_dir + sample + ".cufflinks.log"
+
+    bam = sample + "/accepted_hits.bam"
+    if os.path.isfile(bam) == False:
+        bam = sample + '.Aligned.out.bam'
     if st == 'Y':
-        cufflinks_cmd = cufflinks_tool + " " + sample + "/accepted_hits.bam -g " + ens_ref + " -p " + t\
+        cufflinks_cmd = cufflinks_tool + " " + bam + " -g " + ens_ref + " -p " + t\
                     + " --library-type fr-firststrand -b " + genome + " -u --upper-quartile-norm -o "\
                     + sample + " 2>> " + loc
     else:
-        cufflinks_cmd = cufflinks_tool + " " + sample + "/accepted_hits.bam -g " + ens_ref + " -p " + t\
+        cufflinks_cmd = cufflinks_tool + " " + bam + " -g " + ens_ref + " -p " + t\
                     + "  -b " + genome + " -u --upper-quartile-norm -o " + sample + " 2>> " + loc
 
     log(loc, date_time() + cufflinks_cmd + "\n")

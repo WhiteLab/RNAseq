@@ -20,5 +20,5 @@ for line in fh:
             id_name = re.search(idf + ' "(\S+)"', info[8])
             name = re.search(namef + ' "(\S+)"', info[8])
             type = re.search(typef + ' "(\S+)"', info[8])
-            print '\t'.join(id_name.group(1), name.group(1), type.group(1))
+            print '\t'.join((id_name.group(1), name.group(1), type.group(1)))
 fh.close()

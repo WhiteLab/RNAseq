@@ -16,10 +16,10 @@ for line in index:
     ind[ann[0]]['type'] = ann[2]
 index.close()
 
-sys.stdout.write('name\ttype\t')
 head = next(table)
+sys.stdout.write('name\ttype\t' + head)
 for line in table:
     info = line.split('\t')
-    sys.stdout.write(ind[info[0]]['name'] + '\t ' + ind[info[0]]['type'] + '\t' + line)
+    sys.stdout.write(ind[info[1]]['name'] + '\t ' + ind[info[1]]['type'] + '\t' + line)
 
 table.close()

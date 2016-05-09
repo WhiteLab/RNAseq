@@ -20,6 +20,8 @@ head = next(table)
 sys.stdout.write('name\ttype\t' + head)
 for line in table:
     info = line.split('\t')
-    sys.stdout.write(ind[info[1]]['name'] + '\t ' + ind[info[1]]['type'] + '\t' + line)
-
+    if float(info[3]) > 0:
+        sys.stdout.write(ind[info[1]]['name'] + '\t ' + ind[info[1]]['type'] + '\t' + line)
+    else:
+        sys.stderr.write('Skipped ' + ind[info[1]]['name'] + ' ' + ind[info[1]]['type'] + ' ' + info[1] + ' no reads!\n')
 table.close()

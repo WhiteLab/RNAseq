@@ -14,6 +14,7 @@ from fastqc import fastqc
 from bwt2_pe import bwt2_pe
 from novosort_sort_pe import novosort_sort_pe
 from picard_insert_size import picard_insert_size
+from qc_bam import qc_bam
 from align_stats import align_stats
 from star import star
 from report import report
@@ -122,9 +123,9 @@ class Pipeline():
         end_ss2 = self.sample + '_2.subset.fastq'
         subset = self.sample + '_subset'
 
-        ss_cmd = 'gunzip -c ' + self.end1 + ' | head -n 400000 > ' + end_ss1
+        ss_cmd = 'gunzip -c ' + self.end1 + ' | head -n 4000000 > ' + end_ss1
         subprocess.call(ss_cmd, shell=True)
-        ss_cmd = 'gunzip -c ' + self.end2 + ' | head -n 400000 > ' + end_ss2
+        ss_cmd = 'gunzip -c ' + self.end2 + ' | head -n 4000000 > ' + end_ss2
         subprocess.call(ss_cmd, shell=True)
         # check certain key processes
 
@@ -152,7 +153,8 @@ class Pipeline():
             log(self.loc, date_time() + 'star alignment failure for ' + self.sample + '\n')
             self.status = 1
             exit(1)
-
+        # run QC on bams and get expression
+        check = qc_bam(self.sample, self.json_config)
         # move outputs to correct directories and upload
         log(self.loc, date_time() + 'Organizing outputs\n')
         mv_bams = 'mv *.bam *.bai ' + bam_dir

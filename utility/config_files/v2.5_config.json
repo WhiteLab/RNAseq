@@ -1,0 +1,42 @@
+{
+  "tools": {
+    "cutadapt": "cutadapt",
+    "fastqc": "fastqc",
+    "bwt2": "/home/ubuntu/TOOLS/bowtie2-2.2.3/bowtie2",
+    "samtools": "/home/ubuntu/TOOLS/tophat-2.0.14.Linux_x86_64/samtools_0.1.18",
+    "java": "/home/ubuntu/TOOLS/jdk1.8.0_66/bin/java",
+    "picard": "/home/ubuntu/TOOLS/picard-tools-2.0.1/dist/picard.jar",
+    "novosort": "/home/ubuntu/TOOLS/nova/novosort",
+    "express" : "/home/ubuntu/TOOLS/express-1.5.1-linux_x86_64/express",
+    "bedtools": "/home/ubuntu/TOOLS/bedtools2/bin/bedtools",
+    "tophat": "/home/ubuntu/TOOLS/tophat-2.0.14.Linux_x86_64/tophat",
+    "star": "/home/ubuntu/TOOLS/STAR-STAR_2.4.2a/bin/Linux_x86_64_static/STAR",
+    "cufflinks": "/home/ubuntu/TOOLS/cufflinks-2.2.1.Linux_x86_64/cufflinks",
+    "htseq-count": "htseq-count"
+  },
+  "refs": {
+    "bwt2": "REFS/GENCODE24GRCH37/Transcript_files/gencode.v24lift37.transcripts",
+    "genome": "/REFS/GENCODE24GRCH37/STAR_GENOME",
+    "samtools": "REFS/GENCODE24GRCH37/FASTA/GRCh37.karyo_sorted.fa",
+    "gtf": "REFS/GENCODE24GRCH37/Transcript_files/gencode.v24lift37.annotation.gtf",
+    "transcriptome": "REFS/GENCODE24GRCH37/Transcript_files/gencode.v24lift37.transcripts",
+    "express": "REFS/GENCODE24GRCH37/Transcript_files/gencode.v24lift37.transcripts_ENST_only.fa",
+    "refFlat": "REFS/GENCODE24GRCH37/PICARD/gencode.v24lift37.annotation.refFlat.txt.gz",
+    "rRNA_intervals": "gencode.v24lift37.rRNA_intervals.txt",
+    "cont": "PANCAN",
+    "obj": "ALIGN_RNASEQ",
+    "config": "/mnt/VIP/VIP_RNAseq_config.json"
+  },
+  "params": {
+    "r1adapt": "AGATCGGAAGAGCACACGTCTGAACTCCAGTCA",
+    "r2adapt": "AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT",
+    "r1trim": "0",
+    "r2trim": "0",
+    "qual": "33",
+    "mqual": "30",
+    "minlen": "20",
+    "threads": "8",
+    "ram": "30",
+    "stranded": "N"
+  }
+}

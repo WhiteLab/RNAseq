@@ -10,12 +10,12 @@ from log import log
 def star(STAR, genome, end1, end2, sample, log_dir, th, sf):
     loc = log_dir + sample + "star.log"
     meta = sample.split('_')
-    epoch = 150409
+    RGRP = "@RG\\tID:" + sample + "\\tLB:" + meta[0] + "\\tPU:" + meta[4] + "\\tSM:" + meta[0] + "\\tPL:illumina"
     star_cmd = STAR + " --runMode alignReads --twopassMode Basic --outFileNamePrefix " + sample + " --runThreadN " \
                + th + " --genomeDir " + genome + " --readFilesIn " + end1 + " " + end2 + " --readFilesCommand zcat \
-               --quantMode TranscriptomeSAM GeneCounts --outSAMtype BAM Unsorted --outFilterType BySJout \
+               --quantMode TranscriptomeSAM GeneCounts --outSAMtype BAM Sorted --outFilterType BySJout \
                --outFilterMultimapNmax 20 --alignSJoverhangMin 8 --alignSJDBoverhangMin 1 --outFilterMismatchNmax 8 \
-               --alignIntronMin 20 --alignIntronMax 1000000 --alignMatesGapMax 1000000"
+               --alignIntronMin 20 --alignIntronMax 1000000 --alignMatesGapMax 1000000 --outSAMattrRGline " + RGRP
     if sf == 'N':
         # add XS tag is input is not stranded
         star_cmd += ' --outSAMattributes NH HI AS nM XS'

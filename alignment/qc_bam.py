@@ -17,24 +17,30 @@ def parse_config(json_config):
            config_data['tools']['express'], config_data['refs']['express']
 
 
-def qc_bam(sample, config_file, ref_mnt):
+def qc_bam(sample, config_file, ref_mnt, x, s):
     job_list = []
     loc = sample + '.bam_qc.log'
     if os.path.isdir('LOGS'):
         loc = 'LOGS/' + loc
     (java, ram, picard, refFlat, intervals, strand, express, transcriptome) = parse_config(config_file)
     # for now setting default strand to NONE
-    st = 'NONE'
+    st_dict = {'N': 'NONE', 'fr-stranded': 'FIRST_READ_TRANSCRIPTION_STRAND',
+               'rf-stranded': 'SECOND_READ_TRANSCRIPTION_STRAND'}
+
     refFlat = ref_mnt + '/' + refFlat
     intervals = ref_mnt + '/' + intervals
     transcriptome = ref_mnt + '/' + transcriptome
-    picard_cmd = java + ' -Xmx' + ram + 'g ' + picard + ' CollectRnaSeqMetrics REF_FLAT=' + refFlat + ' STRAND=' + st\
-                 + ' CHART=' + sample + '.pos_v_cov.pdf I=' + sample + '.Aligned.out.bam O=' + sample\
+    picard_cmd = java + ' -Xmx' + ram + 'g ' + picard + ' CollectRnaSeqMetrics REF_FLAT=' + refFlat + ' STRAND=' \
+                 + st_dict[strand] + ' CHART=' + sample + '.pos_v_cov.pdf I=' + sample + '.Aligned.out.bam O=' + sample\
                  + '.picard_RNAseq_qc.txt RIBOSOMAL_INTERVALS=' + intervals
     job_list.append(picard_cmd)
     log(loc, date_time() + picard_cmd + '\n')
-    express_cmd = express + ' ' + transcriptome + ' ' + sample + '.Aligned.toTranscriptome.out.bam --no-update-check' \
-                ' --logtostderr 2>> ' + loc
+    if strand == 'N':
+        express_cmd = express + ' ' + transcriptome + ' ' + sample + '.Aligned.toTranscriptome.out.bam' \
+                    ' --no-update-check -m ' + x + ' -s ' + s + ' --logtostderr 2>> ' + loc
+    else:
+        express_cmd = express + ' ' + transcriptome + ' ' + sample + '.Aligned.toTranscriptome.out.bam' \
+                    ' --no-update-check --' + strand + ' -m ' + x + ' -s ' + s + ' --logtostderr 2>> ' + loc
     log(loc, date_time() + express_cmd + '\n')
     job_list.append(express_cmd)
     job_manager(job_list, '2')

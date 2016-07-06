@@ -21,10 +21,14 @@ def tophat(tophat_tool, tx, bwt2_ref, end1, end2, x, s, sample, log_dir, th):
     # fix to determine which phred score to use using HGAC date assigned 150409 and greater phred33, else hpred 64
     meta = sample.split('_')
     epoch = 150409
-    tophat_cmd = tophat_tool + " --no-coverage-search --mate-inner-dist " + x + " --mate-std-dev " + s + " --num-threads " + th + " --library-type fr-firststrand --transcriptome-index " + tx + " -o " + sample + " " + bwt2_ref + " " + end1 + " " + end2 + " 2>> " + loc
+    tophat_cmd = tophat_tool + " --no-coverage-search --mate-inner-dist " + x + " --mate-std-dev " + s\
+                 + " --num-threads " + th + " --library-type fr-firststrand --transcriptome-index " + tx + " -o " \
+                 + sample + " " + bwt2_ref + " " + end1 + " " + end2 + " 2>> " + loc
 
     if len(meta) >= 2 and RepresentsInt(meta[1]) == True and int(meta[1]) < epoch:
-        tophat_cmd = tophat_tool + " --no-coverage-search  --phred64-quals --mate-inner-dist " + x + " --mate-std-dev " + s + " --num-threads " + th + " --library-type fr-firststrand --transcriptome-index " + tx + " -o " + sample + " " + bwt2_ref + " " + end1 + " " + end2 + " 2>> " + loc
+        tophat_cmd = tophat_tool + " --no-coverage-search  --phred64-quals --mate-inner-dist " + x + " --mate-std-dev "\
+                     + s + " --num-threads " + th + " --library-type fr-firststrand --transcriptome-index " + tx\
+                     + " -o " + sample + " " + bwt2_ref + " " + end1 + " " + end2 + " 2>> " + loc
     log(loc, date_time() + tophat_cmd + "\n")
     call(tophat_cmd, shell=True)
     return 0

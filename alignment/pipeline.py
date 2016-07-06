@@ -154,7 +154,7 @@ class Pipeline():
             self.status = 1
             exit(1)
         # run QC on bams and get expression
-        check = qc_bam(self.sample, self.json_config)
+        check = qc_bam(self.sample, self.json_config, self.ref_mnt, x, s)
         # move outputs to correct directories and upload
         log(self.loc, date_time() + 'Organizing outputs\n')
         mv_bams = 'mv *.bam *.bai ' + bam_dir

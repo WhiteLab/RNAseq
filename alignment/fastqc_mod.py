@@ -18,7 +18,8 @@ def fastqc(fastqc_tool, sample, end1, end2, t):
     fastqc_cmd = fastqc_tool + ' -t ' + t + ' -o QC/ ' + end1 + ' ' + end2
     log(loc, date_time() + fastqc_cmd + "\n")
     f = call(fastqc_cmd, shell=True)
-    # check after a minute whether the process is still good - shouldn't take too long to ascertain whether phred score didn't fit
+    # check after a minute whether the process is still good - shouldn't take too long to ascertain whether phred
+    # score didn't fit
     return 0
 
 

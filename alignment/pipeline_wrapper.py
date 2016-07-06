@@ -62,7 +62,8 @@ for line in fh:
         os.chdir(cwd)
     except:
         sys.stderr.write(
-            date_time() + 'Creating directory for ' + bid + ' failed. Ensure correct machine being used for this sample set\n')
+            date_time() + 'Creating directory for ' + bid + ' failed. Ensure correct machine being used for this'
+                                                            ' sample set\n')
         exit(1)
     loc = cwd[:-7] + bid + '.run.log'
     log(loc, date_time() + 'Initializing scratch directory for ' + bid + '\n')
@@ -82,13 +83,10 @@ for line in fh:
         except:
             log(loc, date_time() + 'Can\'t find sequencing files for ' + lane + ' skipping!\n')
             continue
-        end1 = ''
-        end2 = ''
-        sf1 = ''
-        sf2 = ''
 
         lane_status[lane] = 'Running'
-        # sequencing files downloaded in pairs using simple iterator, as swift gives files in alphanumeric order - standard file naming should work with this
+        # sequencing files downloaded in pairs using simple iterator, as swift gives files in alphanumeric order -
+        #  standard file naming should work with this
         seqfile = re.findall('(\S+[sequence|f*q]*\.gz)', contents)
         sf1 = seqfile[0]
         end1 = os.path.basename(sf1)
@@ -119,7 +117,8 @@ for line in fh:
                 subprocess.call('mkdir ' + l_dir, shell=True)
         except:
             log(loc,
-                date_time() + 'Could not change to new directory ' + cur_dir + ' Skipping and removing sequencing files\n')
+                date_time() + 'Could not change to new directory ' + cur_dir + ' Skipping and removing'
+                                                                               ' sequencing files\n')
             rm_sf = 'rm ' + cur_dir + '/' + end1 + ' ' + cur_dir + '/' + end2
             subprocess.call(rm_sf, shell=True)
             os.chdir(cwd)

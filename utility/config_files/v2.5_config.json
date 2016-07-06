@@ -37,6 +37,6 @@
     "minlen": "20",
     "threads": "8",
     "ram": "30",
-    "stranded": "N"
+    "strand": "fr-firststrand"
   }
 }

@@ -17,7 +17,7 @@ def parse_config(json_config):
            config_data['tools']['express'], config_data['refs']['express']
 
 
-def qc_bam(sample, config_file, ref_mnt, x, s):
+def qc_bam(sample, config_file, ref_mnt):
     job_list = []
     loc = sample + '.bam_qc.log'
     if os.path.isdir('LOGS'):

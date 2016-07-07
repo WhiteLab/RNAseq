@@ -141,7 +141,7 @@ class Pipeline():
             log(self.loc, date_time() + 'novosort sort failure for ' + self.sample + '\n')
             self.status = 1
             exit(1)
-        (x, s) = picard_insert_size(self.java_tool, self.picard_tool, subset, log_dir)
+        (self.x, self.s) = picard_insert_size(self.java_tool, self.picard_tool, subset, log_dir)
         log(self.loc, date_time() + 'Running qc on fastq file\n')
         fastqc(self.fastqc_tool, self.sample, self.end1, self.end2, self.threads)
         log(self.loc, date_time() + 'Performing star alignment ' + self.sample + '\n')
@@ -154,7 +154,11 @@ class Pipeline():
             self.status = 1
             exit(1)
         # run QC on bams and get expression
-        check = qc_bam(self.sample, self.json_config, self.ref_mnt, x, s)
+        check = qc_bam(self.sample, self.json_config, self.ref_mnt)
+        if (check != 0):
+            log(self.loc, date_time() + 'bam qc process failure for ' + self.sample + '\n')
+            self.status = 1
+            exit(1)
         # move outputs to correct directories and upload
         log(self.loc, date_time() + 'Organizing outputs\n')
         mv_bams = 'mv *.bam *.bai ' + bam_dir

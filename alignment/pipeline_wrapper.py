@@ -13,6 +13,8 @@ from date_time import date_time
 import subprocess
 from download_from_swift import download_from_swift
 from pipeline import Pipeline
+from statistics import mean
+from novosort_merge_pe import novosort_merge_pe
 import pdb
 from log import log
 
@@ -74,6 +76,9 @@ for line in fh:
     # iterate through sample/lane pairs
     # dictionary to track status of success of pipelines for each sample and lane to help troubleshoot any failures
     lane_status = {}
+    # mean and standard deviation for insert size for lanes.  average will be used after merging bams
+    means = []
+    stds = []
     for lane in lane_csv.split(', '):
         lane_status[lane] = 'Initializing'
         swift_cmd = src_cmd + 'swift list ' + cont + ' --prefix ' + obj1 + lane
@@ -127,6 +132,8 @@ for line in fh:
         log(loc, date_time() + 'Running pipeline process for lane ' + lane + '\n')
         # check class status flag
         p = Pipeline(end1, end2, pipe_cfg, ref_mnt)
+        means.append(p.x)
+        stds.append(p.s)
         if p.status != 0:
             log(loc, date_time() + "Pipeline process for sample lane " + lane + " failed with status " + str(
                 p.status) + " \n")
@@ -134,6 +141,9 @@ for line in fh:
             log(loc, lane + '\t' + lane_status[lane] + '\n')
             exit(3)
         # change back to parent directory so that new sequencing files can be downloaded in same place
+
+        cur_mean = mean(means)
+        cur_std = mean(stds)
         os.chdir(cwd)
         # clean out files for next run
         cleanup = 'rm -rf ' + cur_dir
@@ -141,6 +151,7 @@ for line in fh:
         lane_status[lane] = 'Pipeline run and data uploaded'
         log(loc, date_time() + lane + '\t' + lane_status[lane] + '\n')
     os.chdir(cwd)
+
 """
 unload_genome=star + ' --genomeLoad Remove --genomeDir ' + genome
 sys.stderr.write(date_time() + "Purging genome from memory\n")

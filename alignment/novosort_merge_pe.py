@@ -19,7 +19,12 @@ def list_bam(cont, obj, sample, wait):
     ct = 0
     list_cmd = '. /home/ubuntu/.novarc;swift list ' + cont + ' --prefix ' + obj + '/' + sample
     sys.stderr.write(date_time() + list_cmd + '\nGetting BAM list\n')
-    flist = subprocess.check_output(list_cmd, shell=True)
+    flist = []
+    # gives some flexibility if giving a list of samples ot just a single one
+    if os.path.isfile(sample):
+        flist = subprocess.check_output(list_cmd, shell=True)
+    else:
+        flist[0] = sample
     # Use to check on download status
     p = []
 

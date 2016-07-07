@@ -15,6 +15,7 @@ from download_from_swift import download_from_swift
 from pipeline import Pipeline
 from statistics import mean
 from novosort_merge_pe import novosort_merge_pe
+from express_quant import express_quant
 import pdb
 from log import log
 
@@ -44,15 +45,7 @@ def parse_config(config_file):
 
 (cont, obj, pipe_cfg, star, genome) = parse_config(inputs.config_file)
 genome = ref_mnt + '/' + genome
-# loads genome reference to make all subsequent runs quicker
-"""
-load_genome=star + ' --genomeLoad LoadAndExit --genomeDir ' + genome
-sys.stderr.write(date_time() + "Loading genome into memory\n" + load_genome + '\n')
-try:
-    subprocess.call(load_genome,shell=True)
-except:
-    sys.stderr.write(date_time() + 'Loading genome failed.  Check location and command\n')
-"""
+
 for line in fh:
     line = line.rstrip('\n')
     (bid, seqtype, lane_csv) = line.split('\t')
@@ -132,8 +125,6 @@ for line in fh:
         log(loc, date_time() + 'Running pipeline process for lane ' + lane + '\n')
         # check class status flag
         p = Pipeline(end1, end2, pipe_cfg, ref_mnt)
-        means.append(p.x)
-        stds.append(p.s)
         if p.status != 0:
             log(loc, date_time() + "Pipeline process for sample lane " + lane + " failed with status " + str(
                 p.status) + " \n")
@@ -141,20 +132,22 @@ for line in fh:
             log(loc, lane + '\t' + lane_status[lane] + '\n')
             exit(3)
         # change back to parent directory so that new sequencing files can be downloaded in same place
-
-        cur_mean = mean(means)
-        cur_std = mean(stds)
-        os.chdir(cwd)
-        # clean out files for next run
-        cleanup = 'rm -rf ' + cur_dir
-        subprocess.call(cleanup, shell=True)
-        lane_status[lane] = 'Pipeline run and data uploaded'
-        log(loc, date_time() + lane + '\t' + lane_status[lane] + '\n')
+        means.append(float(p.x))
+        stds.append(float(p.s))
+    cur_mean = mean(means)
+    cur_std = mean(stds)
+    novosort_merge_pe(inputs.config_file, bid, '600')
+    check = express_quant(bid, inputs.config_file, ref_mnt, str(cur_mean), str(cur_std))
+    if check != 0:
+        log(loc, date_time() + 'Quantification of RNA failed.  Please check logs\n')
+        exit(1)
+    os.chdir(cwd)
+    mv_cmd = 'mv *.bam *.bai BAM/; *xpr* REPORTS/;'
+    # clean out files for next run
+    cleanup = 'rm -rf ' + cur_dir
+    subprocess.call(cleanup, shell=True)
+    lane_status[lane] = 'Pipeline run and data uploaded'
+    log(loc, date_time() + lane + '\t' + lane_status[lane] + '\n')
     os.chdir(cwd)
 
-"""
-unload_genome=star + ' --genomeLoad Remove --genomeDir ' + genome
-sys.stderr.write(date_time() + "Purging genome from memory\n")
-subprocess.call(unload_genome, shell=True)
-"""
 sys.stderr.write(date_time() + "Process complete.  Check logs for any errors\n")

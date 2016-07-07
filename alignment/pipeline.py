@@ -96,10 +96,10 @@ class Pipeline():
             mk_qc_dir = 'mkdir ' + qc_dir
             call(mk_qc_dir, shell=True)
             log(self.loc, date_time() + 'Made qc directory ' + qc_dir + "\n")
-            #       if os.path.isdir(rpt_dir) == False:
-            #           mk_rpt_dir='mkdir ' + rpt_dir
-            #           call(mk_rpt_dir,shell=True)
-            #           log(self.loc,date_time() + 'Made reports directory ' + rpt_dir + "\n")
+        if os.path.isdir(rpt_dir) == False:
+            mk_rpt_dir='mkdir ' + rpt_dir
+            call(mk_rpt_dir,shell=True)
+            log(self.loc,date_time() + 'Made reports directory ' + rpt_dir + "\n")
         log(self.loc,
             date_time() + "Starting alignment qc for paired end sample files " + self.end1 + " and " + self.end2 + "\n")
         # inputs

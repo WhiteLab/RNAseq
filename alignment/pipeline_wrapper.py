@@ -5,6 +5,7 @@ import sys
 
 sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
 sys.path.append('/home/ubuntu/TOOLS/Scripts/alignment')
+sys.path.append('/home/ubuntu/TOOLS/Scripts/analysis')
 import os
 import re
 import argparse

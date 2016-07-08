@@ -65,6 +65,7 @@ class Pipeline():
         self.pipeline()
 
     def pipeline(self):
+        # CUR POS SCRATCH/RAW/bnid
         log_dir = 'LOGS/'
         if os.path.isdir(log_dir) == False:
             mk_log_dir = 'mkdir ' + log_dir
@@ -75,6 +76,7 @@ class Pipeline():
             mk_fq_dir = 'mkdir ' + fq_dir
             call(mk_fq_dir, shell=True)
             log(self.loc, date_time() + 'Made fastq trimmed directory ' + fq_dir + "\n")
+        # SCRATCH/RAW/bnid/TRIMMED_FQ
         os.chdir(fq_dir)
         mv_fq = 'mv ../LOGS .'
         call(mv_fq, shell=True)
@@ -172,6 +174,7 @@ class Pipeline():
         #        org_mv='mv BAMS STAR_OUT QC REPORTS LOGS ../'
         org_mv = 'mv BAMS STAR_OUT QC LOGS ../'
         call(org_mv, shell=True)
+        #CUR POS # SCRATCH/RAW/
         os.chdir('../../')
         sys.stderr.write(date_time() + 'Uploading results for ' + self.sample + '\n')
         check = upload_to_swift(self.cont, self.obj)

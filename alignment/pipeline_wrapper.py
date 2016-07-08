@@ -17,6 +17,7 @@ from pipeline import Pipeline
 from statistics import mean
 from novosort_merge_pe import novosort_merge_pe
 from express_quant import express_quant
+from upload_to_swift import upload_to_swift
 import pdb
 from log import log
 
@@ -38,6 +39,19 @@ src_cmd = '. ~/.novarc;'
 ref_mnt = inputs.ref_mnt
 
 
+def upload_special(bnid, cont, obj):
+    bam = bnid + '.merged.final.bam'
+    bai = bnid + '.merged.final.bam.bai'
+    if not os.path.isfile('BAM/' + bai):
+        bai = bnid + '.merged.final.bai'
+    up_bam = src_cmd + ' swift upload ' + cont + 'BAM/' + bam + ' --object-name ' + obj + '/' + bnid + '/' + bam
+    subprocess.call(up_bam, shell=True)
+    up_bai = src_cmd + ' swift upload ' + cont + 'BAM/' + bai + ' --object-name ' + obj + '/' + bnid + '/' + bai
+    subprocess.call(up_bai, shell=True)
+    up_reports = src_cmd + ' swift upload ' + cont + 'REPORTS/  --object-name ' + obj + '/' + bnid + '/REPORTS/'
+    subprocess.call(up_reports, shell=True)
+
+
 def parse_config(config_file):
     config_data = json.loads(open(config_file, 'r').read())
     return (config_data['refs']['cont'], config_data['refs']['obj'], config_data['refs']['config'],
@@ -54,6 +68,7 @@ for line in fh:
     check_dir = os.path.isdir(cwd)
     if check_dir == False:
         subprocess.check_output('mkdir ' + cwd, shell=True)
+    # CUR POS ref_mnt/SCRATCH
     try:
         os.chdir(cwd)
     except:
@@ -108,6 +123,7 @@ for line in fh:
             lane_status[lane] = 'Sequencing file download failed'
             log(loc, lane + '\t' + lane_status[lane] + '\n')
             exit(3)
+        # CUR POS SCRATCH/RAW/bnid
         try:
             os.chdir(cur_dir)
             l_dir = cur_dir + '/LOGS'
@@ -135,6 +151,9 @@ for line in fh:
         # change back to parent directory so that new sequencing files can be downloaded in same place
         means.append(float(p.x))
         stds.append(float(p.s))
+    # going back to sample dir to ensure file output in correct place
+    #CUR POS # SCRATCH/RAW/bnid
+    os.chdir(cur_dir)
     cur_mean = mean(means)
     cur_std = mean(stds)
     novosort_merge_pe(inputs.config_file, bid, '600')
@@ -142,8 +161,13 @@ for line in fh:
     if check != 0:
         log(loc, date_time() + 'Quantification of RNA failed.  Please check logs\n')
         exit(1)
-    os.chdir(cwd)
     mv_cmd = 'mv *.bam *.bai BAM/; *xpr* REPORTS/;'
+    subprocess.call(mv_cmd, shell=True)
+    os.chdir('../')
+    log(loc, date_time() + 'Uploading merged bam and quant files for ' + bid + '\n')
+    upload_special(bid, cont, obj)
+    os.chdir(cwd)
+
     # clean out files for next run
     cleanup = 'rm -rf ' + cur_dir
     subprocess.call(cleanup, shell=True)

@@ -11,7 +11,7 @@ def star(STAR, genome, end1, end2, sample, log_dir, th, sf):
     loc = log_dir + sample + "star.log"
     meta = sample.split('_')
     RGRP = "ID:" + sample + "\tLB:" + meta[0] + "\tPU:" + meta[4] + "\tSM:" + meta[0] + "\tPL:illumina"
-    star_cmd = STAR + " --runMode alignReads --twopassMode Basic --outFileNamePrefix " + sample + " --runThreadN " \
+    star_cmd = STAR + " --runMode alignReads --twopassMode Basic --outFileNamePrefix " + sample + ". --runThreadN " \
                + th + " --genomeDir " + genome + " --readFilesIn " + end1 + " " + end2 + " --readFilesCommand zcat \
                --quantMode TranscriptomeSAM GeneCounts --outSAMtype BAM SortedByCoordinate --outFilterType BySJout \
                --outFilterMultimapNmax 20 --alignSJoverhangMin 8 --alignSJDBoverhangMin 1 --outFilterMismatchNmax 8 \
@@ -20,7 +20,7 @@ def star(STAR, genome, end1, end2, sample, log_dir, th, sf):
     if sf == 'N':
         # add XS tag is input is not stranded
         star_cmd += ' --outSAMattributes NH HI AS nM XS'
-    star_cmd += ' 2>> ' + loc
+    star_cmd += ' 2>> ' + loc + ' >> ' + loc + '; mv *Log* ' + log_dir
 
     log(loc, date_time() + star_cmd + "\n")
     check = call(star_cmd, shell=True)

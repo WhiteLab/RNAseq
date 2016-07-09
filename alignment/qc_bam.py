@@ -29,8 +29,8 @@ def qc_bam(sample, config_file, ref_mnt):
     refFlat = ref_mnt + '/' + refFlat
     intervals = ref_mnt + '/' + intervals
     picard_cmd = java + ' -Xmx' + ram + 'g ' + picard + ' CollectRnaSeqMetrics REF_FLAT=' + refFlat + ' STRAND=' \
-                 + st_dict[strand] + ' CHART=' + sample + '.pos_v_cov.pdf I=' + sample + '.Aligned.out.bam O=' + sample\
-                 + '.picard_RNAseq_qc.txt RIBOSOMAL_INTERVALS=' + intervals
+                 + st_dict[strand] + ' CHART=' + sample + '.pos_v_cov.pdf I=' + sample \
+                 + '.Aligned.sortedByCoord.out.bam O=' + sample + '.picard_RNAseq_qc.txt RIBOSOMAL_INTERVALS=' + intervals
     # job_list.append(picard_cmd)
     log(loc, date_time() + picard_cmd + '\n')
     subprocess.call(picard, shell=True)

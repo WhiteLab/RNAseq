@@ -15,9 +15,7 @@ from bwt2_pe import bwt2_pe
 from novosort_sort_pe import novosort_sort_pe
 from picard_insert_size import picard_insert_size
 from qc_bam import qc_bam
-from align_stats import align_stats
 from star import star
-from report import report
 from upload_to_swift import upload_to_swift
 from subprocess import call
 import pdb
@@ -149,8 +147,7 @@ class Pipeline():
         log(self.loc, date_time() + 'Performing star alignment ' + self.sample + '\n')
         check = star(self.star_tool, self.genome_ref, self.end1, self.end2, (self.sample + '.'), log_dir, self.threads,
                      self.sf)
-        #        align_stats(self.sample)
-        #        report(self.sample,self.gtf_ref,cout)
+
         if (check != 0):
             log(self.loc, date_time() + 'star alignment failure for ' + self.sample + '\n')
             self.status = 1
@@ -169,9 +166,6 @@ class Pipeline():
         call(mv_star, shell=True)
         mv_sub = 'mv *subset* ' + qc_dir
         call(mv_sub, shell=True)
-        #       mv_rpt='mv *.txt REPORTS/'
-        #       call(mv_rpt,shell=True)
-        #        org_mv='mv BAMS STAR_OUT QC REPORTS LOGS ../'
         org_mv = 'mv BAMS STAR_OUT QC LOGS ../'
         call(org_mv, shell=True)
         #CUR POS # SCRATCH/RAW/

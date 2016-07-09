@@ -8,7 +8,7 @@ from log import log
 
 
 def star(STAR, genome, end1, end2, sample, log_dir, th, sf):
-    loc = log_dir + sample + "star.log"
+    loc = log_dir + sample + ".star.log"
     meta = sample.split('_')
     RGRP = "ID:" + sample + "\tLB:" + meta[0] + "\tPU:" + meta[4] + "\tSM:" + meta[0] + "\tPL:illumina"
     star_cmd = STAR + " --runMode alignReads --twopassMode Basic --outFileNamePrefix " + sample + ". --runThreadN " \

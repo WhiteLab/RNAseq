@@ -22,9 +22,9 @@ def qc_bam(sample, config_file, ref_mnt):
     if os.path.isdir('LOGS'):
         loc = 'LOGS/' + loc
     (java, ram, picard, refFlat, intervals, strand) = parse_config(config_file)
-    # for now setting default strand to NONE
-    st_dict = {'N': 'NONE', 'fr-strand': 'FIRST_READ_TRANSCRIPTION_STRAND',
-               'rf-strand': 'SECOND_READ_TRANSCRIPTION_STRAND'}
+
+    st_dict = {'N': 'NONE', 'fr-stranded': 'FIRST_READ_TRANSCRIPTION_STRAND',
+               'rf-stranded': 'SECOND_READ_TRANSCRIPTION_STRAND'}
 
     refFlat = ref_mnt + '/' + refFlat
     intervals = ref_mnt + '/' + intervals

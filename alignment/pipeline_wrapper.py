@@ -161,7 +161,7 @@ for line in fh:
     if check != 0:
         log(loc, date_time() + 'Quantification of RNA failed.  Please check logs\n')
         exit(1)
-    mv_cmd = 'mv *.bam *.bai BAM/; *xpr* REPORTS/;'
+    mv_cmd = 'mv *.bam *.bai BAM/; mkdir REPORTS; *xpr* REPORTS/;'
     subprocess.call(mv_cmd, shell=True)
     os.chdir('../')
     log(loc, date_time() + 'Uploading merged bam and quant files for ' + bid + '\n')

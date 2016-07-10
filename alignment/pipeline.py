@@ -83,7 +83,6 @@ class Pipeline():
         star_dir = 'STAR_OUT/'
         bam_dir = 'BAMS/'
         qc_dir = 'QC/'
-        rpt_dir = 'REPORTS/'
         if os.path.isdir(star_dir) == False:
             mk_star_dir = 'mkdir ' + star_dir
             call(mk_star_dir, shell=True)
@@ -96,10 +95,6 @@ class Pipeline():
             mk_qc_dir = 'mkdir ' + qc_dir
             call(mk_qc_dir, shell=True)
             log(self.loc, date_time() + 'Made qc directory ' + qc_dir + "\n")
-        if os.path.isdir(rpt_dir) == False:
-            mk_rpt_dir='mkdir ' + rpt_dir
-            call(mk_rpt_dir,shell=True)
-            log(self.loc,date_time() + 'Made reports directory ' + rpt_dir + "\n")
         log(self.loc,
             date_time() + "Starting alignment qc for paired end sample files " + self.end1 + " and " + self.end2 + "\n")
         # inputs
@@ -162,12 +157,17 @@ class Pipeline():
         log(self.loc, date_time() + 'Organizing outputs\n')
         mv_bams = 'mv *.bam *.bai ' + bam_dir
         call(mv_bams, shell=True)
-        mv_star = 'mv *.out *.tab ' + star_dir
+        mv_star = 'mv  *.tab ' + star_dir
         call(mv_star, shell=True)
-        mv_sub = 'mv *subset* ' + qc_dir
+        mv_sub = 'mv *subset* *.txt *.pdf ' + qc_dir
         call(mv_sub, shell=True)
         org_mv = 'mv BAMS STAR_OUT QC LOGS ../'
         call(org_mv, shell=True)
+        rm_tmp = 'rm -rf *STAR* .subset.fastq'
+        call(rm_tmp, shell=True)
+        # mv subdirectories to right place
+        mv_dir = 'mv ' + ' '.join((bam_dir, log_dir, qc_dir)) + ' ../'
+        call(mv_dir, shell=True)
         #CUR POS # SCRATCH/RAW/
         os.chdir('../../')
         sys.stderr.write(date_time() + 'Uploading results for ' + self.sample + '\n')

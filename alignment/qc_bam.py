@@ -34,7 +34,7 @@ def qc_bam(sample, config_file, ref_mnt):
                  + intervals + ' VALIDATION_STRINGENCY=LENIENT 2>> ' + loc + ' >> ' + loc
     # job_list.append(picard_cmd)
     log(loc, date_time() + picard_cmd + '\n')
-    subprocess.call(picard, shell=True)
+    subprocess.call(picard_cmd, shell=True)
     return 0
 
 

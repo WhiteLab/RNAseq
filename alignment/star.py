@@ -13,7 +13,7 @@ def star(STAR, genome, end1, end2, sample, log_dir, th, sf):
     RGRP = "ID:" + sample + "\tLB:" + meta[0] + "\tPU:" + meta[4] + "\tSM:" + meta[0] + "\tPL:illumina"
     star_cmd = STAR + " --runMode alignReads --twopassMode Basic --outFileNamePrefix " + sample + ". --runThreadN " \
                + th + " --genomeDir " + genome + " --readFilesIn " + end1 + " " + end2 + " --readFilesCommand zcat \
-               --quantMode TranscriptomeSAM GeneCounts --outSAMtype BAM  --outFilterType BySJout \
+               --quantMode TranscriptomeSAM GeneCounts --outSAMtype BAM Unsorted --outFilterType BySJout \
                --outFilterMultimapNmax 20 --alignSJoverhangMin 8 --alignSJDBoverhangMin 1 --outFilterMismatchNmax 8 \
                --alignIntronMin 20 --alignIntronMax 1000000 --alignMatesGapMax 1000000 --outSAMattrRGline \"" + RGRP \
                + "\""

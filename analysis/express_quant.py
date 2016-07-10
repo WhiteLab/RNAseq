@@ -11,17 +11,18 @@ import json
 
 def parse_config(json_config):
     config_data = json.loads(open(json_config, 'r').read())
-    return config_data['params']['strand'], config_data['tools']['express'], config_data['refs']['express']
+    return config_data['params']['stranded'], config_data['params']['strand'], config_data['tools']['express'],\
+           config_data['refs']['express']
 
 
 def express_quant(sample, config_file, ref_mnt, x, s):
     loc = sample + '.express.log'
     if os.path.isdir('LOGS'):
         loc = 'LOGS/' + loc
-    (strand, express, transcriptome) = parse_config(config_file)
+    (stranded, strand, express, transcriptome) = parse_config(config_file)
 
     transcriptome = ref_mnt + '/' + transcriptome
-    if strand == 'N':
+    if stranded == 'N':
         express_cmd = express + ' ' + transcriptome + ' ' + sample + '.merged.bam --no-update-check -m ' + x + ' -s ' \
                       + s + ' --logtostderr 2>> ' + loc
     else:

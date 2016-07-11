@@ -154,8 +154,8 @@ for line in fh:
     # going back to sample dir to ensure file output in correct place
     #CUR POS # SCRATCH/RAW/bnid
     os.chdir(cur_dir)
-    cur_mean = mean(means)
-    cur_std = mean(stds)
+    cur_mean = int(round(mean(means)))
+    cur_std = int(round(mean(stds)))
     novosort_merge_pe(inputs.config_file, bid, '600')
     check = express_quant(bid, inputs.config_file, ref_mnt, str(cur_mean), str(cur_std))
     if check != 0:

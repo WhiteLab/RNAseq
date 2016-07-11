@@ -14,7 +14,7 @@ from job_manager import job_manager
 def parse_config(config_file):
     config_data = json.loads(open(config_file, 'r').read())
     return config_data['tools']['novosort'], config_data['refs']['cont'], config_data['refs']['obj'],\
-           config_data['params']['threads'], config_data['params']['ram']
+           config_data['params']['threads'], config_data['params']['ram'], config_data['tools']['samtools']
 
 
 def list_bam(cont, obj, sample, wait, th):
@@ -46,7 +46,7 @@ def list_bam(cont, obj, sample, wait, th):
 
 
 def novosort_merge_pe(config_file, sample_list, wait):
-    (novosort, cont, obj, th, ram) = parse_config(config_file)
+    (novosort, cont, obj, th, ram, samtools) = parse_config(config_file)
     # gives some flexibility if giving a list of samples ot just a single one
     if os.path.isfile(sample_list):
         fh = open(sample_list, 'r')
@@ -57,9 +57,10 @@ def novosort_merge_pe(config_file, sample_list, wait):
         sample = sample.rstrip('\n')
         (bam_list, bai_list, n) = list_bam(cont, obj, sample, wait, th)
         bam_string = ",".join(bam_list)
+        final_bam = sample + '.merged.final.bam'
         if n > 1:
-            novosort_merge_pe_cmd = novosort + " --c " + th + " --m " + ram + "G --assumesorted --output " + sample \
-                                    + '.merged.bam --index --md --tmpdir ./TMP ' + bam_string
+            novosort_merge_pe_cmd = novosort + " --c " + th + " --m " + ram + "G --assumesorted --output " + final_bam \
+                                    + ' --index --md --tmpdir ./TMP ' + bam_string
             sys.stderr.write(date_time() + novosort_merge_pe_cmd + "\n")
             try:
                 subprocess.check_output(novosort_merge_pe_cmd, shell=True)
@@ -67,7 +68,7 @@ def novosort_merge_pe(config_file, sample_list, wait):
                 sys.stderr.write(date_time() + 'novosort failed for sample ' + sample + '\n')
                 exit(1)
         else:
-            rename_bam = 'cp ' + bam_list[0] + ' ' + sample + '.merged.final.bam;'
+            rename_bam = 'cp ' + bam_list[0] + ' ' + sample + '.merged.final.bam; ' + samtools + ' index ' + final_bam
             sys.stderr.write(date_time() + rename_bam + ' Only one associated bam file, renaming\n')
             call(rename_bam, shell=True)
     sys.stderr.write(date_time() + 'Merge process complete\n')

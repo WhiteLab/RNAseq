@@ -58,19 +58,15 @@ def novosort_merge_pe(config_file, sample_list, wait):
         (bam_list, bai_list, n) = list_bam(cont, obj, sample, wait, th)
         bam_string = ",".join(bam_list)
         final_bam = sample + '.merged.final.bam'
-        if n > 1:
-            novosort_merge_pe_cmd = novosort + " --c " + th + " --m " + ram + "G --assumesorted --output " + final_bam \
-                                    + ' --index --md --tmpdir ./TMP ' + bam_string
-            sys.stderr.write(date_time() + novosort_merge_pe_cmd + "\n")
-            try:
-                subprocess.check_output(novosort_merge_pe_cmd, shell=True)
-            except:
-                sys.stderr.write(date_time() + 'novosort failed for sample ' + sample + '\n')
-                exit(1)
-        else:
-            rename_bam = 'cp ' + bam_list[0] + ' ' + sample + '.merged.final.bam; ' + samtools + ' index ' + final_bam
-            sys.stderr.write(date_time() + rename_bam + ' Only one associated bam file, renaming\n')
-            call(rename_bam, shell=True)
+        #transcriptome files are unsorted, so sort anyway
+        novosort_merge_pe_cmd = novosort + " --c " + th + " --m " + ram + "G  --output " + final_bam \
+                                + ' --index --md --tmpdir ./TMP ' + bam_string
+        sys.stderr.write(date_time() + novosort_merge_pe_cmd + "\n")
+        try:
+            subprocess.check_output(novosort_merge_pe_cmd, shell=True)
+        except:
+            sys.stderr.write(date_time() + 'novosort failed for sample ' + sample + '\n')
+            exit(1)
     sys.stderr.write(date_time() + 'Merge process complete\n')
     return 0
 

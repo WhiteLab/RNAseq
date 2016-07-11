@@ -60,7 +60,7 @@ def novosort_merge_pe(config_file, sample_list, wait):
         final_bam = sample + '.merged.final.bam'
         #transcriptome files are unsorted, so sort anyway
         novosort_merge_pe_cmd = novosort + " --c " + th + " --m " + ram + "G  --output " + final_bam \
-                                + ' --index --md --tmpdir ./TMP ' + bam_string
+                                + ' --index --md ' + bam_string
         sys.stderr.write(date_time() + novosort_merge_pe_cmd + "\n")
         try:
             subprocess.check_output(novosort_merge_pe_cmd, shell=True)

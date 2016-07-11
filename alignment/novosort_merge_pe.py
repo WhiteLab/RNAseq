@@ -60,7 +60,7 @@ def novosort_merge_pe(config_file, sample_list):
         bam_string = ",".join(bam_list)
         final_bam = sample + '.merged.final.bam'
         #transcriptome files are unsorted, so sort anyway
-        novosort_merge_pe_cmd = novosort + " -c " + th + " -m " + ram + "G  -o " + final_bam + ' --i --md '\
+        novosort_merge_pe_cmd = novosort + " -c " + th + " -m " + ram + "G  -o " + final_bam + ' -i --md '\
                                 + bam_string + ' 2>> LOGS/' + sample + '.novosort_merge.log'
         sys.stderr.write(date_time() + novosort_merge_pe_cmd + "\n")
         try:

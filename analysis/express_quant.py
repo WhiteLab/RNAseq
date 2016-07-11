@@ -29,7 +29,7 @@ def express_quant(sample, config_file, ref_mnt, x, s):
         express_cmd = express + ' ' + transcriptome + ' ' + sample + '.merged.bam --no-update-check --' + strand \
                       + ' -m ' + x + ' -s ' + s + ' --logtostderr 2>> ' + loc
     log(loc, date_time() + express_cmd + '\n')
-    check = subprocess.call(express_cmd)
+    check = subprocess.call(express_cmd, shell=True)
 
     rename_express_out = 'mv results.xprs ' + sample + '.express_quantification.txt; mv params.xprs ' + sample\
                          + '.params.xprs'

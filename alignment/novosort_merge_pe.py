@@ -17,7 +17,7 @@ def parse_config(config_file):
            config_data['params']['threads'], config_data['params']['ram'], config_data['tools']['samtools']
 
 
-def list_bam(cont, obj, sample, wait, th):
+def list_bam(cont, obj, sample, th):
     ct = 0
     list_cmd = '. /home/ubuntu/.novarc;swift list ' + cont + ' --prefix ' + obj + '/' + sample
     sys.stderr.write(date_time() + list_cmd + '\nGetting BAM list\n')
@@ -46,7 +46,7 @@ def list_bam(cont, obj, sample, wait, th):
         exit(1)
 
 
-def novosort_merge_pe(config_file, sample_list, wait):
+def novosort_merge_pe(config_file, sample_list):
     (novosort, cont, obj, th, ram, samtools) = parse_config(config_file)
     # gives some flexibility if giving a list of samples ot just a single one
     if os.path.isfile(sample_list):
@@ -56,12 +56,12 @@ def novosort_merge_pe(config_file, sample_list, wait):
         fh.append(sample_list)
     for sample in fh:
         sample = sample.rstrip('\n')
-        (bam_list, bai_list, n) = list_bam(cont, obj, sample, wait, th)
+        (bam_list, bai_list, n) = list_bam(cont, obj, sample, th)
         bam_string = ",".join(bam_list)
         final_bam = sample + '.merged.final.bam'
         #transcriptome files are unsorted, so sort anyway
-        novosort_merge_pe_cmd = novosort + " -c " + th + " -m " + ram + "G  -output " + final_bam \
-                                + ' --index --md ' + bam_string + ' 2>> LOGS/' + sample + '.novosort_merge.log'
+        novosort_merge_pe_cmd = novosort + " -c " + th + " -m " + ram + "G  -o " + final_bam + ' --i --md '\
+                                + bam_string + ' 2>> LOGS/' + sample + '.novosort_merge.log'
         sys.stderr.write(date_time() + novosort_merge_pe_cmd + "\n")
         try:
             subprocess.check_output(novosort_merge_pe_cmd, shell=True)
@@ -79,13 +79,12 @@ if __name__ == "__main__":
     parser.add_argument('-sl', '--sample_list', action='store', dest='sample_list', help='Sample/project prefix list')
     parser.add_argument('-j', '--json', action='store', dest='config_file',
                         help='JSON config file with tool and ref locations')
-    parser.add_argument('-w', '--wait', action='store', dest='wait',
-                        help='Wait time to download bam files.  900 (seconds) recommended')
+
 
     if len(sys.argv) == 1:
         parser.print_help()
         sys.exit(1)
 
     inputs = parser.parse_args()
-    (sample_list, config_file, wait) = (inputs.sample_list, inputs.config_file, inputs.wait)
-    novosort_merge_pe(config_file, sample_list, wait)
+    (sample_list, config_file) = (inputs.sample_list, inputs.config_file)
+    novosort_merge_pe(config_file, sample_list)

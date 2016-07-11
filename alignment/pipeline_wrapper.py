@@ -156,7 +156,7 @@ for line in fh:
     os.chdir(cur_dir)
     cur_mean = int(round(mean(means)))
     cur_std = int(round(mean(stds)))
-    novosort_merge_pe(inputs.config_file, bid, '600')
+    novosort_merge_pe(inputs.config_file, bid)
     check = express_quant(bid, inputs.config_file, ref_mnt, str(cur_mean), str(cur_std))
     if check != 0:
         log(loc, date_time() + 'Quantification of RNA failed.  Please check logs\n')

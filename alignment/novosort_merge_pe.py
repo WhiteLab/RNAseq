@@ -29,7 +29,8 @@ def list_bam(cont, obj, sample, wait, th):
     for fn in re.findall('(.*)\n', flist):
         if re.match('^\S+_\d+\.Aligned.toTranscriptome.out.bam$', fn):
             sys.stderr.write(date_time() + 'Downloading relevant BAM file ' + fn + '\n')
-            dl_cmd = '. /home/ubuntu/.novarc;swift download ' + cont + ' --skip-identical ' + fn
+            dl_cmd = '. /home/ubuntu/.novarc;swift download ' + cont + ' --skip-identical ' + fn + ' >> LOGS/' \
+                     + sample + '.novosort_merge.log'
             p.append(dl_cmd)
             if fn[-3:] == 'bam':
                 bam_list.append(fn)
@@ -59,8 +60,8 @@ def novosort_merge_pe(config_file, sample_list, wait):
         bam_string = ",".join(bam_list)
         final_bam = sample + '.merged.final.bam'
         #transcriptome files are unsorted, so sort anyway
-        novosort_merge_pe_cmd = novosort + " --c " + th + " --m " + ram + "G  --output " + final_bam \
-                                + ' --index --md ' + bam_string
+        novosort_merge_pe_cmd = novosort + " -c " + th + " -m " + ram + "G  -output " + final_bam \
+                                + ' --index --md ' + bam_string + ' 2>> LOGS/' + sample + '.novosort_merge.log'
         sys.stderr.write(date_time() + novosort_merge_pe_cmd + "\n")
         try:
             subprocess.check_output(novosort_merge_pe_cmd, shell=True)

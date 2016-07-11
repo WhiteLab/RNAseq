@@ -66,7 +66,7 @@ def novosort_merge_pe(config_file, sample_list, wait):
         fh = open(sample_list, 'r')
     else:
         fh = []
-        fh[0] = sample_list
+        fh.append(sample_list)
     for sample in fh:
         sample = sample.rstrip('\n')
         (bam_list, bai_list, n) = list_bam(cont, obj, sample, wait)

@@ -140,7 +140,7 @@ class Pipeline():
         log(self.loc, date_time() + 'Running qc on fastq file\n')
         fastqc(self.fastqc_tool, self.sample, self.end1, self.end2, self.threads)
         log(self.loc, date_time() + 'Performing star alignment ' + self.sample + '\n')
-        check = star(self.star_tool, self.genome_ref, self.end1, self.end2, (self.sample + '.'), log_dir, self.threads,
+        check = star(self.star_tool, self.genome_ref, self.end1, self.end2, self.sample, log_dir, self.threads,
                      self.sf)
 
         if (check != 0):

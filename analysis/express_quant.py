@@ -37,7 +37,7 @@ def express_quant(sample, config_file, ref_mnt, x, s):
     log(loc, date_time() + 'Completed qc.  Renaming files\n')
     return check
 
-def main():
+if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description='Quantify transcripts using STAR output bam')
     parser.add_argument('-sa', '--sample', action='store', dest='sample', help='Sample/project name prefix')

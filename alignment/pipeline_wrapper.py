@@ -41,13 +41,15 @@ ref_mnt = inputs.ref_mnt
 
 def upload_special(bnid, cont, obj):
     bam = bnid + '.merged.final.bam'
-    bai = bnid + '.merged.final.bam.bai'
-    if not os.path.isfile('BAM/' + bai):
-        bai = bnid + '.merged.final.bai'
-    up_bam = src_cmd + ' swift upload ' + cont + 'BAM/' + bam + ' --object-name ' + obj + '/' + bnid + '/' + bam
+    # bai = bnid + '.merged.final.bam.bai'
+    # if not os.path.isfile('BAM/' + bai):
+    #    bai = bnid + '.merged.final.bai'
+    ONE_GB = 1073741824
+    up_bam = src_cmd + ' swift upload -S ' + str(ONE_GB) + ' ' + cont + 'BAMS/' + bam + ' --object-name ' + obj + '/' \
+             + bnid + '/' + bam
     subprocess.call(up_bam, shell=True)
-    up_bai = src_cmd + ' swift upload ' + cont + 'BAM/' + bai + ' --object-name ' + obj + '/' + bnid + '/' + bai
-    subprocess.call(up_bai, shell=True)
+    #up_bai = src_cmd + ' swift upload ' + cont + 'BAMS/' + bai + ' --object-name ' + obj + '/' + bnid + '/' + bai
+    #subprocess.call(up_bai, shell=True)
     up_reports = src_cmd + ' swift upload ' + cont + 'REPORTS/  --object-name ' + obj + '/' + bnid + '/REPORTS/'
     subprocess.call(up_reports, shell=True)
 
@@ -161,15 +163,14 @@ for line in fh:
     if check != 0:
         log(loc, date_time() + 'Quantification of RNA failed.  Please check logs\n')
         exit(1)
-    mv_cmd = 'mv *.bam *.bai BAM/; mkdir REPORTS; *xpr* REPORTS/;'
+    mv_cmd = 'mv *.bam BAMS/; mkdir REPORTS; mv *xpr* REPORTS/;'
     subprocess.call(mv_cmd, shell=True)
-    os.chdir('../')
     log(loc, date_time() + 'Uploading merged bam and quant files for ' + bid + '\n')
     upload_special(bid, cont, obj)
-    os.chdir(cwd)
+    os.chdir('../../')
 
     # clean out files for next run
-    cleanup = 'rm -rf ' + cur_dir
+    cleanup = 'rm -rf RAW'
     subprocess.call(cleanup, shell=True)
     lane_status[lane] = 'Pipeline run and data uploaded'
     log(loc, date_time() + lane + '\t' + lane_status[lane] + '\n')

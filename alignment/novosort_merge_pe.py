@@ -8,18 +8,20 @@ sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
 from date_time import date_time
 from subprocess import call
 import subprocess
+from job_manager import job_manager
 
 
 def parse_config(config_file):
     config_data = json.loads(open(config_file, 'r').read())
-    return (config_data['tools']['novosort'], config_data['refs']['cont'], config_data['refs']['obj'])
+    return config_data['tools']['novosort'], config_data['refs']['cont'], config_data['refs']['obj'],\
+           config_data['params']['threads'], config_data['params']['ram']
 
 
-def list_bam(cont, obj, sample, wait):
+def list_bam(cont, obj, sample, wait, th):
     ct = 0
     list_cmd = '. /home/ubuntu/.novarc;swift list ' + cont + ' --prefix ' + obj + '/' + sample
     sys.stderr.write(date_time() + list_cmd + '\nGetting BAM list\n')
-    flist = []
+    flist = subprocess.check_output(list_cmd, shell=True)
     # Use to check on download status
     p = []
     bam_list = []
@@ -28,39 +30,23 @@ def list_bam(cont, obj, sample, wait):
         if re.match('^\S+_\d+\.Aligned.toTranscriptome.out.bam$', fn):
             sys.stderr.write(date_time() + 'Downloading relevant BAM file ' + fn + '\n')
             dl_cmd = '. /home/ubuntu/.novarc;swift download ' + cont + ' --skip-identical ' + fn
-            p.append(subprocess.Popen(dl_cmd, shell=True))
+            p.append(dl_cmd)
             if fn[-3:] == 'bam':
                 bam_list.append(fn)
                 ct = ct + 1
             #else:
             #    bai_list.append(fn)
-    n = 0
-    f = 0
-    x = len(p)
-    while (n < wait):
-        sys.stderr.write(date_time() + 'Checking status of download processes. ' + str(n) + ' seconds have passed\n')
-        s = 0
-        for cur in p:
-            check = cur.poll()
-            if str(check) != 'None':
-                s = s + 1
-        if s == x:
-            f = 1
-            break
-        sys.stderr.write(date_time() + str(s) + ' of ' + str(x) + ' downloads have been completed\n')
-        n = n + 30
-        sleep_cmd = 'sleep 30s;'
-        subprocess.call(sleep_cmd, shell=True)
-    if f == 1:
+    f = job_manager(p, th)
+    if f == 0:
         sys.stderr.write(date_time() + 'BAM download complete\n')
-        return (bam_list, bai_list, ct)
+        return bam_list, bai_list, ct
     else:
         sys.stderr.write(date_time() + 'BAM download failed\n')
         exit(1)
 
 
 def novosort_merge_pe(config_file, sample_list, wait):
-    (novosort, cont, obj) = parse_config(config_file)
+    (novosort, cont, obj, th, ram) = parse_config(config_file)
     # gives some flexibility if giving a list of samples ot just a single one
     if os.path.isfile(sample_list):
         fh = open(sample_list, 'r')
@@ -69,11 +55,11 @@ def novosort_merge_pe(config_file, sample_list, wait):
         fh.append(sample_list)
     for sample in fh:
         sample = sample.rstrip('\n')
-        (bam_list, bai_list, n) = list_bam(cont, obj, sample, wait)
+        (bam_list, bai_list, n) = list_bam(cont, obj, sample, wait, th)
         bam_string = ",".join(bam_list)
         if n > 1:
-            novosort_merge_pe_cmd = novosort + " --threads 8 --ram 28G --assumesorted --output " + sample \
-                                    + '.merged.bam --index --tmpdir ./TMP ' + bam_string
+            novosort_merge_pe_cmd = novosort + " --c " + th + " --m " + ram + "G --assumesorted --output " + sample \
+                                    + '.merged.bam --index --md --tmpdir ./TMP ' + bam_string
             sys.stderr.write(date_time() + novosort_merge_pe_cmd + "\n")
             try:
                 subprocess.check_output(novosort_merge_pe_cmd, shell=True)
@@ -82,9 +68,8 @@ def novosort_merge_pe(config_file, sample_list, wait):
                 exit(1)
         else:
             rename_bam = 'cp ' + bam_list[0] + ' ' + sample + '.merged.final.bam;'
-            #cp ' + bai_list[0] + ' ' + sample + '.merged.final.bai'
             sys.stderr.write(date_time() + rename_bam + ' Only one associated bam file, renaming\n')
-            subprocess.call(rename_bam, shell=True)
+            call(rename_bam, shell=True)
     sys.stderr.write(date_time() + 'Merge process complete\n')
     return 0
 

@@ -54,13 +54,16 @@ def novosort_merge_pe(config_file, sample_list):
     else:
         fh = []
         fh.append(sample_list)
+    # create temp dir for sorting
+    mk_temp = 'mkdir nova_temp'
+    call(mk_temp, shell=True)
     for sample in fh:
         sample = sample.rstrip('\n')
         (bam_list, bai_list, n) = list_bam(cont, obj, sample, th)
         bam_string = ",".join(bam_list)
         final_bam = sample + '.merged.final.bam'
         #transcriptome files are unsorted, so sort anyway
-        novosort_merge_pe_cmd = novosort + " -c " + th + " -m " + ram + "G  -o " + final_bam + ' -i --md '\
+        novosort_merge_pe_cmd = novosort + " -c " + th + " -m " + ram + "G  -o " + final_bam + ' -i --md -t nova_temp '\
                                 + bam_string + ' 2>> LOGS/' + sample + '.novosort_merge.log'
         sys.stderr.write(date_time() + novosort_merge_pe_cmd + "\n")
         try:
@@ -68,6 +71,8 @@ def novosort_merge_pe(config_file, sample_list):
         except:
             sys.stderr.write(date_time() + 'novosort failed for sample ' + sample + '\n')
             exit(1)
+    rm_temp = 'rm -rf nova_temp'
+    call(rm_temp, shell=True)
     sys.stderr.write(date_time() + 'Merge process complete\n')
     return 0
 

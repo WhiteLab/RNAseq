@@ -20,14 +20,8 @@ def list_bam(cont, obj, sample, wait):
     list_cmd = '. /home/ubuntu/.novarc;swift list ' + cont + ' --prefix ' + obj + '/' + sample
     sys.stderr.write(date_time() + list_cmd + '\nGetting BAM list\n')
     flist = []
-    # gives some flexibility if giving a list of samples ot just a single one
-    if os.path.isfile(sample):
-        flist = subprocess.check_output(list_cmd, shell=True)
-    else:
-        flist[0] = sample
     # Use to check on download status
     p = []
-
     bam_list = []
     bai_list = []
     for fn in re.findall('(.*)\n', flist):
@@ -66,8 +60,12 @@ def list_bam(cont, obj, sample, wait):
 
 
 def novosort_merge_pe(config_file, sample_list, wait):
-    fh = open(sample_list, 'r')
     (novosort, cont, obj) = parse_config(config_file)
+    # gives some flexibility if giving a list of samples ot just a single one
+    if os.path.isfile(sample_list):
+        fh = open(sample_list, 'r')
+    else:
+        fh = sample_list
     for sample in fh:
         sample = sample.rstrip('\n')
         (bam_list, bai_list, n) = list_bam(cont, obj, sample, wait)

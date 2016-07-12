@@ -153,6 +153,7 @@ for line in fh:
         # change back to parent directory so that new sequencing files can be downloaded in same place
         means.append(float(p.x))
         stds.append(float(p.s))
+        os.chdir(cwd)
     # going back to sample dir to ensure file output in correct place
     #CUR POS # SCRATCH/RAW/bnid
     os.chdir(cur_dir)

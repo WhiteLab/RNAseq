@@ -151,24 +151,11 @@ for line in fh:
             log(loc, lane + '\t' + lane_status[lane] + '\n')
             exit(3)
         # change back to parent directory so that new sequencing files can be downloaded in same place
-        means.append(float(p.x))
-        stds.append(float(p.s))
         os.chdir(cwd)
     # going back to sample dir to ensure file output in correct place
     #CUR POS # SCRATCH/RAW/bnid
-    os.chdir(cur_dir)
-    cur_mean = int(round(mean(means)))
-    cur_std = int(round(mean(stds)))
-    novosort_merge_pe(inputs.config_file, bid)
-    check = express_quant(bid, inputs.config_file, ref_mnt, str(cur_mean), str(cur_std))
-    if check != 0:
-        log(loc, date_time() + 'Quantification of RNA failed.  Please check logs\n')
-        exit(1)
-    mv_cmd = 'mv *.bam BAMS/; mkdir REPORTS; mv *xpr* REPORTS/;'
-    subprocess.call(mv_cmd, shell=True)
-    log(loc, date_time() + 'Uploading merged bam and quant files for ' + bid + '\n')
-    upload_special(bid, cont, obj)
-    os.chdir('../../')
+    os.chdir(cwd)
+
 
     # clean out files for next run
     cleanup = 'rm -rf RAW'

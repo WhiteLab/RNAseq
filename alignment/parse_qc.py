@@ -26,7 +26,7 @@ def parseFASTQC(FASTQC, loc):
     pdb.set_trace()
     try:
         fh = open(FASTQC, 'r')
-        skip_lines(fh, 6)
+        skip_lines(fh, 8)
         len_range = next(fh)
         info = len_range.rstrip('\n').split('-')
         return info[1]
@@ -90,7 +90,7 @@ def parseCUTADAPT(CUTADAPT, loc):
 def parseINS(INS, loc):
     try:
         fh = open(INS, 'r')
-        skip_lines(fh, 6)
+        skip_lines(fh, 8)
         line = next(fh)
         line = line.rstrip('\n')
         stats = line.split('\t')
@@ -110,11 +110,11 @@ def parseSTAR(STAR, loc):
     try:
         fh = open(STAR, 'r')
         stats = []
-        skip_lines(fh, 4)
+        skip_lines(fh, 6)
         num_rds = next(fh)
         num_rds = processSTAR(num_rds)
         stats.append(num_rds)
-        skip_lines(fh, 2)
+        skip_lines(fh, 4)
         uniq = next(fh)
         uniq = processSTAR(uniq)
         stats.append(uniq)
@@ -122,7 +122,7 @@ def parseSTAR(STAR, loc):
         sjt = next(fh)
         sjt = processSTAR(sjt)
         stats.append(sjt)
-        skip_lines(fh, 2)
+        skip_lines(fh, 4)
         nsj = next(fh)
         nsj = processSTAR(nsj)
         stats.append(nsj)
@@ -136,7 +136,7 @@ def parseSTAR(STAR, loc):
         ins = next(fh)
         ins = processSTAR(ins)
         stats.append(ins)
-        skip_lines(fh, 2)
+        skip_lines(fh, 4)
         mml = next(fh)
         mml = processSTAR(mml)
         stats.append(mml)
@@ -162,7 +162,7 @@ def parseSTAR(STAR, loc):
 def parsePICARD(PICARD, loc):
     try:
         fh = open(PICARD, 'r')
-        skip_lines(fh, 6)
+        skip_lines(fh, 8)
         keys = next(fh)
         keys = keys.rstrip('\n').split('\t')
         vals = next(fh)

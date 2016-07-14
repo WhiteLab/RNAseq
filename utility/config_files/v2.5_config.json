@@ -22,10 +22,10 @@
     "transcriptome": "REFS/GENCODE24GRCH37/Transcript_files/gencode.v24lift37.transcripts",
     "express": "REFS/GENCODE24GRCH37/Transcript_files/gencode.v24lift37.transcripts_ENST_only.fa",
     "refFlat": "REFS/GENCODE24GRCH37/PICARD/gencode.v24lift37.annotation.refFlat.txt.gz",
-    "rRNA_intervals": "gencode.v24lift37.rRNA_intervals.txt",
-    "cont": "PANCAN",
+    "rRNA_intervals": "REFS/GENCODE24GRCH37/PICARD/gencode.v24lift37.rRNA_intervals.txt",
+    "cont": "PDX",
     "obj": "ALIGN_RNASEQ",
-    "config": "/mnt/VIP/VIP_RNAseq_config.json"
+    "config": "/mnt/WORK/2016-Jul-14_UM_RNAseq.json"
   },
   "params": {
     "r1adapt": "AGATCGGAAGAGCACACGTCTGAACTCCAGTCA",
@@ -37,6 +37,7 @@
     "minlen": "20",
     "threads": "8",
     "ram": "30",
-    "strand": "fr-firststrand"
+    "strand": "rf-stranded",
+    "stranded": "Y"
   }
 }

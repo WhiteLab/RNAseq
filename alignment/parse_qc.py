@@ -170,25 +170,25 @@ def parse_qc(config_file, sample):
     try:
         rd_len = parseFASTQC(fastqc)
     except:
-        log(loc + date_time() + 'Unable to open/process file ' + fastqc)
+        log(loc, date_time() + 'Unable to open/process file ' + fastqc)
     try:
         (tot_pairs, r1a_pct, r2a_pct, short, rp_pass, tot_bp, r1_trim, r2_trim, bp_pass) = parseCUTADAPT(cutadapt)
     except:
-        log(loc + date_time() + 'Unable to open/process file ' + cutadapt)
+        log(loc, date_time() + 'Unable to open/process file ' + cutadapt)
     date_aligned = time.strftime("%c")
     try:
         (start_reads, pct_uniq_map, annot_sj, new_sj, pct_mm_pb, pct_del_bp, pct_ins_pb, pct_mm, pct_mmm, pct_unmapped)\
         = parseSTAR(star)
     except:
-        log(loc + date_time() + 'Unable to open/process file ' + star)
+        log(loc, date_time() + 'Unable to open/process file ' + star)
     try:
         (median_insert_size, median_absolute_deviation, mean_insert_size, insert_standard_deviation) = parseINS(insert)
     except:
-        log(loc + date_time() + 'Unable to open/process file ' + insert)
+        log(loc, date_time() + 'Unable to open/process file ' + insert)
     try:
         picard_rnaseq_dict = parsePICARD(picard)
     except:
-        log(loc + date_time() + 'Unable to open/process file ' + picard)
+        log(loc, date_time() + 'Unable to open/process file ' + picard)
 
     json_dict = {'BionimbusID': RG[0], 'Date': RG[1], 'Machine': RG[2], 'Run': RG[3], 'BarCode': RG[4],
                  'Lane': RG[5], 'read_length': rd_len, 'strand': strand, 'align_date': date_aligned,

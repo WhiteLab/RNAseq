@@ -159,7 +159,7 @@ class Pipeline():
         call(mv_bams, shell=True)
         mv_star = 'mv  *.tab ' + star_dir
         call(mv_star, shell=True)
-        mv_sub = 'mv *subset* *.txt *.pdf ' + qc_dir
+        mv_sub = 'mv *subset* *.txt *.pdf *.json ' + qc_dir + '; cp ' + self.json_config + ' ' + qc_dir
         call(mv_sub, shell=True)
         org_mv = 'mv BAMS STAR_OUT QC LOGS ../'
         call(org_mv, shell=True)

@@ -152,16 +152,11 @@ for line in fh:
             exit(3)
         # change back to parent directory so that new sequencing files can be downloaded in same place
         os.chdir(cwd)
-    # going back to sample dir to ensure file output in correct place
-    #CUR POS # SCRATCH/RAW/bnid
-    os.chdir(cwd)
-
 
     # clean out files for next run
     cleanup = 'rm -rf RAW'
     subprocess.call(cleanup, shell=True)
     lane_status[lane] = 'Pipeline run and data uploaded'
     log(loc, date_time() + lane + '\t' + lane_status[lane] + '\n')
-    os.chdir(cwd)
 
 sys.stderr.write(date_time() + "Process complete.  Check logs for any errors\n")

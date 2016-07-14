@@ -17,13 +17,17 @@ def parse_config(config_file):
            config_data['params']['mqual'], config_data['params']['strand']
 
 
+def skip_lines(fh, stop):
+    for i in xrange(0, stop, 1):
+        next(fh)
+
+
 def parseFASTQC(FASTQC, loc):
     pdb.set_trace()
     try:
         fh = open(FASTQC, 'r')
-        for i in xrange(0, 7, 1):
-            next(fh)
-        len_range = next(FASTQC)
+        skip_lines(fh, 7)
+        len_range = next(fh)
         info = len_range.rstrip('\n').split('-')
         return info[1]
     except:
@@ -34,8 +38,8 @@ def parseFASTQC(FASTQC, loc):
 # dumb helper function to remove parans and retun only last part of line
 def process_parens(cur):
     info = cur.rstrip('\n').split()
-    data = info[-1].replace('(','')
-    data = data.replace(')','')
+    data = info[-1].replace('(', '')
+    data = data.replace(')', '')
     return data
 
 
@@ -82,11 +86,11 @@ def parseCUTADAPT(CUTADAPT, loc):
         exit(1)
     #return tot_pairs, r1a_pct, r2a_pct, short, rp_pass, tot_bp, r1_trim, r2_trim, bp_pass
 
+
 def parseINS(INS, loc):
     try:
         fh = open(INS, 'r')
-        for i in xrange(0, 7, 1):
-            skip = next(fh)
+        skip_lines(fh, 7)
         line = next(fh)
         line = line.rstrip('\n')
         stats = line.split('\t')
@@ -95,11 +99,6 @@ def parseINS(INS, loc):
     except:
         log(loc, date_time() + 'Unable to open/process file ' + INS + '\n')
         exit(1)
-
-
-def skip_lines(fh, stop):
-    for i in xrange(0, stop, 1):
-        next(fh)
 
 
 def processSTAR(line):
@@ -163,8 +162,7 @@ def parseSTAR(STAR, loc):
 def parsePICARD(PICARD, loc):
     try:
         fh = open(PICARD, 'r')
-        for i in xrange(0, 6, 1):
-            next(fh)
+        skip_lines(fh, 7)
         keys = next(fh)
         keys = keys.rstrip('\n').split('\t')
         vals = next(fh)

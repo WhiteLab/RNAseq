@@ -28,6 +28,7 @@ def parseFASTQC(FASTQC, loc):
         skip_lines(fh, 8)
         len_range = next(fh)
         info = len_range.rstrip('\n').split('-')
+        fh.close()
         return info[1].rstrip('\t')
     except:
         log(loc, date_time() + 'Unable to open/process file ' + FASTQC)
@@ -44,7 +45,6 @@ def process_parens(cur):
 
 def parseCUTADAPT(CUTADAPT, loc):
     try:
-        pdb.set_trace()
         fh = open(CUTADAPT, 'r')
         flag = 0
         stats = []
@@ -78,19 +78,19 @@ def parseCUTADAPT(CUTADAPT, loc):
         # calculate trimmed base pers per read as a pct
         r1_qt_line = next(fh)
         info = r1_qt_line.split()
-        r1_pct = round(float(info[-2].replace(',', ''))/tot_bp * 100)
+        r1_pct = round(float(info[-2].replace(',', ''))/tot_bp * 100, 2)
         #r1 trimmed
         stats.append(str(r1_pct) + '%')
 
         r2_qt_line = next(fh)
         info = r2_qt_line.split()
-        r2_pct = round(float(info[-2].replace(',', ''))/tot_bp * 100)
+        r2_pct = round(float(info[-2].replace(',', ''))/tot_bp * 100, 2)
         # r2 trimmed
         stats.append(str(r2_pct) + '%')
         # total written
         tw = next(fh)
         stats.append(process_parens(tw))
-
+        fh.close()
         return stats
     except:
         log(loc, date_time() + 'Unable to open/process file ' + CUTADAPT + '\n')
@@ -119,6 +119,7 @@ def processSTAR(line):
 
 def parseSTAR(STAR, loc):
     try:
+        pdb.set_trace()
         fh = open(STAR, 'r')
         stats = []
         skip_lines(fh, 6)

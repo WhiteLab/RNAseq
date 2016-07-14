@@ -167,18 +167,32 @@ def parse_qc(config_file, sample):
     insert = sample + '_subset.insert_metrics.hist'
     fastqc = 'QC/' + sample + '1_sequence_fastqc/fastqc_data.txt'
     picard = sample + '.picard_RNAseq_qc.txt'
-    rd_len = parseFASTQC(fastqc)
-    (tot_pairs, r1a_pct, r2a_pct, short, rp_pass, tot_bp, r1_trim, r2_trim, bp_pass) = parseCUTADAPT(cutadapt)
-
+    try:
+        rd_len = parseFASTQC(fastqc)
+    except:
+        log(loc + date_time() + 'Unable to open/process file ' + fastqc)
+    try:
+        (tot_pairs, r1a_pct, r2a_pct, short, rp_pass, tot_bp, r1_trim, r2_trim, bp_pass) = parseCUTADAPT(cutadapt)
+    except:
+        log(loc + date_time() + 'Unable to open/process file ' + cutadapt)
     date_aligned = time.strftime("%c")
-    (start_reads, pct_uniq_map, annot_sj, new_sj, pct_mm_pb, pct_del_bp, pct_ins_pb, pct_mm, pct_mmm, pct_unmapped)\
+    try:
+        (start_reads, pct_uniq_map, annot_sj, new_sj, pct_mm_pb, pct_del_bp, pct_ins_pb, pct_mm, pct_mmm, pct_unmapped)\
         = parseSTAR(star)
-    (median_insert_size, median_absolute_deviation, mean_insert_size, insert_standard_deviation) = parseINS(insert)
-    picard_rnaseq_dict = parsePICARD(picard)
+    except:
+        log(loc + date_time() + 'Unable to open/process file ' + star)
+    try:
+        (median_insert_size, median_absolute_deviation, mean_insert_size, insert_standard_deviation) = parseINS(insert)
+    except:
+        log(loc + date_time() + 'Unable to open/process file ' + insert)
+    try:
+        picard_rnaseq_dict = parsePICARD(picard)
+    except:
+        log(loc + date_time() + 'Unable to open/process file ' + picard)
 
     json_dict = {'BionimbusID': RG[0], 'Date': RG[1], 'Machine': RG[2], 'Run': RG[3], 'BarCode': RG[4],
                  'Lane': RG[5], 'read_length': rd_len, 'strand': strand, 'align_date': date_aligned,
-                 'cutadapt_stats': {'r1_adapter': r1,'r2_adapter': r2, 'min_len': minlen, 'min_qual': minqual,
+                 'cutadapt_stats': {'r1_adapter': r1, 'r2_adapter': r2, 'min_len': minlen, 'min_qual': minqual,
                                     'starting_read_pairs': tot_pairs, 'pct_r1_adapt': r1a_pct, 'pct_r2_adapt': r2a_pct,
                                     'pct_too_short': short, 'rp_pass': rp_pass, 'total_bp': tot_bp,
                                     'pct_r1_qtrim': r1_trim, 'pct_r2_qtrim': r2_trim, 'pct_bp_passed': bp_pass},

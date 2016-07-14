@@ -100,8 +100,9 @@ def parseCUTADAPT(CUTADAPT, loc):
 
 def parseINS(INS, loc):
     try:
+        pdb.set_trace()
         fh = open(INS, 'r')
-        skip_lines(fh, 8)
+        skip_lines(fh, 7)
         line = next(fh)
         line = line.rstrip('\n')
         stats = line.split('\t')
@@ -119,7 +120,6 @@ def processSTAR(line):
 
 def parseSTAR(STAR, loc):
     try:
-        pdb.set_trace()
         fh = open(STAR, 'r')
         stats = []
         skip_lines(fh, 5)
@@ -175,8 +175,9 @@ def parseSTAR(STAR, loc):
 
 def parsePICARD(PICARD, loc):
     try:
+        pdb.set_trace()
         fh = open(PICARD, 'r')
-        skip_lines(fh, 8)
+        skip_lines(fh, 7)
         keys = next(fh)
         keys = keys.rstrip('\n').split('\t')
         vals = next(fh)

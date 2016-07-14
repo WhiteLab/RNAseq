@@ -17,13 +17,18 @@ def parse_config(config_file):
            config_data['params']['mqual'], config_data['params']['strand']
 
 
-def parseFASTQC(FASTQC):
-    fh = open(FASTQC, 'r')
-    for i in xrange(0, 7, 1):
-        next(fh)
-    len_range = next(FASTQC)
-    info = len_range.rstrip('\n').split('-')
-    return info[1]
+def parseFASTQC(FASTQC, loc):
+    try:
+        fh = open(FASTQC, 'r')
+        for i in xrange(0, 7, 1):
+            next(fh)
+        len_range = next(FASTQC)
+        info = len_range.rstrip('\n').split('-')
+        return info[1]
+    except:
+        log(loc, date_time() + 'Unable to open/process file ' + FASTQC)
+        exit(1)
+
 
 # dumb helper function to remove parans and retun only last part of line
 def process_parens(cur):
@@ -33,125 +38,143 @@ def process_parens(cur):
     return data
 
 
-def parseCUTADAPT(CUTADAPT):
-    fh = open(CUTADAPT, 'r')
-    flag = 0
-    stats = []
-    while flag == 0:
-        cur = next(fh)
-        if re.search('Total read', cur):
-            stats.append(process_parens(cur))
+def parseCUTADAPT(CUTADAPT, loc):
+    try:
+        fh = open(CUTADAPT, 'r')
+        flag = 0
+        stats = []
+        while flag == 0:
             cur = next(fh)
-            stats.append(process_parens(cur))
-            cur = next(fh)
-            stats.append(process_parens(cur))
-            cur = next(fh)
-            stats.append(process_parens(cur))
-            next(fh)
-            next(fh)
-            flag = 1
-    tot_bp_line = next(fh)
-    info = tot_bp_line.split()
-    tot_bp = int(info[-2].replace(',', ''))
-    stats.append(str(tot_bp))
-    next(fh)
-    next(fh)
-    next(fh)
-    r1_qt_line = next(fh)
-    info = r1_qt_line.split()
-    r1a_pct = round(float(info[-2].replace(',', ''))/tot_bp * 100)
-    stats.append(str(r1a_pct) + '%')
+            if re.search('Total read', cur):
+                stats.append(process_parens(cur))
+                cur = next(fh)
+                stats.append(process_parens(cur))
+                cur = next(fh)
+                stats.append(process_parens(cur))
+                cur = next(fh)
+                stats.append(process_parens(cur))
+                next(fh)
+                next(fh)
+                flag = 1
+        tot_bp_line = next(fh)
+        info = tot_bp_line.split()
+        tot_bp = int(info[-2].replace(',', ''))
+        stats.append(str(tot_bp))
+        next(fh)
+        next(fh)
+        next(fh)
+        r1_qt_line = next(fh)
+        info = r1_qt_line.split()
+        r1a_pct = round(float(info[-2].replace(',', ''))/tot_bp * 100)
+        stats.append(str(r1a_pct) + '%')
 
-    r2_qt_line = next(fh)
-    info = r2_qt_line.split()
-    r2a_pct = round(float(info[-2].replace(',', ''))/tot_bp * 100)
-    stats.append(str(r2a_pct) + '%')
-    tw = next(fh)
-    stats.append(process_parens(tw))
+        r2_qt_line = next(fh)
+        info = r2_qt_line.split()
+        r2a_pct = round(float(info[-2].replace(',', ''))/tot_bp * 100)
+        stats.append(str(r2a_pct) + '%')
+        tw = next(fh)
+        stats.append(process_parens(tw))
 
-    return stats
+        return stats
+    except:
+        log(loc, date_time() + 'Unable to open/process file ' + CUTADAPT)
+        exit(1)
     #return tot_pairs, r1a_pct, r2a_pct, short, rp_pass, tot_bp, r1_trim, r2_trim, bp_pass
 
-def parseINS(INS):
-    fh = open(INS, 'r')
-    for i in xrange(0, 7, 1):
-        skip = next(fh)
-    line = next(fh)
-    line = line.rstrip('\n')
-    stats = line.split('\t')
-    fh.close()
-    return stats[0], stats[1], stats[4], stats[5]
+def parseINS(INS, loc):
+    try:
+        fh = open(INS, 'r')
+        for i in xrange(0, 7, 1):
+            skip = next(fh)
+        line = next(fh)
+        line = line.rstrip('\n')
+        stats = line.split('\t')
+        fh.close()
+        return stats[0], stats[1], stats[4], stats[5]
+    except:
+        log(loc, date_time() + 'Unable to open/process file ' + INS)
+        exit(1)
+
 
 def skip_lines(fh, stop):
     for i in xrange(0, stop, 1):
         next(fh)
+
 
 def processSTAR(line):
     info = line.rstrip('\n').split('\t')
     return info[-1]
 
 
-def parseSTAR(STAR):
-    fh = open(STAR, 'r')
-    stats = []
-    skip_lines(fh, 5)
-    num_rds = next(fh)
-    num_rds = processSTAR(num_rds)
-    stats.append(num_rds)
-    skip_lines(fh, 3)
-    uniq = next(fh)
-    uniq = processSTAR(uniq)
-    stats.append(uniq)
-    next(fh)
-    sjt = next(fh)
-    sjt = processSTAR(sjt)
-    stats.append(sjt)
-    skip_lines(fh, 3)
-    nsj = next(fh)
-    nsj = processSTAR(nsj)
-    stats.append(nsj)
-    mm = next(fh)
-    mm = processSTAR(mm)
-    stats.append(mm)
-    delrate = next(fh)
-    delrate = processSTAR(delrate)
-    stats.append(delrate)
-    next(fh)
-    ins = next(fh)
-    ins = processSTAR(ins)
-    stats.append(ins)
-    skip_lines(fh, 3)
-    mml = next(fh)
-    mml = processSTAR(mml)
-    stats.append(mml)
-    next(fh)
-    mmml = next(fh)
-    mmml = processSTAR(mmml)
-    stats.append(mmml)
-    next(fh)
-    unmap = next(fh)
-    unmap = processSTAR(unmap)
-    unmap2 = next(fh)
-    unmap2 = processSTAR(unmap2)
-    unmap3 = next(fh)
-    unmap3 = processSTAR(unmap3)
-    unmap_tot = (float(unmap.rstrip('%')) + float(unmap2.rstrip('%')) + float(unmap3.rstrip('%')))
-    stats.append(str(unmap_tot) + '%')
-    return stats
-
-
-def parsePICARD(picard):
-    fh = open(picard, 'r')
-    for i in xrange(0, 6,1):
+def parseSTAR(STAR, loc):
+    try:
+        fh = open(STAR, 'r')
+        stats = []
+        skip_lines(fh, 5)
+        num_rds = next(fh)
+        num_rds = processSTAR(num_rds)
+        stats.append(num_rds)
+        skip_lines(fh, 3)
+        uniq = next(fh)
+        uniq = processSTAR(uniq)
+        stats.append(uniq)
         next(fh)
-    keys = next(fh)
-    keys = keys.rstrip('\n').split('\t')
-    vals = next(fh)
-    vals = vals.rstrip('\n').split('\t')
-    qc_dict = {}
-    for i in xrange(0, len(keys), 1):
-        qc_dict[keys[i]] = vals[i]
-    return qc_dict
+        sjt = next(fh)
+        sjt = processSTAR(sjt)
+        stats.append(sjt)
+        skip_lines(fh, 3)
+        nsj = next(fh)
+        nsj = processSTAR(nsj)
+        stats.append(nsj)
+        mm = next(fh)
+        mm = processSTAR(mm)
+        stats.append(mm)
+        delrate = next(fh)
+        delrate = processSTAR(delrate)
+        stats.append(delrate)
+        next(fh)
+        ins = next(fh)
+        ins = processSTAR(ins)
+        stats.append(ins)
+        skip_lines(fh, 3)
+        mml = next(fh)
+        mml = processSTAR(mml)
+        stats.append(mml)
+        next(fh)
+        mmml = next(fh)
+        mmml = processSTAR(mmml)
+        stats.append(mmml)
+        next(fh)
+        unmap = next(fh)
+        unmap = processSTAR(unmap)
+        unmap2 = next(fh)
+        unmap2 = processSTAR(unmap2)
+        unmap3 = next(fh)
+        unmap3 = processSTAR(unmap3)
+        unmap_tot = (float(unmap.rstrip('%')) + float(unmap2.rstrip('%')) + float(unmap3.rstrip('%')))
+        stats.append(str(unmap_tot) + '%')
+        return stats
+    except:
+        log(loc, date_time() + 'Unable to open/process file ' + STAR)
+        exit(1)
+
+
+def parsePICARD(PICARD, loc):
+    try:
+        fh = open(PICARD, 'r')
+        for i in xrange(0, 6, 1):
+            next(fh)
+        keys = next(fh)
+        keys = keys.rstrip('\n').split('\t')
+        vals = next(fh)
+        vals = vals.rstrip('\n').split('\t')
+        qc_dict = {}
+        for i in xrange(0, len(keys), 1):
+            qc_dict[keys[i]] = vals[i]
+        return qc_dict
+    except:
+        log(loc, date_time() + 'Unable to open/process file ' + PICARD)
+        exit(1)
 
 
 def parse_qc(config_file, sample):
@@ -167,28 +190,15 @@ def parse_qc(config_file, sample):
     insert = sample + '_subset.insert_metrics.hist'
     fastqc = 'QC/' + sample + '1_sequence_fastqc/fastqc_data.txt'
     picard = sample + '.picard_RNAseq_qc.txt'
-    try:
-        rd_len = parseFASTQC(fastqc)
-    except:
-        log(loc, date_time() + 'Unable to open/process file ' + fastqc)
-    try:
-        (tot_pairs, r1a_pct, r2a_pct, short, rp_pass, tot_bp, r1_trim, r2_trim, bp_pass) = parseCUTADAPT(cutadapt)
-    except:
-        log(loc, date_time() + 'Unable to open/process file ' + cutadapt)
+    rd_len = parseFASTQC(fastqc, loc)
+
+    (tot_pairs, r1a_pct, r2a_pct, short, rp_pass, tot_bp, r1_trim, r2_trim, bp_pass) = parseCUTADAPT(cutadapt, loc)
+
     date_aligned = time.strftime("%c")
-    try:
-        (start_reads, pct_uniq_map, annot_sj, new_sj, pct_mm_pb, pct_del_bp, pct_ins_pb, pct_mm, pct_mmm, pct_unmapped)\
-        = parseSTAR(star)
-    except:
-        log(loc, date_time() + 'Unable to open/process file ' + star)
-    try:
-        (median_insert_size, median_absolute_deviation, mean_insert_size, insert_standard_deviation) = parseINS(insert)
-    except:
-        log(loc, date_time() + 'Unable to open/process file ' + insert)
-    try:
-        picard_rnaseq_dict = parsePICARD(picard)
-    except:
-        log(loc, date_time() + 'Unable to open/process file ' + picard)
+    (start_reads, pct_uniq_map, annot_sj, new_sj, pct_mm_pb, pct_del_bp, pct_ins_pb, pct_mm, pct_mmm, pct_unmapped)\
+        = parseSTAR(star, loc)
+    (median_insert_size, median_absolute_deviation, mean_insert_size, insert_standard_deviation) = parseINS(insert, loc)
+    picard_rnaseq_dict = parsePICARD(picard, loc)
 
     json_dict = {'BionimbusID': RG[0], 'Date': RG[1], 'Machine': RG[2], 'Run': RG[3], 'BarCode': RG[4],
                  'Lane': RG[5], 'read_length': rd_len, 'strand': strand, 'align_date': date_aligned,

@@ -122,11 +122,11 @@ def parseSTAR(STAR, loc):
         pdb.set_trace()
         fh = open(STAR, 'r')
         stats = []
-        skip_lines(fh, 6)
+        skip_lines(fh, 5)
         num_rds = next(fh)
         num_rds = processSTAR(num_rds)
         stats.append(num_rds)
-        skip_lines(fh, 4)
+        skip_lines(fh, 3)
         uniq = next(fh)
         uniq = processSTAR(uniq)
         stats.append(uniq)
@@ -148,7 +148,7 @@ def parseSTAR(STAR, loc):
         ins = next(fh)
         ins = processSTAR(ins)
         stats.append(ins)
-        skip_lines(fh, 4)
+        skip_lines(fh, 3)
         mml = next(fh)
         mml = processSTAR(mml)
         stats.append(mml)
@@ -164,7 +164,9 @@ def parseSTAR(STAR, loc):
         unmap3 = next(fh)
         unmap3 = processSTAR(unmap3)
         unmap_tot = (float(unmap.rstrip('%')) + float(unmap2.rstrip('%')) + float(unmap3.rstrip('%')))
+        unmap_tot = round(unmap_tot, 2)
         stats.append(str(unmap_tot) + '%')
+        fh.close()
         return stats
     except:
         log(loc, date_time() + 'Unable to open/process file ' + STAR + '\n')

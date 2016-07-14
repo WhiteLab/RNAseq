@@ -3,9 +3,9 @@
 import json
 import os
 import re
-import subprocess
 import sys
 import time
+import pdb
 sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
 from date_time import date_time
 from log import log
@@ -18,6 +18,7 @@ def parse_config(config_file):
 
 
 def parseFASTQC(FASTQC, loc):
+    pdb.set_trace()
     try:
         fh = open(FASTQC, 'r')
         for i in xrange(0, 7, 1):
@@ -77,7 +78,7 @@ def parseCUTADAPT(CUTADAPT, loc):
 
         return stats
     except:
-        log(loc, date_time() + 'Unable to open/process file ' + CUTADAPT)
+        log(loc, date_time() + 'Unable to open/process file ' + CUTADAPT + '\n')
         exit(1)
     #return tot_pairs, r1a_pct, r2a_pct, short, rp_pass, tot_bp, r1_trim, r2_trim, bp_pass
 
@@ -92,7 +93,7 @@ def parseINS(INS, loc):
         fh.close()
         return stats[0], stats[1], stats[4], stats[5]
     except:
-        log(loc, date_time() + 'Unable to open/process file ' + INS)
+        log(loc, date_time() + 'Unable to open/process file ' + INS + '\n')
         exit(1)
 
 
@@ -155,7 +156,7 @@ def parseSTAR(STAR, loc):
         stats.append(str(unmap_tot) + '%')
         return stats
     except:
-        log(loc, date_time() + 'Unable to open/process file ' + STAR)
+        log(loc, date_time() + 'Unable to open/process file ' + STAR + '\n')
         exit(1)
 
 
@@ -173,7 +174,7 @@ def parsePICARD(PICARD, loc):
             qc_dict[keys[i]] = vals[i]
         return qc_dict
     except:
-        log(loc, date_time() + 'Unable to open/process file ' + PICARD)
+        log(loc, date_time() + 'Unable to open/process file ' + PICARD + '\n')
         exit(1)
 
 
@@ -188,7 +189,7 @@ def parse_qc(config_file, sample):
     cutadapt = log_dir + sample + '.cutadapt.log'
     star = sample + '.Log.final.out'
     insert = sample + '_subset.insert_metrics.hist'
-    fastqc = 'QC/' + sample + '1_sequence_fastqc/fastqc_data.txt'
+    fastqc = 'QC/' + sample + '_1_sequence_fastqc/fastqc_data.txt'
     picard = sample + '.picard_RNAseq_qc.txt'
     rd_len = parseFASTQC(fastqc, loc)
 

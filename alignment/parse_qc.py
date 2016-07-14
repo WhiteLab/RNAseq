@@ -23,13 +23,12 @@ def skip_lines(fh, stop):
 
 
 def parseFASTQC(FASTQC, loc):
-    pdb.set_trace()
     try:
         fh = open(FASTQC, 'r')
         skip_lines(fh, 8)
         len_range = next(fh)
         info = len_range.rstrip('\n').split('-')
-        return info[1]
+        return info[1].rstrip('\t')
     except:
         log(loc, date_time() + 'Unable to open/process file ' + FASTQC)
         exit(1)
@@ -45,38 +44,50 @@ def process_parens(cur):
 
 def parseCUTADAPT(CUTADAPT, loc):
     try:
+        pdb.set_trace()
         fh = open(CUTADAPT, 'r')
         flag = 0
         stats = []
         while flag == 0:
             cur = next(fh)
             if re.search('Total read', cur):
+                # total read pairs
                 stats.append(process_parens(cur))
                 cur = next(fh)
+                # r1a pct
                 stats.append(process_parens(cur))
                 cur = next(fh)
+                # r2a pct
                 stats.append(process_parens(cur))
                 cur = next(fh)
+                # too short
                 stats.append(process_parens(cur))
-                next(fh)
+                cur = next(fh)
+                # too rp pass
+                stats.append(process_parens(cur))
                 next(fh)
                 flag = 1
         tot_bp_line = next(fh)
         info = tot_bp_line.split()
         tot_bp = int(info[-2].replace(',', ''))
+        # total bp
         stats.append(str(tot_bp))
         next(fh)
         next(fh)
         next(fh)
+        # calculate trimmed base pers per read as a pct
         r1_qt_line = next(fh)
         info = r1_qt_line.split()
-        r1a_pct = round(float(info[-2].replace(',', ''))/tot_bp * 100)
-        stats.append(str(r1a_pct) + '%')
+        r1_pct = round(float(info[-2].replace(',', ''))/tot_bp * 100)
+        #r1 trimmed
+        stats.append(str(r1_pct) + '%')
 
         r2_qt_line = next(fh)
         info = r2_qt_line.split()
-        r2a_pct = round(float(info[-2].replace(',', ''))/tot_bp * 100)
-        stats.append(str(r2a_pct) + '%')
+        r2_pct = round(float(info[-2].replace(',', ''))/tot_bp * 100)
+        # r2 trimmed
+        stats.append(str(r2_pct) + '%')
+        # total written
         tw = next(fh)
         stats.append(process_parens(tw))
 

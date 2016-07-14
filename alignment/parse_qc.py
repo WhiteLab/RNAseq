@@ -100,7 +100,6 @@ def parseCUTADAPT(CUTADAPT, loc):
 
 def parseINS(INS, loc):
     try:
-        pdb.set_trace()
         fh = open(INS, 'r')
         skip_lines(fh, 7)
         line = next(fh)
@@ -177,7 +176,7 @@ def parsePICARD(PICARD, loc):
     try:
         pdb.set_trace()
         fh = open(PICARD, 'r')
-        skip_lines(fh, 7)
+        skip_lines(fh, 6)
         keys = next(fh)
         keys = keys.rstrip('\n').split('\t')
         vals = next(fh)

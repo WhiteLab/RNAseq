@@ -5,7 +5,6 @@ import os
 import re
 import sys
 import time
-import pdb
 sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
 from date_time import date_time
 from log import log
@@ -174,7 +173,6 @@ def parseSTAR(STAR, loc):
 
 def parsePICARD(PICARD, loc):
     try:
-        pdb.set_trace()
         fh = open(PICARD, 'r')
         skip_lines(fh, 6)
         keys = next(fh)
@@ -184,6 +182,7 @@ def parsePICARD(PICARD, loc):
         qc_dict = {}
         for i in xrange(0, len(keys), 1):
             qc_dict[keys[i]] = vals[i]
+        fh .close()
         return qc_dict
     except:
         log(loc, date_time() + 'Unable to open/process file ' + PICARD + '\n')

@@ -18,6 +18,7 @@ from qc_bam import qc_bam
 from star import star
 from upload_to_swift import upload_to_swift
 from subprocess import call
+from parse_qc import parse_qc
 import pdb
 
 
@@ -151,6 +152,11 @@ class Pipeline():
         check = qc_bam(self.sample, self.json_config, self.ref_mnt)
         if (check != 0):
             log(self.loc, date_time() + 'bam qc process failure for ' + self.sample + '\n')
+            self.status = 1
+            exit(1)
+        check = parse_qc(self.json_config, self.sample)
+        if (check != 0):
+            log(self.loc, date_time() + 'qc summary failure for ' + self.sample + '\n')
             self.status = 1
             exit(1)
         # move outputs to correct directories and upload

@@ -198,7 +198,7 @@ def parse_qc(config_file, sample):
     loc = log_dir + sample + '.qc_stats.log'
     # set up input files and variables - .hist, .flagstats, .metrics, .qs
     cutadapt = log_dir + sample + '.cutadapt.log'
-    star = sample + '.Log.final.out'
+    star = log_dir + sample + '.Log.final.out'
     insert = sample + '_subset.insert_metrics.hist'
     fastqc = 'QC/' + sample + '_1_sequence_fastqc/fastqc_data.txt'
     picard = sample + '.picard_RNAseq_qc.txt'

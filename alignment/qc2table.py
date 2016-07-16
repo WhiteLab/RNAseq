@@ -10,17 +10,20 @@ from subprocess import check_output
 from log import log
 
 
-def parse_config(config_file):
-    config_data = json.loads(open(config_file, 'r').read())
-    return config_data['params']['r1adapt'], config_data['params']['r2adapt'], config_data['params']['minlen'], \
-           config_data['params']['mqual'], config_data['params']['strand']
-
-
 def download_from_swift(cont, obj, lane_list):
     src_cmd = ". /home/ubuntu/.novarc;"
     lanes = open(lane_list, 'r')
-    head = ''
-    data = []
+    # header doubles as keys for qc stats dicts
+    header = ("BarCode", "BionimbusID", "Date", "Lane", "Machine", "Run", "align_date", "read_length", "strand",
+              "r1_adapter", "r2_adapter", "min_len", "min_qual", "starting_read_pairs", "pct_r1_adapt", "pct_r2_adapt",
+              "pct_too_short", "rp_pass", "total_bp", "pct_bp_passed", "pct_r1_qtrim", "pct_r2_qtrim", "input_reads",
+              "pct_uniq_map", "pct_multi-map", "pct_uber-multi-map", "pct_unmapped", "mismatch_per-base",
+              "del_per-base", "ins_per-base", "annot_sj", "non-canon_sj", "x_ins_size", "s_ins_size",
+              "CORRECT_STRAND_READS", "INCORRECT_STRAND_READS", "CODING_BASES", "INTRONIC_BASES", "INTERGENIC_BASES",
+              "MEDIAN_5PRIME_BIAS", "MEDIAN_3PRIME_BIAS", "MEDIAN_5PRIME_TO_3PRIME_BIAS", "MEDIAN_CV_COVERAGE",
+              "PCT_CORRECT_STRAND_READS", "UTR_BASES", "PCT_MRNA_BASES", "PCT_INTRONIC_BASES", "PCT_CODING_BASES",
+              "PCT_INTERGENIC_BASES", "PCT_RIBOSOMAL_BASES", "RIBOSOMAL_BASES")
+    sys.stdout.write('\t'.join(header) + '\n')
     for line in lanes:
         line = line.rstrip('\n')
         (bid, seqtype, lane_csv) = line.split('\t')
@@ -33,14 +36,12 @@ def download_from_swift(cont, obj, lane_list):
             except:
                 sys.stderr.write(date_time() + "Download of " + obj + " from " + cont + " failed\n")
                 exit(1)
-            stat = open(cur, 'r')
-            head = next(stat)
-            data.append(next(stat))
-            stat.close()
+            qc_dict = json.loads(open(cur, 'r').read())
+            data = []
+            for entry in header:
+                data.append(qc_dict[entry])
+            sys.stdout.write('\t'.join(data) + '\n')
     lanes.close()
-    sys.stdout.write(head)
-    for datum in data:
-        sys.stdout.write(datum)
     return 0
 
 

@@ -28,7 +28,7 @@ def download_from_swift(cont, obj, lane_list):
         line = line.rstrip('\n')
         (bid, seqtype, lane_csv) = line.split('\t')
         for lane in lane_csv.split(', '):
-            cur = obj + '/' + bid + '/QC/' + bid + '_' + lane + '.qc_stats.txt'
+            cur = obj + '/' + bid + '/QC/' + bid + '_' + lane + '.qc_stats.json'
             swift_cmd = src_cmd + "swift download " + cont + " --skip-identical --prefix " + cur
             sys.stderr.write(date_time() + swift_cmd + "\n")
             try:

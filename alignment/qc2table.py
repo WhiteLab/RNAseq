@@ -15,7 +15,7 @@ def download_from_swift(cont, obj, lane_list):
     lanes = open(lane_list, 'r')
     # header doubles as keys for qc stats dicts
     header = ("BarCode", "BionimbusID", "Date", "Lane", "Machine", "Run", "align_date", "read_length", "strand",
-              "r1_adapter", "r2_adapter", "min_len", "min_qual", "starting_read_pairs", "pct_r1_adapt", "pct_r2_adapt",
+              "r1_adapt", "r2_adapt", "minlen", "qual", "starting_read_pairs", "pct_r1_adapt", "pct_r2_adapt",
               "pct_too_short", "rp_pass", "total_bp", "pct_bp_passed", "pct_r1_qtrim", "pct_r2_qtrim", "input_reads",
               "pct_uniq_map", "pct_multi-map", "pct_uber-multi-map", "pct_unmapped", "mismatch_per-base",
               "del_per-base", "ins_per-base", "annot_sj", "non-canon_sj", "x_ins_size", "s_ins_size",

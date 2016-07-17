@@ -14,16 +14,18 @@ def download_from_swift(cont, obj, lane_list):
     src_cmd = ". /home/ubuntu/.novarc;"
     lanes = open(lane_list, 'r')
     # header doubles as keys for qc stats dicts
-    header = ("BarCode", "BionimbusID", "Date", "Lane", "Machine", "Run", "align_date", "read_length", "strand",
-              "r1_adapt", "r2_adapt", "minlen", "qual", "starting_read_pairs", "pct_r1_adapt", "pct_r2_adapt",
-              "pct_too_short", "rp_pass", "total_bp", "pct_bp_passed", "pct_r1_qtrim", "pct_r2_qtrim", "input_reads",
-              "pct_uniq_map", "pct_multi-map", "pct_uber-multi-map", "pct_unmapped", "mismatch_per-base",
-              "del_per-base", "ins_per-base", "annot_sj", "non-canon_sj", "x_ins_size", "s_ins_size",
-              "CORRECT_STRAND_READS", "INCORRECT_STRAND_READS", "CODING_BASES", "INTRONIC_BASES", "INTERGENIC_BASES",
-              "MEDIAN_5PRIME_BIAS", "MEDIAN_3PRIME_BIAS", "MEDIAN_5PRIME_TO_3PRIME_BIAS", "MEDIAN_CV_COVERAGE",
-              "PCT_CORRECT_STRAND_READS", "UTR_BASES", "PCT_MRNA_BASES", "PCT_INTRONIC_BASES", "PCT_CODING_BASES",
-              "PCT_INTERGENIC_BASES", "PCT_RIBOSOMAL_BASES", "RIBOSOMAL_BASES")
-    sys.stdout.write('\t'.join(header) + '\n')
+    gen_keys = ("BarCode", "BionimbusID", "Date", "Lane", "Machine", "Run", "align_date", "read_length", "strand",
+              "r1_adapter", "r2_adapter", "min_len", "min_qual")
+    cutadapt_keys = ("starting_read_pairs", "pct_r1_adapt", "pct_r2_adapt", "pct_too_short", "rp_pass",
+                     "total_bp", "pct_r1_qtrim", "pct_r2_qtrim", "pct_bp_passed")
+    star_keys = ("input_reads", "pct_uniq_map", "pct_multi-map", "pct_uber-multi-map", "pct_unmapped",
+                 "mismatch_per-base", "del_per-base", "ins_per-base", "annot_sj", "non-canon_sj")
+    picard_keys = ( "x_ins_size", "s_ins_size", "CORRECT_STRAND_READS", "INCORRECT_STRAND_READS", "CODING_BASES",
+                      "INTRONIC_BASES", "INTERGENIC_BASES", "MEDIAN_5PRIME_BIAS", "MEDIAN_3PRIME_BIAS",
+                      "MEDIAN_5PRIME_TO_3PRIME_BIAS", "MEDIAN_CV_COVERAGE", "PCT_CORRECT_STRAND_READS", "UTR_BASES",
+                      "PCT_MRNA_BASES", "PCT_INTRONIC_BASES", "PCT_CODING_BASES", "PCT_INTERGENIC_BASES",
+                      "PCT_RIBOSOMAL_BASES", "RIBOSOMAL_BASES")
+    sys.stdout.write('\t'.join((gen_keys + cutadapt_keys + star_keys + picard_keys)) + '\n')
     for line in lanes:
         line = line.rstrip('\n')
         (bid, seqtype, lane_csv) = line.split('\t')
@@ -38,8 +40,14 @@ def download_from_swift(cont, obj, lane_list):
                 exit(1)
             qc_dict = json.loads(open(cur, 'r').read())
             data = []
-            for entry in header:
+            for entry in gen_keys:
                 data.append(qc_dict[entry])
+            for entry in cutadapt_keys:
+                data.append(qc_dict['cutadapt_stats'][entry])
+            for entry in star_keys:
+                data.append(qc_dict['STAR_stats'][entry])
+            for entry in picard_keys:
+                data.append(qc_dict['picard_stats'][entry])
             sys.stdout.write('\t'.join(data) + '\n')
     lanes.close()
     return 0

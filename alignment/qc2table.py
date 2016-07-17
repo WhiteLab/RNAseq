@@ -14,10 +14,10 @@ def download_from_swift(cont, obj, lane_list):
     src_cmd = ". /home/ubuntu/.novarc;"
     lanes = open(lane_list, 'r')
     # header doubles as keys for qc stats dicts
-    gen_keys = ("BarCode", "BionimbusID", "Date", "Lane", "Machine", "Run", "align_date", "read_length", "strand",
-              "r1_adapter", "r2_adapter", "min_len", "min_qual")
-    cutadapt_keys = ("starting_read_pairs", "pct_r1_adapt", "pct_r2_adapt", "pct_too_short", "rp_pass",
-                     "total_bp", "pct_r1_qtrim", "pct_r2_qtrim", "pct_bp_passed")
+    gen_keys = ("BarCode", "BionimbusID", "Date", "Lane", "Machine", "Run", "align_date", "read_length", "strand")
+    cutadapt_keys = ("r1_adapter", "r2_adapter", "min_len", "min_qual", "starting_read_pairs", "pct_r1_adapt",
+                     "pct_r2_adapt", "pct_too_short", "rp_pass", "total_bp", "pct_r1_qtrim", "pct_r2_qtrim",
+                     "pct_bp_passed")
     star_keys = ("input_reads", "pct_uniq_map", "pct_multi-map", "pct_uber-multi-map", "pct_unmapped",
                  "mismatch_per-base", "del_per-base", "ins_per-base", "annot_sj", "non-canon_sj")
     picard_keys = ( "x_ins_size", "s_ins_size", "CORRECT_STRAND_READS", "INCORRECT_STRAND_READS", "CODING_BASES",

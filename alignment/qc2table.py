@@ -14,7 +14,7 @@ def download_from_swift(cont, obj, lane_list):
     src_cmd = ". /home/ubuntu/.novarc;"
     lanes = open(lane_list, 'r')
     # header doubles as keys for qc stats dicts
-    gen_keys = ("BarCode", "BionimbusID", "Date", "Lane", "Machine", "Run", "align_date", "read_length", "strand")
+    gen_keys = ("BionimbusID", "Date", "Machine", "Run", "BarCode", "Lane", "align_date", "read_length", "strand")
     cutadapt_keys = ("r1_adapter", "r2_adapter", "min_len", "min_qual", "starting_read_pairs", "pct_r1_adapt",
                      "pct_r2_adapt", "pct_too_short", "rp_pass", "total_bp", "pct_r1_qtrim", "pct_r2_qtrim",
                      "pct_bp_passed")

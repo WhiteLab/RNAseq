@@ -20,11 +20,11 @@ def download_from_swift(cont, obj, lane_list):
                      "pct_bp_passed")
     star_keys = ("input_reads", "pct_uniq_map", "pct_multi-map", "pct_uber-multi-map", "pct_unmapped",
                  "mismatch_per-base", "del_per-base", "ins_per-base", "annot_sj", "non-canon_sj")
-    picard_keys = ( "x_ins_size", "s_ins_size", "CORRECT_STRAND_READS", "INCORRECT_STRAND_READS", "CODING_BASES",
-                      "INTRONIC_BASES", "INTERGENIC_BASES", "MEDIAN_5PRIME_BIAS", "MEDIAN_3PRIME_BIAS",
-                      "MEDIAN_5PRIME_TO_3PRIME_BIAS", "MEDIAN_CV_COVERAGE", "PCT_CORRECT_STRAND_READS", "UTR_BASES",
-                      "PCT_MRNA_BASES", "PCT_INTRONIC_BASES", "PCT_CODING_BASES", "PCT_INTERGENIC_BASES",
-                      "PCT_RIBOSOMAL_BASES", "RIBOSOMAL_BASES")
+    picard_keys = ("x_ins_size", "s_ins_size", "CORRECT_STRAND_READS", "INCORRECT_STRAND_READS", "CODING_BASES",
+                   "INTRONIC_BASES", "INTERGENIC_BASES", "MEDIAN_5PRIME_BIAS", "MEDIAN_3PRIME_BIAS",
+                   "MEDIAN_5PRIME_TO_3PRIME_BIAS", "MEDIAN_CV_COVERAGE", "PCT_CORRECT_STRAND_READS", "UTR_BASES",
+                   "RIBOSOMAL_BASES", "PCT_MRNA_BASES", "PCT_INTRONIC_BASES", "PCT_CODING_BASES",
+                   "PCT_INTERGENIC_BASES", "PCT_RIBOSOMAL_BASES")
     sys.stdout.write('\t'.join((gen_keys + cutadapt_keys + star_keys + picard_keys)) + '\n')
     for line in lanes:
         line = line.rstrip('\n')

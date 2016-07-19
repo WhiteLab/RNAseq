@@ -61,7 +61,7 @@ def novosort_merge_pe(config_file, sample_list):
         sample = sample.rstrip('\n')
         (bam_list, bai_list, n) = list_bam(cont, obj, sample, th)
         bam_string = ",".join(bam_list)
-        final_bam = sample + '.merged.final.bam'
+        final_bam = sample + '.merged.transcriptome.bam'
         #transcriptome files are unsorted, so sort anyway
         novosort_merge_pe_cmd = novosort + " -c " + th + " -m " + ram + "G  -o " + final_bam + ' -i -n -t' \
                                 ' nova_temp ' + bam_string + ' 2>> LOGS/' + sample + '.novosort_merge.log'

@@ -2,26 +2,56 @@
 
 import sys
 
-index = open(sys.argv[1], 'r')
 
-table = open(sys.argv[2], 'r')
+def make_index(index_ref):
+    ind = {}
+    index = open(index_ref, 'r')
+    next(index)
+    for line in index:
+        ann = line.rstrip('\n').split('\t')
+        ind[ann[0]] = {}
+        ind[ann[0]]['name'] = ann[1]
+        ind[ann[0]]['type'] = ann[2]
+    index.close()
+    return ind
 
-ind = {}
 
-head = next(index)
-for line in index:
-    ann = line.rstrip('\n').split('\t')
-    ind[ann[0]] = {}
-    ind[ann[0]]['name'] = ann[1]
-    ind[ann[0]]['type'] = ann[2]
-index.close()
+def annot_express(index_ref, sample, ref_mnt):
+    index_ref = ref_mnt + '/' + index_ref
+    ind = make_index(index_ref)
+    table = open(sample + '.express_quantification.txt', 'r')
+    head = next(table)
+    out_fn = sample + '.express_quantification_annotated.txt'
+    out_fh = open(out_fn, 'w')
+    out_fh.write('name\ttype\t' + head)
+    for line in table:
+        info = line.split('\t')
+        if float(info[3]) > 0:
+            out_fh.write(ind[info[1]]['name'] + '\t ' + ind[info[1]]['type'] + '\t' + line)
+        else:
+            sys.stderr.write('Skipped ' + ind[info[1]]['name'] + ' ' + ind[info[1]]['type'] + ' ' + info[1]
+                             + ' no reads!\n')
+    table.close()
+    return 0
 
-head = next(table)
-sys.stdout.write('name\ttype\t' + head)
-for line in table:
-    info = line.split('\t')
-    if float(info[3]) > 0:
-        sys.stdout.write(ind[info[1]]['name'] + '\t ' + ind[info[1]]['type'] + '\t' + line)
-    else:
-        sys.stderr.write('Skipped ' + ind[info[1]]['name'] + ' ' + ind[info[1]]['type'] + ' ' + info[1] + ' no reads!\n')
-table.close()
+if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser(description='Quantify transcripts using STAR output bam')
+    parser.add_argument('-i', '--index', action='store', dest='index', help='Reference file with RNA gene names,'
+                                                                                ' type and trasncript ids')
+    parser.add_argument('-m', '--mount', action='store', dest='ref_mnt',
+                        help='Drive mount location.  Example would be /mnt/cinder/REFS_XXX')
+    parser.add_argument('-sa', '--sample', action='store', dest='sample', help='Sample name prefix')
+
+    if len(sys.argv) == 1:
+        parser.print_help()
+        sys.exit(1)
+
+    inputs = parser.parse_args()
+
+    index = inputs.index
+    ref_mnt = inputs.ref_mnt
+    sample = inputs.sample
+
+    annot_express(index, sample, ref_mnt)
+

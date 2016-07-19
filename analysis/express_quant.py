@@ -23,11 +23,11 @@ def express_quant(sample, config_file, ref_mnt, x, s):
 
     transcriptome = ref_mnt + '/' + transcriptome
     if stranded == 'N':
-        express_cmd = express + ' ' + transcriptome + ' ' + sample + '.merged.transcriptome.bam --no-update-check -m ' + x\
-                      + ' -s ' + s + ' --logtostderr 2>> ' + loc
+        express_cmd = express + ' ' + transcriptome + ' ' + sample + '.merged.transcriptome.bam --no-update-check -m '\
+                      + x + ' -s ' + s + ' --logtostderr 2>> ' + loc
     else:
-        express_cmd = express + ' ' + transcriptome + ' ' + sample + '.merged.transcriptome.bam --no-update-check --' + strand \
-                      + ' -m ' + x + ' -s ' + s + ' --logtostderr 2>> ' + loc
+        express_cmd = express + ' ' + transcriptome + ' ' + sample + '.merged.transcriptome.bam --no-update-check --'\
+                      + strand + ' -m ' + x + ' -s ' + s + ' --logtostderr 2>> ' + loc
     log(loc, date_time() + express_cmd + '\n')
     check = subprocess.call(express_cmd, shell=True)
 

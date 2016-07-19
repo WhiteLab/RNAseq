@@ -39,21 +39,6 @@ src_cmd = '. ~/.novarc;'
 ref_mnt = inputs.ref_mnt
 
 
-def upload_special(bnid, cont, obj):
-    bam = bnid + '.merged.final.bam'
-    # bai = bnid + '.merged.final.bam.bai'
-    # if not os.path.isfile('BAM/' + bai):
-    #    bai = bnid + '.merged.final.bai'
-    ONE_GB = 1073741824
-    up_bam = src_cmd + ' swift upload -S ' + str(ONE_GB) + ' ' + cont + 'BAMS/' + bam + ' --object-name ' + obj + '/' \
-             + bnid + '/' + bam
-    subprocess.call(up_bam, shell=True)
-    #up_bai = src_cmd + ' swift upload ' + cont + 'BAMS/' + bai + ' --object-name ' + obj + '/' + bnid + '/' + bai
-    #subprocess.call(up_bai, shell=True)
-    up_reports = src_cmd + ' swift upload ' + cont + 'REPORTS/  --object-name ' + obj + '/' + bnid + '/REPORTS/'
-    subprocess.call(up_reports, shell=True)
-
-
 def parse_config(config_file):
     config_data = json.loads(open(config_file, 'r').read())
     return (config_data['refs']['cont'], config_data['refs']['obj'], config_data['refs']['config'],

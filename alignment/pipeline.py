@@ -51,6 +51,13 @@ class Pipeline():
         self.samtools_tool = self.config_data['tools']['samtools']
         self.picard_tmp = 'picard_tmp'
         self.star_tool = self.config_data['tools']['star']
+        self.pdxflag = self.config_data['params']['pdxflag']
+        if self.pdxflag == 'Y':
+            self.mmu_filter = self.config_data['tools']['mouse_filter']
+            self.mmu_bwa_ref = self.ref_mnt + '/' + self.config_data['refs']['mmu_bwa']
+            self.hsa_bwa_ref = self.ref_mnt + '/' + self.config_data['refs']['hsa_bwa']
+            self.mmu_samtools_ref = self.ref_mnt + '/' + self.config_data['refs']['mmu_samtools']
+            self.hsa_samtools_ref = self.ref_mnt + '/' + self.config_data['refs']['hsa_samtools']
         self.genome_ref = self.ref_mnt + '/' + self.config_data['refs']['genome']
         self.samtools_ref = self.ref_mnt + '/' + self.config_data['refs']['samtools']
         self.htseq_count = self.config_data['tools']['htseq-count']

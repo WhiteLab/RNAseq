@@ -14,11 +14,6 @@ from date_time import date_time
 import subprocess
 from download_from_swift import download_from_swift
 from pipeline import Pipeline
-from statistics import mean
-from novosort_merge_pe import novosort_merge_pe
-from express_quant import express_quant
-from upload_to_swift import upload_to_swift
-import pdb
 from log import log
 
 parser = argparse.ArgumentParser(description='Pipeline wrapper script to process multiple paired end set serially.')

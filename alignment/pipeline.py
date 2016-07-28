@@ -15,6 +15,7 @@ from bwt2_pe import bwt2_pe
 from novosort_sort_pe import novosort_sort_pe
 from picard_insert_size import picard_insert_size
 from qc_bam import qc_bam
+from filter_wrap import filter_wrap
 from star import star
 from upload_to_swift import upload_to_swift
 from subprocess import call
@@ -54,10 +55,8 @@ class Pipeline():
         self.pdxflag = self.config_data['params']['pdxflag']
         if self.pdxflag == 'Y':
             self.mmu_filter = self.config_data['tools']['mouse_filter']
-            self.mmu_bwa_ref = self.ref_mnt + '/' + self.config_data['refs']['mmu_bwa']
-            self.hsa_bwa_ref = self.ref_mnt + '/' + self.config_data['refs']['hsa_bwa']
-            self.mmu_samtools_ref = self.ref_mnt + '/' + self.config_data['refs']['mmu_samtools']
-            self.hsa_samtools_ref = self.ref_mnt + '/' + self.config_data['refs']['hsa_samtools']
+            self.mmu_star_ref = self.ref_mnt + '/' + self.config_data['refs']['mmu_star']
+            self.hsa_star_ref = self.ref_mnt + '/' + self.config_data['refs']['hsa_star']
         self.genome_ref = self.ref_mnt + '/' + self.config_data['refs']['genome']
         self.samtools_ref = self.ref_mnt + '/' + self.config_data['refs']['samtools']
         self.htseq_count = self.config_data['tools']['htseq-count']
@@ -73,12 +72,12 @@ class Pipeline():
     def pipeline(self):
         # CUR POS SCRATCH/RAW/bnid
         log_dir = 'LOGS/'
-        if os.path.isdir(log_dir) == False:
+        if not os.path.isdir(log_dir):
             mk_log_dir = 'mkdir ' + log_dir
             call(mk_log_dir, shell=True)
             log(self.loc, date_time() + 'Made log directory ' + log_dir + "\n")
         fq_dir = 'TRIMMED_FQ'
-        if os.path.isdir(fq_dir) == False:
+        if not os.path.isdir(fq_dir):
             mk_fq_dir = 'mkdir ' + fq_dir
             call(mk_fq_dir, shell=True)
             log(self.loc, date_time() + 'Made fastq trimmed directory ' + fq_dir + "\n")
@@ -87,19 +86,18 @@ class Pipeline():
         mv_fq = 'mv ../LOGS .'
         call(mv_fq, shell=True)
         log(self.loc, date_time() + 'Changed into ' + fq_dir + " and moved log directory there\n")
-        # create TOPHAT_OUT, QC, and CUFFLINKS_RES directories if they don't exist already
         star_dir = 'STAR_OUT/'
         bam_dir = 'BAMS/'
         qc_dir = 'QC/'
-        if os.path.isdir(star_dir) == False:
+        if not os.path.isdir(star_dir):
             mk_star_dir = 'mkdir ' + star_dir
             call(mk_star_dir, shell=True)
             log(self.loc, date_time() + 'Made star output directory ' + star_dir + "\n")
-        if os.path.isdir(bam_dir) == False:
+        if not os.path.isdir(bam_dir):
             mk_bam_dir = 'mkdir ' + bam_dir
             call(mk_bam_dir, shell=True)
             log(self.loc, date_time() + 'Made bam output directory ' + bam_dir + "\n")
-        if os.path.isdir(qc_dir) == False:
+        if not os.path.isdir(qc_dir):
             mk_qc_dir = 'mkdir ' + qc_dir
             call(mk_qc_dir, shell=True)
             log(self.loc, date_time() + 'Made qc directory ' + qc_dir + "\n")
@@ -114,7 +112,7 @@ class Pipeline():
         # remove adapters
 
         check = cutadapter(self.sample, self.end1, self.end2, self.json_config)
-        if (check != 0):
+        if check != 0:
             log(self.loc, date_time() + 'cutadapt failure for ' + self.sample + '\n')
             exit(1)
         # remove original fastqs as they are no longer needed
@@ -122,6 +120,13 @@ class Pipeline():
         log(self.loc, date_time() + 'deleting untrimmed fastqs, no longer needed\n' + rm_fq + '\n')
         call(rm_fq, shell=True)
         # start fastqc, will run while insert size being calculated
+        if self.pdxflag == 'Y':
+            log(self.loc, date_time() + 'Aligning and filtering reads for mouse contamination')
+            check = filter_wrap(self.mmu_filter, self.star_tool, self.mmu_star_ref, self.end1, self.end2,
+                            self.sample, log_dir, self.threads)
+            if check != 0:
+                log(self.loc, date_time() + 'Read filter failure for ' + self.sample + '\n')
+                exit(1)
         end_ss1 = self.sample + '_1.subset.fastq'
         end_ss2 = self.sample + '_2.subset.fastq'
         subset = self.sample + '_subset'
@@ -134,13 +139,13 @@ class Pipeline():
 
         check = bwt2_pe(self.bwt2_tool, self.tx, end_ss1, end_ss2, self.samtools_tool, self.samtools_ref, subset,
                         self.threads, log_dir)
-        if (check != 0):
+        if check != 0:
             log(self.loc, date_time() + 'Bowtie2 failure for ' + self.sample + '\n')
             self.status = 1
             exit(1)
         check = novosort_sort_pe(self.novosort, subset, log_dir, self.threads,
                                  self.ram)  # rest won't run until completed
-        if (check != 0):
+        if check != 0:
             log(self.loc, date_time() + 'novosort sort failure for ' + self.sample + '\n')
             self.status = 1
             exit(1)
@@ -148,21 +153,26 @@ class Pipeline():
         log(self.loc, date_time() + 'Running qc on fastq file\n')
         fastqc(self.fastqc_tool, self.sample, self.end1, self.end2, self.threads)
         log(self.loc, date_time() + 'Performing star alignment ' + self.sample + '\n')
-        check = star(self.star_tool, self.genome_ref, self.end1, self.end2, self.sample, log_dir, self.threads,
+        if self.pdxflag == 'Y':
+            check = star(self.star_tool, self.hsa_star_ref, self.end1, self.end2, self.sample, log_dir, self.threads,
+                     self.sf)
+        else:
+            log(self.loc, date_time() + 'Starting BWA align\n')
+            check = star(self.star_tool, self.genome_ref, self.end1, self.end2, self.sample, log_dir, self.threads,
                      self.sf)
 
-        if (check != 0):
+        if check != 0:
             log(self.loc, date_time() + 'star alignment failure for ' + self.sample + '\n')
             self.status = 1
             exit(1)
         # run QC on bams and get expression
         check = qc_bam(self.sample, self.json_config, self.ref_mnt)
-        if (check != 0):
+        if check != 0:
             log(self.loc, date_time() + 'bam qc process failure for ' + self.sample + '\n')
             self.status = 1
             exit(1)
         check = parse_qc(self.json_config, self.sample)
-        if (check != 0):
+        if check != 0:
             log(self.loc, date_time() + 'qc summary failure for ' + self.sample + '\n')
             self.status = 1
             exit(1)
@@ -185,7 +195,7 @@ class Pipeline():
         os.chdir('../../')
         sys.stderr.write(date_time() + 'Uploading results for ' + self.sample + '\n')
         check = upload_to_swift(self.cont, self.obj)
-        if (check != 0):
+        if check != 0:
             sys.stderr.write(date_time() + 'Upload failure for ' + self.sample + '\n')
             self.status = 1
             exit(1)

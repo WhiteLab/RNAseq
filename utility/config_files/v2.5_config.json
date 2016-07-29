@@ -29,7 +29,7 @@
     "rRNA_intervals": "REFS/GENCODE24GRCH37/PICARD/gencode.v24lift37.rRNA_intervals.txt",
     "cont": "PDX",
     "obj": "ALIGN_RNASEQ",
-    "config": "/mnt/WORK/2016-Jul-14_UM_RNAseq.json"
+    "config": "/mnt/WORK/2016-Jul-29_RNAseq_PDX_TEST.json"
   },
   "params": {
     "r1adapt": "AGATCGGAAGAGCACACGTCTGAACTCCAGTCA",

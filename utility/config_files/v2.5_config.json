@@ -10,6 +10,7 @@
     "express" : "/home/ubuntu/TOOLS/express-1.5.1-linux_x86_64/express",
     "bedtools": "/home/ubuntu/TOOLS/bedtools2/bin/bedtools",
     "tophat": "/home/ubuntu/TOOLS/tophat-2.0.14.Linux_x86_64/tophat",
+    "mouse_filter": "/home/ubuntu/TOOLS/mouse_filter/filter_bam.py",
     "star": "/home/ubuntu/TOOLS/STAR-STAR_2.4.2a/bin/Linux_x86_64_static/STAR",
     "cufflinks": "/home/ubuntu/TOOLS/cufflinks-2.2.1.Linux_x86_64/cufflinks",
     "htseq-count": "htseq-count"
@@ -40,6 +41,7 @@
     "minlen": "20",
     "threads": "8",
     "ram": "30",
+    "pdxflag": "Y",
     "strand": "rf-stranded",
     "stranded": "Y"
   }

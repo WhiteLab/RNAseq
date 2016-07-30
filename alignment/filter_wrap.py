@@ -9,7 +9,7 @@ import subprocess
 
 def filter_wrap(mmu_filter, star_tool, genome_ref, end1, end2, sample, log_dir, threads):
     # command will pipe directly to stdout to pipe into mose filter
-    star_cmd = star_tool + " --runMode alignReads --twopassMode Basic --outFileNamePrefix " + sample + \
+    star_cmd = "(" + star_tool + " --runMode alignReads --twopassMode Basic --outFileNamePrefix " + sample + \
                ".mmu_filt. --runThreadN " + threads + " --genomeDir " + genome_ref + " --readFilesIn " + end1 + " " \
                + end2 + " --readFilesCommand zcat --outSAMtype BAM Unsorted --outFilterType BySJout " \
                "--outFilterMultimapNmax 20 --alignSJoverhangMin 8 --alignSJDBoverhangMin 1 --outFilterMismatchNmax 0 \

@@ -12,8 +12,8 @@ def filter_wrap(mmu_filter, star_tool, genome_ref, end1, end2, sample, log_dir, 
     star_cmd = "(" + star_tool + " --runMode alignReads --twopassMode Basic --outFileNamePrefix " + sample + \
                ".mmu_filt. --runThreadN " + threads + " --genomeDir " + genome_ref + " --readFilesIn " + end1 + " " \
                + end2 + " --readFilesCommand zcat --outSAMtype BAM Unsorted --outFilterType BySJout " \
-               "--outFilterMultimapNmax 20 --alignSJoverhangMin 8 --alignSJDBoverhangMin 1 --outFilterMismatchNmax 0 \
-               --alignIntronMin 20 --alignIntronMax 1000000 --alignMatesGapMax 1000000 --outStd BAM_Unsorted | tee " \
+               "--outFilterMultimapNmax 20 --alignSJoverhangMin 8 --alignSJDBoverhangMin 1 --outFilterMismatchNmax 0" +\
+               " --alignIntronMin 20 --alignIntronMax 1000000 --alignMatesGapMax 1000000 --outStd BAM_Unsorted | tee " \
                + sample + ".mmu.bam | python " + mmu_filter + " -s " + sample + " | gzip -4 -c - > " + sample \
                + "_1.filtered.fq.gz;) 2>&1 | gzip -4 -c - > " + sample + "_2.filtered.fq.gz"
     loc = log_dir + sample + ".mmu.star.pe.log"

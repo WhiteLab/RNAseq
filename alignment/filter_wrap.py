@@ -8,22 +8,28 @@ import subprocess
 
 
 def filter_wrap(mmu_filter, star_tool, genome_ref, end1, end2, sample, log_dir, threads):
-    # command will pipe directly to stdout to pipe into mose filter
-    star_cmd = "(" + star_tool + " --runMode alignReads --twopassMode Basic --outFileNamePrefix " + sample + \
-               ".mmu_filt. --runThreadN " + threads + " --genomeDir " + genome_ref + " --readFilesIn " + end1 + " " \
-               + end2 + " --readFilesCommand zcat --outSAMtype BAM Unsorted --outFilterType BySJout " \
-               "--outFilterMultimapNmax 20 --alignSJoverhangMin 8 --alignSJDBoverhangMin 1 --outFilterMismatchNmax 0" +\
-               " --alignIntronMin 20 --alignIntronMax 1000000 --alignMatesGapMax 1000000 --outStd BAM_Unsorted | tee " \
-               + sample + ".mmu.bam | python " + mmu_filter + " -s " + sample + " | gzip -4 -c - > " + sample \
-               + "_1.filtered.fq.gz;) 2>&1 | gzip -4 -c - > " + sample + "_2.filtered.fq.gz"
+    meta = sample.split('_')
+    RGRP = "ID:" + sample + "\tLB:" + meta[0] + "\tPU:" + meta[4] + "\tSM:" + meta[0] + "\tPL:illumina"
+    star_cmd = star_tool + " --runMode alignReads --twopassMode Basic --outSAMattrRGline " + RGRP \
+               + " --outFileNamePrefix " + sample + ".mmu_filt. --runThreadN " + threads + " --genomeDir " + genome_ref\
+               + " --readFilesIn " + end1 + " " + end2 + " --readFilesCommand zcat --outSAMtype BAM Unsorted" \
+                " --outFilterType BySJout --outFilterMultimapNmax 20 --alignSJoverhangMin 8 --alignSJDBoverhangMin 1" \
+                " --outFilterMismatchNmax 0" + " --alignIntronMin 20 --alignIntronMax 1000000 --alignMatesGapMax" \
+                                               " 1000000"
     loc = log_dir + sample + ".mmu.star.pe.log"
     log(loc, date_time() + star_cmd + '\n')
     check = subprocess.call(star_cmd, shell=True)
     if check != 0:
         log(loc + date_time() + 'Star alignment against mouse genome failed\n')
         exit(1)
+    filter_cmd =  mmu_filter + " -s " + sample + " -b " + sample + ".mmu_filt.Aligned.out.bam -o " + sample \
+                  + ".filtered"
+    check = subprocess.call(filter_cmd, shell=True)
+    if check != 0:
+        log(loc, date_time() + "Filtering failed\n")
+        exit(1)
     log(loc, date_time() + 'Filtering completed, replacing fastq file\n')
-    rn_fq = 'mv ' + sample + '_1.filtered.fq.gz ' + end1 + '; mv ' + sample + '_2.filtered.fq.gz ' + end2
+    rn_fq = 'mv ' + sample + '.filtered_1.fq.gz ' + end1 + '; mv ' + sample + '.filtered_2.fq.gz ' + end2
     check = subprocess.call(rn_fq, shell=True)
     if check != 0:
         log(loc, date_time() + 'File rename failed\n' + rn_fq + '\n')

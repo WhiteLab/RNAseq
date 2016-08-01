@@ -13,7 +13,7 @@ def filter_wrap(mmu_filter, star_tool, genome_ref, end1, end2, sample, log_dir, 
     star_cmd = star_tool + " --runMode alignReads --twopassMode Basic --outSAMattrRGline " + RGRP \
                + " --outFileNamePrefix " + sample + ".mmu_filt. --runThreadN " + threads + " --genomeDir " + genome_ref\
                + " --readFilesIn " + end1 + " " + end2 + " --readFilesCommand zcat --outSAMtype BAM Unsorted" \
-                " --outFilterType BySJout --outFilterMultimapNmax 20 --alignSJoverhangMin 8 --alignSJDBoverhangMin 1" \
+                " --outFilterType BySJout --outFilterMultimapNmax 1 --alignSJoverhangMin 8 --alignSJDBoverhangMin 1" \
                 " --outFilterMismatchNmax 0" + " --alignIntronMin 20 --alignIntronMax 1000000 --alignMatesGapMax" \
                 " 1000000 --outSAMunmapped Within"
     loc = log_dir + sample + ".mmu.star.pe.log"
@@ -26,7 +26,7 @@ def filter_wrap(mmu_filter, star_tool, genome_ref, end1, end2, sample, log_dir, 
                   + ".filtered"
     check = subprocess.call(filter_cmd, shell=True)
     if check != 0:
-        log(loc, date_time() + "Filtering failed\n")
+        log(loc, date_time() + "Filtering failed\n" + filter_cmd + "\n")
         exit(1)
     log(loc, date_time() + 'Filtering completed, replacing fastq file\n')
     rn_fq = 'mv ' + sample + '.filtered_1.fq.gz ' + end1 + '; mv ' + sample + '.filtered_2.fq.gz ' + end2

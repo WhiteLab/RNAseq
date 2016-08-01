@@ -15,7 +15,7 @@ def filter_wrap(mmu_filter, star_tool, genome_ref, end1, end2, sample, log_dir, 
                + " --readFilesIn " + end1 + " " + end2 + " --readFilesCommand zcat --outSAMtype BAM Unsorted" \
                 " --outFilterType BySJout --outFilterMultimapNmax 20 --alignSJoverhangMin 8 --alignSJDBoverhangMin 1" \
                 " --outFilterMismatchNmax 0" + " --alignIntronMin 20 --alignIntronMax 1000000 --alignMatesGapMax" \
-                                               " 1000000"
+                " 1000000 --outSAMunmapped Within"
     loc = log_dir + sample + ".mmu.star.pe.log"
     log(loc, date_time() + star_cmd + '\n')
     check = subprocess.call(star_cmd, shell=True)

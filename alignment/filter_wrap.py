@@ -22,7 +22,7 @@ def filter_wrap(mmu_filter, star_tool, genome_ref, end1, end2, sample, log_dir, 
     if check != 0:
         log(loc + date_time() + 'Star alignment against mouse genome failed\n')
         exit(1)
-    filter_cmd =  mmu_filter + " -s " + sample + " -b " + sample + ".mmu_filt.Aligned.out.bam -o " + sample \
+    filter_cmd = mmu_filter + " -s " + sample + " -b " + sample + ".mmu_filt.Aligned.out.bam -o " + sample \
                   + ".filtered"
     check = subprocess.call(filter_cmd, shell=True)
     if check != 0:

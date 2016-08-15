@@ -191,7 +191,7 @@ class Pipeline():
         # mv subdirectories to right place
         mv_dir = 'mv ' + ' '.join((bam_dir, log_dir, qc_dir)) + ' ../'
         call(mv_dir, shell=True)
-        #CUR POS # SCRATCH/RAW/
+        #CUR POS SCRATCH/RAW/
         os.chdir('../../')
         sys.stderr.write(date_time() + 'Uploading results for ' + self.sample + '\n')
         check = upload_to_swift(self.cont, self.obj)

@@ -84,7 +84,7 @@ def quant_pipe(lane, config_file, ref_mnt):
             log(loc, date_time() + 'Quantification of RNA failed.  Please check logs\n')
             exit(1)
         # annotate with gene symbol and type, ignore 0 values for ease of use
-        check = annot_express(tx_index, ref_mnt, bnid)
+        check = annot_express(tx_index, bnid, ref_mnt)
         if check != 0:
             log(loc, date_time() + 'Annotation of eXpress file.  Please check logs\n')
             exit(1)

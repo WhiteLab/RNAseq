@@ -23,8 +23,8 @@ def parse_config(json_config):
             sys.stderr.write(date_time() + 'Accessing keys failed.  Attempting to output current keys:\n')
             for key in config_data:
                 sys.stderr.write(key + '\n')
-                for subkey in key:
-                    sys.stderr.write(key + ":" + subkey + '\n')
+                for subkey in config_data[key]:
+                    sys.stderr.write(key + ":" + subkey + ":" + config_data[key][subkey] + '\n')
             exit(1)
         except:
             sys.stderr.write(date_time() + 'Could not read config file ' + json_config + '\n')

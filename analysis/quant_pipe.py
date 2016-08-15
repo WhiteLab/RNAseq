@@ -17,7 +17,7 @@ from statistics import mean
 def parse_config(json_config):
     config_data = json.loads(open(json_config, 'r').read())
     try:
-        return config_data['refs']['cont'], config_data['refs']['obj'], config_file['refs']['tx_index']
+        return config_data['refs']['cont'], config_data['refs']['obj'], config_data['refs']['tx_index']
     except:
         try:
             sys.stderr.write(date_time() + 'Accessing keys failed.  Attempting to output current keys:\n')

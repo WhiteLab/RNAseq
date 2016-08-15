@@ -16,8 +16,10 @@ from statistics import mean
 
 def parse_config(json_config):
     config_data = json.loads(open(json_config, 'r').read())
-    return config_data['refs']['cont'], config_data['refs']['obj'], config_file['refs']['tx_index']
-
+    try:
+        return config_data['refs']['cont'], config_data['refs']['obj'], config_file['refs']['tx_index']
+    except:
+        sys.stderr.write(date_time() + 'Could not read config file ' + json_config + '\n')
 
 def upload_special(bnid, cont, obj):
     src_cmd = '. ~/.novarc;'

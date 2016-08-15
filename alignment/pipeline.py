@@ -199,9 +199,9 @@ class Pipeline():
             sys.stderr.write(date_time() + 'Upload failure for ' + self.sample + '\n')
             self.status = 1
             exit(1)
-        cleanup = 'rm -rf ' + self.sample
+        # cleanup = 'rm -rf ' + self.sample
         # clear out for next run
-        call(cleanup, shell=True)
+        # call(cleanup, shell=True)
         sys.stderr.write(date_time() + 'Pipeline complete for ' + self.sample + '\n')
         self.status = 0
 

@@ -46,11 +46,12 @@ def quant_pipe(lane, config_file, ref_mnt):
     for sample in fh:
         (bnid, stype, lanes) = sample.rstrip('\n').split('\t')
         log_dir = 'LOGS/'
+        loc = ''
         if not os.path.isdir(log_dir):
             mk_log_dir = 'mkdir ' + log_dir
             subprocess.call(mk_log_dir, shell=True)
-            loc = log_dir + bnid + '.quantification_pipe.log'
-            log(loc, date_time() + 'Made log directory ' + log_dir + "\n")
+        loc = log_dir + bnid + '.quantification_pipe.log'
+        log(loc, date_time() + 'Made log directory ' + log_dir + "\n")
         lanes = lanes.split(', ')
         x = []
         s = []

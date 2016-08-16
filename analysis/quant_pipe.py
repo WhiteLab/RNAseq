@@ -60,8 +60,9 @@ def quant_pipe(lane, config_file, ref_mnt):
         if not os.path.isdir(log_dir):
             mk_log_dir = 'mkdir ' + log_dir
             subprocess.call(mk_log_dir, shell=True)
-            loc = log_dir + bnid + '.quantification_pipe.log'
             log(loc, date_time() + 'Made log directory ' + log_dir + "\n")
+
+        loc = log_dir + bnid + '.quantification_pipe.log'
         lanes = lanes.split(', ')
         x = []
         s = []

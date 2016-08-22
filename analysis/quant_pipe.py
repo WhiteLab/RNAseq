@@ -35,12 +35,16 @@ def upload_special(bnid, cont, obj):
     bam = bnid + '.merged.transcriptome.bam'
 
     ONE_GB = 1073741824
-    up_bam = src_cmd + ' swift upload -S ' + str(ONE_GB) + ' ' + cont + 'BAMS/' + bam + ' --object-name ' + obj + '/' \
+    up_bam = src_cmd + ' swift upload -S ' + str(ONE_GB) + ' ' + cont + ' BAMS/' + bam + ' --object-name ' + obj + '/' \
              + bnid + '/' + bam
-    subprocess.call(up_bam, shell=True)
-    up_reports = src_cmd + ' swift upload ' + cont + 'REPORTS/  --object-name ' + obj + '/' + bnid + '/REPORTS/'
-    subprocess.call(up_reports, shell=True)
+    check = subprocess.call(up_bam, shell=True)
+    if check != 0:
+        sys.stderr.write('Could not upload bam file. Command given: ' + up_bam + '\n')
 
+    up_reports = src_cmd + ' swift upload ' + cont + ' REPORTS/  --object-name ' + obj + '/' + bnid + '/REPORTS/'
+    check = subprocess.call(up_reports, shell=True)
+    if check != 0:
+        sys.stderr.write('Could not upload report file. Command given: ' + up_reports + '\n')
 
 def quant_pipe(lane, config_file, ref_mnt):
     src_cmd = '. ~/.novarc;'
@@ -60,8 +64,7 @@ def quant_pipe(lane, config_file, ref_mnt):
         if not os.path.isdir(log_dir):
             mk_log_dir = 'mkdir ' + log_dir
             subprocess.call(mk_log_dir, shell=True)
-            loc = log_dir + bnid + '.quantification_pipe.log'
-            log(loc, date_time() + 'Made log directory ' + log_dir + "\n")
+        loc = log_dir + bnid + '.quantification_pipe.log'
         lanes = lanes.split(', ')
         x = []
         s = []

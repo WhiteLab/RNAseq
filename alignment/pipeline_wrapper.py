@@ -134,7 +134,7 @@ for line in fh:
         os.chdir(cwd)
 
     # clean out files for next run
-        cleanup = 'rm -rf RAW'
+        cleanup = 'rm -rf RAW ' + bid
         subprocess.call(cleanup, shell=True)
         lane_status[lane] = 'Pipeline run and data uploaded'
         log(loc, date_time() + lane + '\t' + lane_status[lane] + '\n')

@@ -15,14 +15,14 @@ def filter_wrap(mmu_filter, star_tool, genome_ref, end1, end2, sample, log_dir, 
                + " --readFilesIn " + end1 + " " + end2 + " --readFilesCommand zcat --outSAMtype BAM Unsorted" \
                 " --outFilterType BySJout --outFilterMultimapNmax 1 --alignSJoverhangMin 8 --alignSJDBoverhangMin 1" \
                 " --outFilterMismatchNmax 0" + " --alignIntronMin 20 --alignIntronMax 1000000 --alignMatesGapMax" \
-                " 1000000 --outSAMunmapped Within"
+                " 1000000 --outSAMunmapped Within --quantMode TranscriptomeSAM"
     loc = log_dir + sample + ".mmu.star.pe.log"
     log(loc, date_time() + star_cmd + '\n')
     check = subprocess.call(star_cmd, shell=True)
     if check != 0:
         log(loc, date_time() + 'Star alignment against mouse genome failed\n')
         exit(1)
-    filter_cmd = mmu_filter + " -s " + sample + " -b " + sample + ".mmu_filt.Aligned.out.bam -o " + sample \
+    filter_cmd = mmu_filter + " -s " + sample + " -b " + sample + ".mmu_filt.Aligned.out.bam -t RNA -o " + sample \
                   + ".filtered"
     check = subprocess.call(filter_cmd, shell=True)
     if check != 0:

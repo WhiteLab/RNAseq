@@ -12,10 +12,10 @@ def filter_wrap(mmu_filter, star_tool, genome_ref, end1, end2, sample, log_dir, 
     RGRP = "ID:" + sample + "\tLB:" + meta[0] + "\tPU:" + meta[4] + "\tSM:" + meta[0] + "\tPL:illumina"
     star_cmd = star_tool + " --runMode alignReads --twopassMode Basic --outSAMattrRGline " + RGRP \
                + " --outFileNamePrefix " + sample + ".mmu_filt. --runThreadN " + threads + " --genomeDir " + genome_ref\
-               + " --readFilesIn " + end1 + " " + end2 + " --readFilesCommand zcat --outSAMtype BAM Unsorted" \
+               + " --readFilesIn " + end1 + " " + end2 + " --readFilesCommand zcat --outSAMtype BAM Unsorted " \
                 " --outFilterType BySJout --outFilterMultimapNmax 20 --alignSJoverhangMin 8 --alignSJDBoverhangMin 1" \
                 " --outFilterMismatchNmax 8" + " --alignIntronMin 20 --alignIntronMax 1000000 --alignMatesGapMax" \
-                " 1000000 --outSAMunmapped Within --quantMode TranscriptomeSAM"
+                " 1000000 --outSAMunmapped Within --outSAMorder PairedKeepInputOrder"
     loc = log_dir + sample + ".mmu.star.pe.log"
     log(loc, date_time() + star_cmd + '\n')
     check = subprocess.call(star_cmd, shell=True)

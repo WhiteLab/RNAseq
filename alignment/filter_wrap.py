@@ -7,26 +7,24 @@ from log import log
 import subprocess
 
 
-def filter_wrap(mmu_filter, star_tool, genome_ref, end1, end2, sample, log_dir, threads):
+def filter_wrap(mmu_filter, star_tool, genome_ref, end1, end2, sample, log_dir, threads, novosort, mem):
     meta = sample.split('_')
     RGRP = "ID:" + sample + "\tLB:" + meta[0] + "\tPU:" + meta[4] + "\tSM:" + meta[0] + "\tPL:illumina"
-    star_cmd = star_tool + " --runMode alignReads --outSAMattrRGline " + RGRP \
-               + " --outFileNamePrefix " + sample + ".mmu_filt. --runThreadN " + threads + " --genomeDir " + genome_ref\
-               + " --readFilesIn " + end1 + " " + end2 + " --readFilesCommand zcat --outSAMtype BAM Unsorted " \
-                " --outFilterType BySJout --outFilterMultimapNmax 20 --alignSJoverhangMin 8 --alignSJDBoverhangMin 1" \
-                " --outFilterMismatchNmax 0" + " --alignIntronMin 20 --alignIntronMax 1000000 --alignMatesGapMax" \
-                " 1000000 --outSAMunmapped Within"
     loc = log_dir + sample + ".mmu.star.pe.log"
+    star_cmd = "(" + star_tool + " --runMode alignReads --outSAMattrRGline " + RGRP \
+            + " --outFileNamePrefix " + sample + ".mmu_filt. --runThreadN " + threads + " --genomeDir " + genome_ref\
+            + " --readFilesIn " + end1 + " " + end2 + " --readFilesCommand zcat --outSAMtype BAM Unsorted --outStd " \
+            "Bam_Unsorted --outFilterType BySJout --outFilterMultimapNmax 20 --alignSJoverhangMin 8 " \
+            "--alignSJDBoverhangMin 1 --outFilterMismatchNmax 0" + " --alignIntronMin 20 --alignIntronMax 1000000 " \
+            "--alignMatesGapMax 1000000 --outSAMunmapped Within 2>> " + loc + "  | " + novosort + " - -n -c " + threads\
+            + " -m " + mem + "G 2>> " + loc + " | tee " + sample + ".mmu.nsrt.bam | python " + mmu_filter + " -s " + \
+            sample + " -n 0 -t RNA | gzip -4 -c - > " + sample + "_1.filtered.fq.gz;) 2>&1 | gzip -4 -c - > " + sample \
+            + "_2.filtered.fq.gz"
+
     log(loc, date_time() + star_cmd + '\n')
     check = subprocess.call(star_cmd, shell=True)
     if check != 0:
-        log(loc, date_time() + 'Star alignment against mouse genome failed\n')
-        exit(1)
-    filter_cmd = mmu_filter + " -s " + sample + " -b " + sample + ".mmu_filt.Aligned.out.bam -n 1 -t RNA -o " + sample \
-                  + ".filtered"
-    check = subprocess.call(filter_cmd, shell=True)
-    if check != 0:
-        log(loc, date_time() + "Filtering failed\n" + filter_cmd + "\n")
+        log(loc, date_time() + 'Star alignment and filter against against mouse genome failed\n')
         exit(1)
     log(loc, date_time() + 'Filtering completed, replacing fastq file\n')
     rn_fq = 'mv ' + sample + '.filtered_1.fq.gz ' + end1 + '; mv ' + sample + '.filtered_2.fq.gz ' + end2

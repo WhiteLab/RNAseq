@@ -7,7 +7,7 @@ from log import log
 import subprocess
 
 
-def filter_wrap(mmu_filter, star_tool, genome_ref, end1, end2, sample, log_dir, threads, novosort, mem):
+def filter_wrap(mmu_filter, star_tool, genome_ref, end1, end2, sample, log_dir, threads, novosort):
     meta = sample.split('_')
     RGRP = "ID:" + sample + "\tLB:" + meta[0] + "\tPU:" + meta[4] + "\tSM:" + meta[0] + "\tPL:illumina"
     loc = log_dir + sample + ".mmu.star.pe.log"
@@ -58,8 +58,6 @@ if __name__ == "__main__":
                         help='Number of threads to use.  8 recommended for standard vm')
     parser.add_argument('-n', '--novosort', action='store', dest='novosort',
                         help='Location of novosort to name sort read output')
-    parser.add_argument('-m', '--memory', action='store', dest='mem',
-                        help='Amount of ram in G use.  30 recommended for standard vm')
 
     if len(sys.argv) == 1:
         parser.print_help()

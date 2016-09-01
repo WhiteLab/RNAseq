@@ -64,7 +64,7 @@ if __name__ == "__main__":
         sys.exit(1)
 
     inputs = parser.parse_args()
-    (mmu_filter, star_tool, genome_ref, end1, end2, sample, log_dir, threads, novosort, mem) = (
+    (mmu_filter, star_tool, genome_ref, end1, end2, sample, log_dir, threads, novosort) = (
         inputs.mmu_filter, inputs.star_tool, inputs.genome_ref, inputs.end1, inputs.end2, inputs.sample,
-        inputs.log_dir, inputs.threads, inputs.novosort, inputs.mem)
-    filter_wrap(mmu_filter, star_tool, genome_ref, end1, end2, sample, log_dir, threads, novosort, mem)
+        inputs.log_dir, inputs.threads, inputs.novosort)
+    filter_wrap(mmu_filter, star_tool, genome_ref, end1, end2, sample, log_dir, threads, novosort)

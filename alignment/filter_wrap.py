@@ -19,7 +19,7 @@ def filter_wrap(mmu_filter, star_tool, genome_ref, end1, end2, sample, log_dir, 
             + " --readFilesIn " + end1 + " " + end2 + " --readFilesCommand zcat --outSAMtype BAM Unsorted --outStd " \
             "BAM_Unsorted --outFilterType BySJout --outFilterMultimapNmax 20 --alignSJoverhangMin 8 " \
             "--alignSJDBoverhangMin 1 --outFilterMismatchNmax 0" + " --alignIntronMin 20 --alignIntronMax 1000000 " \
-            "--alignMatesGapMax 1000000 --outSAMunmapped Within 2>> " + loc + "  | " + novosort + " - -n -c 8 -m 2G -t"\
+            "--alignMatesGapMax 1000000 --outSAMunmapped Within 2>> " + loc + "  | " + novosort + " - -n -c 2 -m 2G -t"\
             " TMP 2>> " + loc + " | tee " + sample + ".mmu.nsrt.bam | python " + mmu_filter + " -s " + \
             sample + " -n 0 -t RNA | gzip -4 -c - > " + sample + "_1.filtered.fq.gz;) 2>&1 | gzip -4 -c - > " + sample \
             + "_2.filtered.fq.gz"

@@ -123,7 +123,7 @@ class Pipeline():
         if self.pdxflag == 'Y':
             log(self.loc, date_time() + 'Aligning and filtering reads for mouse contamination')
             check = filter_wrap(self.mmu_filter, self.star_tool, self.mmu_star_ref, self.end1, self.end2,
-                            self.sample, log_dir, self.threads, self.novosort, self.ram)
+                            self.sample, log_dir, self.threads, self.novosort)
             if check != 0:
                 log(self.loc, date_time() + 'Read filter failure for ' + self.sample + '\n')
                 exit(1)

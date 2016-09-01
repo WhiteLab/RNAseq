@@ -51,13 +51,17 @@ if __name__ == "__main__":
     parser.add_argument('-l', '--log', action='store', dest='log_dir', help='LOG directory location')
     parser.add_argument('-t', '--threads', action='store', dest='threads',
                         help='Number of threads to use.  8 recommended for standard vm')
+    parser.add_argument('-n', '--novosort', action='store', dest='novosort',
+                        help='Location of novosort to name sort read output')
+    parser.add_argument('-m', '--memory', action='store', dest='mem',
+                        help='Amount of ram in G use.  30 recommended for standard vm')
 
     if len(sys.argv) == 1:
         parser.print_help()
         sys.exit(1)
 
     inputs = parser.parse_args()
-    (mmu_filter, star_tool, genome_ref, end1, end2, sample, log_dir, threads) = (
+    (mmu_filter, star_tool, genome_ref, end1, end2, sample, log_dir, threads, novosort, mem) = (
         inputs.mmu_filter, inputs.star_tool, inputs.genome_ref, inputs.end1, inputs.end2, inputs.sample,
-        inputs.log_dir, inputs.threads)
-    filter_wrap(mmu_filter, star_tool, genome_ref, end1, end2, sample, log_dir, threads)
+        inputs.log_dir, inputs.threads, inputs.novosort, inputs.mem)
+    filter_wrap(mmu_filter, star_tool, genome_ref, end1, end2, sample, log_dir, threads, novosort, mem)

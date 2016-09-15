@@ -10,7 +10,7 @@ def filter_bam(index):
     for line in open(index, 'r'):
         line = line.rstrip('\n')
         tx[line] = 1
-    for line in sys.stderr:
+    for line in sys.stdin:
         if line[0] == '@':
             sys.stdout.write(line)
             continue

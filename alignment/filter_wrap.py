@@ -31,7 +31,7 @@ def filter_wrap(mmu_filter, star_tool, genome_ref, end1, end2, sample, log_dir, 
         log(loc, date_time() + 'Star alignment and filter against against mouse genome failed\n')
         exit(1)
     log(loc, date_time() + 'Filtering completed, replacing fastq file\n')
-    rn_fq = 'mv ' + sample + '.filtered_1.fq.gz ' + end1 + '; mv ' + sample + '.filtered_2.fq.gz ' + end2 \
+    rn_fq = 'mv ' + sample + '_1.filtered.fq.gz ' + end1 + '; mv ' + sample + '_2.filtered.fq.gz ' + end2 \
             + ';rm -rf TMP'
     check = subprocess.call(rn_fq, shell=True)
     if check != 0:

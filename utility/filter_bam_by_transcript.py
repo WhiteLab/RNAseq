@@ -22,7 +22,8 @@ def filter_bam(index):
             sys.stdout.write(line)
     sys.stdout.write(str(fct) + ' entries out of ' + str(rct) + ' kept.\n')
 
-def main():
+
+if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description='Helper script to filter transcriptome bam by transcript.  '
                                                  'Pipe in sam input.  Intended for ENSEMBL input')

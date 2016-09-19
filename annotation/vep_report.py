@@ -8,7 +8,7 @@ from date_time import date_time
 
 def gen_report(vcf, sample):
     vcf_in = VariantFile(vcf)
-    out = open(sample + '.germline_pass.xls', 'w')
+    out = open(sample + '.haplotype_pass.xls', 'w')
     desired = {'Consequence': 0, 'IMPACT': 0, 'SYMBOL': 0, 'Amino_acids': 0, 'Codons': 0, 'BIOTYPE': 0, 'SIFT': 0,
                'Existing_variation': 0, 'VARIANT_CLASS': 0, 'ExAC_MAF': 0, 'CLIN_SIG': 0, 'CADD_PHRED': 0}
 

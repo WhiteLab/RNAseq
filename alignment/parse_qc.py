@@ -214,7 +214,7 @@ def parse_qc(config_file, sample):
 
     json_dict = {'BionimbusID': RG[0], 'Date': RG[1], 'Machine': RG[2], 'Run': RG[3], 'BarCode': RG[4],
                  'Lane': RG[5], 'read_length': rd_len, 'strand': strand, 'align_date': date_aligned,
-                 'cutadapt_stats': {'r1_adapter': r1, 'r2_adapter': r2, 'min_len': minlen, 'min_qual': minqual,
+                 'cutadapt_stats': {'r1_adapter': r1, 'r2_adapter': r2, 'min_len': minlen, 'min_qual': minqual, 
                                     'starting_read_pairs': tot_pairs, 'pct_r1_adapt': r1a_pct, 'pct_r2_adapt': r2a_pct,
                                     'pct_too_short': short, 'rp_pass': rp_pass, 'total_bp': tot_bp,
                                     'pct_r1_qtrim': r1_trim, 'pct_r2_qtrim': r2_trim, 'pct_bp_passed': bp_pass},

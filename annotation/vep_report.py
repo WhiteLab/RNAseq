@@ -11,8 +11,7 @@ def gen_report(vcf, sample):
     out = open(sample + '.haplotype_pass.xls', 'w')
     desired = {'Consequence': 0, 'IMPACT': 0, 'SYMBOL': 0, 'Amino_acids': 0, 'Codons': 0, 'BIOTYPE': 0, 'SIFT': 0,
                'Existing_variation': 0, 'VARIANT_CLASS': 0, 'ExAC_MAF': 0, 'CLIN_SIG': 0, 'CADD_PHRED': 0}
-
-    desc_string = vcf_in.header.info['ANN'].record['Description']
+    desc_string = vcf_in.header.info['ANN'].header.attrs[3][1]
     desc_string = desc_string.lstrip('"')
     desc_string = desc_string.rstrip('"')
     desc_string = desc_string.replace('Consequence annotations from Ensembl VEP. Format: ', '')
@@ -23,12 +22,13 @@ def gen_report(vcf, sample):
         if desc_list[i] in desired:
             f_pos_list.append(i)
             desired[desc_list[i]] = 1
-    out.write('CHROM\tPOS\tREF\tAllele\tTotal Allele Count\tTotal Position Coverage\tConsequence\tIMPACT\t'
+    #pdb.set_trace()
+    out.write('CHROM\tPOS\tREF\tAllele\tTotal Position Coverage\tConsequence\tIMPACT\t'
                     'SYMBOL\tBIOTYPE\tAmino_acids\tCodons\tExisting_variation\tVARIANT_CLASS\tSIFT\tExAC_MAF\t'
                     'CLIN_SIG\tCADD_PHRED\n')
     for record in vcf_in.fetch():
         #pdb.set_trace()
-        common = '\t'.join((record.contig, str(record.pos), record.ref, str(record.alts), str(record.info['AD']),
+        common = '\t'.join((record.contig, str(record.pos), record.ref, str(record.alts),
                             str(record.info['DP'])))
         ann_list = [_.split('|') for _ in record.info['ANN'].split(',')]
         temp = {}

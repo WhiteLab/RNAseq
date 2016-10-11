@@ -27,6 +27,8 @@
     "tx_index": "REFS/GENCODE24GRCH37/Transcript_files/gencode.v24lift37.tx_index.txt",
     "refFlat": "REFS/GENCODE24GRCH37/PICARD/gencode.v24lift37.annotation.refFlat.txt.gz",
     "rRNA_intervals": "REFS/GENCODE24GRCH37/PICARD/gencode.v24lift37.rRNA_intervals.txt",
+    "cap_ref": "REFS/CAPTURE_BED/S03723314_Covered.bed",
+    "cap_intvl": "REFS/CAPTURE_BED/S03723314_Covered.intervals",
     "cont": "PDX",
     "obj": "ALIGN_RNASEQ",
     "config": "/mnt/WORK/2016-Jul-29_RNAseq_PDX_TEST.json"
@@ -42,6 +44,7 @@
     "threads": "8",
     "ram": "30",
     "pdxflag": "Y",
+    "capture_flag": "N",
     "strand": "rf-stranded",
     "stranded": "Y"
   }

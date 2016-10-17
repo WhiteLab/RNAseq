@@ -17,7 +17,7 @@ def parse_config(config_file):
            config_data['params']['threads'], config_data['params']['ram'], config_data['tools']['samtools']
 
 
-def list_bam(cont, obj, sample, th):
+def list_bam(cont, obj, sample, th, in_suffix):
     ct = 0
     list_cmd = '. /home/ubuntu/.novarc;swift list ' + cont + ' --prefix ' + obj + '/' + sample
     sys.stderr.write(date_time() + list_cmd + '\nGetting BAM list\n')
@@ -27,7 +27,7 @@ def list_bam(cont, obj, sample, th):
     bam_list = []
     bai_list = []
     for fn in re.findall('(.*)\n', flist):
-        if re.match('^\S+_\d+\.Aligned.toTranscriptome.out.bam$', fn):
+        if re.match('^\S+_\d+\.' + in_suffix + '$', fn):
             sys.stderr.write(date_time() + 'Downloading relevant BAM file ' + fn + '\n')
             dl_cmd = '. /home/ubuntu/.novarc;swift download ' + cont + ' --skip-identical ' + fn + ' >> LOGS/' \
                      + sample + '.novosort_merge.log'
@@ -46,7 +46,7 @@ def list_bam(cont, obj, sample, th):
         exit(1)
 
 
-def novosort_merge_pe(config_file, sample_list):
+def novosort_merge_pe(config_file, sample_list, in_suffix, out_suffix, sort_type):
     (novosort, cont, obj, th, ram, samtools) = parse_config(config_file)
     # gives some flexibility if giving a list of samples ot just a single one
     if os.path.isfile(sample_list):
@@ -59,12 +59,15 @@ def novosort_merge_pe(config_file, sample_list):
     call(mk_temp, shell=True)
     for sample in fh:
         sample = sample.rstrip('\n')
-        (bam_list, bai_list, n) = list_bam(cont, obj, sample, th)
+        (bam_list, bai_list, n) = list_bam(cont, obj, sample, th, in_suffix)
         bam_string = " ".join(bam_list)
-        final_bam = sample + '.merged.transcriptome.bam'
-        #transcriptome files are unsorted, so sort anyway
-        novosort_merge_pe_cmd = novosort + " -c " + th + " -m " + ram + "G  -o " + final_bam + '  -n -t' \
+        final_bam = sample + out_suffix
+        if sort_type == 'name':
+            novosort_merge_pe_cmd = novosort + " -c " + th + " -m " + ram + "G  -o " + final_bam + ' -n -t' \
                                 ' nova_temp ' + bam_string + ' 2>> LOGS/' + sample + '.novosort_merge.log'
+        else:
+            novosort_merge_pe_cmd = novosort + " -c " + th + " -m " + ram + "G  -o " + final_bam + ' -i -t' \
+                                ' nova_temp --md ' + bam_string + ' 2>> LOGS/' + sample + '.novosort_merge.log'
         sys.stderr.write(date_time() + novosort_merge_pe_cmd + "\n")
         try:
             subprocess.check_output(novosort_merge_pe_cmd, shell=True)
@@ -84,12 +87,15 @@ if __name__ == "__main__":
     parser.add_argument('-sl', '--sample_list', action='store', dest='sample_list', help='Sample/project prefix list')
     parser.add_argument('-j', '--json', action='store', dest='config_file',
                         help='JSON config file with tool and ref locations')
-
+    parser.add_argument('-os', '--out_bam_suffix', action='store', dest='out_suffix', help='Suffix of output bam')
+    parser.add_argument('-is', '--in_bam_suffix', action='store', dest='in_suffix', help='Suffix of input bam')
+    parser.add_argument('-t', '--sort_type', action='store', dest='sort_type', help='Name or coordinate sort')
 
     if len(sys.argv) == 1:
         parser.print_help()
         sys.exit(1)
 
     inputs = parser.parse_args()
-    (sample_list, config_file) = (inputs.sample_list, inputs.config_file)
-    novosort_merge_pe(config_file, sample_list)
+    (sample_list, config_file, in_suffix, out_suffix, sort_type) = (inputs.sample_list, inputs.config_file,
+                                                                inputs.in_suffix, inputs.out_suffix, inputs.sort_type)
+    novosort_merge_pe(sample_list, config_file, in_suffix, out_suffix, sort_type)

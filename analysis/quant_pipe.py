@@ -86,12 +86,15 @@ def quant_pipe(lane, config_file, ref_mnt):
 
         cur_mean = int(round(mean(x)))
         cur_std = int(round(mean(s)))
-        check = novosort_merge_pe(inputs.config_file, bnid)
+        in_suffix = '.Aligned.toTranscriptome.out.bam'
+        out_suffix = '.merged.transcriptome.bam'
+        sort_type = 'name'
+        check = novosort_merge_pe(inputs.config_file, bnid, in_suffix, out_suffix, sort_type)
         if check != 0:
             log(loc, date_time() + 'Merge of RNAseq bams for ' + bnid + ' failed.  Please check logs\n')
             exit(1)
         if cflag == 'Y':
-            mbam = sample + '.merged.transcriptome.bam'
+            mbam = sample + out_suffix
             out_bam = sample + '.merged.capture_filtered.transcriptome.bam'
             cmd = samtools + ' view -h ' + mbam + ' | ' + filter_bam + ' -i ' + ctargets + ' | ' + samtools\
                   + ' view -bSh - > ' + out_bam + '; rm ' + mbam + '; mv ' + out_bam + ' ' + mbam

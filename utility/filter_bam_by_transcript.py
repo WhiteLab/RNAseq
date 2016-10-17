@@ -8,8 +8,9 @@ def filter_bam(index):
     fct = 0
     tx = {}
     for line in open(index, 'r'):
-        line = line.rstrip('\n')
-        tx[line] = 1
+        if line[0] != '#' and line[0] != '\n':
+            line = line.rstrip('\n')
+            tx[line] = 1
     for line in sys.stdin:
         if line[0] == '@':
             sys.stdout.write(line)
@@ -20,7 +21,7 @@ def filter_bam(index):
         if tx_id[0] in tx:
             fct += 1
             sys.stdout.write(line)
-    sys.stdout.write(str(fct) + ' entries out of ' + str(rct) + ' kept.\n')
+    sys.stderr.write(str(fct) + ' entries out of ' + str(rct) + ' kept.\n')
 
 
 if __name__ == "__main__":

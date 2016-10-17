@@ -29,6 +29,7 @@
     "rRNA_intervals": "REFS/GENCODE24GRCH37/PICARD/gencode.v24lift37.rRNA_intervals.txt",
     "cap_ref": "REFS/CAPTURE_BED/S03723314_Covered.bed",
     "cap_intvl": "REFS/CAPTURE_BED/S03723314_Covered.intervals",
+    "cap_targets": "REFS/CAPTURE_BED/S03723314_Targets.txt",
     "cont": "PDX",
     "obj": "ALIGN_RNASEQ",
     "config": "/mnt/WORK/2016-Jul-29_RNAseq_PDX_TEST.json"

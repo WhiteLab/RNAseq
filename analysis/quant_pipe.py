@@ -18,7 +18,7 @@ def parse_config(json_config):
     config_data = json.loads(open(json_config, 'r').read())
     try:
         return config_data['refs']['cont'], config_data['refs']['obj'], config_data['refs']['tx_index'], \
-               config_data['params']['capture_flag'], config_data['refs']['cap_ref'], config_data['refs']['cap_intvl'],\
+               config_data['params']['capture_flag'], config_data['refs']['cap_targets'],\
                config_data['tools']['samtools'], config_data['tools']['filter_bam']
     except:
         try:
@@ -33,7 +33,7 @@ def parse_config(json_config):
             exit(1)
 
 
-def upload_special(bnid, cont, obj):
+def upload_special(bnid, cont, obj, cflag):
     src_cmd = '. ~/.novarc;'
     bam = obj + '/' + bnid + '/BAMS/' + bnid + '.merged.transcriptome.bam'
 
@@ -42,16 +42,28 @@ def upload_special(bnid, cont, obj):
     check = subprocess.call(up_bam, shell=True)
     if check != 0:
         sys.stderr.write('Could not upload bam file. Command given: ' + up_bam + '\n')
+    if cflag == 'Y':
+        unfilt_bam = obj + '/' + bnid + '/BAMS/' + bnid + '.merged.unfiltered.transcriptome.bam'
+        up_unfilt = src_cmd + ' swift upload -S ' + str(ONE_GB) + ' ' + cont + ' ' + unfilt_bam
+        check = subprocess.call(up_unfilt, shell=True)
+        if check != 0:
+            sys.stderr.write('Could not upload unfiltered bam file. Command given: ' + up_unfilt + '\n')
+
     report_dir = obj + '/' + bnid + '/REPORTS/'
     up_reports = src_cmd + ' swift upload ' + cont + ' ' + report_dir
     check = subprocess.call(up_reports, shell=True)
     if check != 0:
         sys.stderr.write('Could not upload report file. Command given: ' + up_reports + '\n')
+    log_dir = obj + '/' + bnid + '/LOGS/'
+    up_logs = src_cmd + ' swift upload ' + cont + ' ' + log_dir
+    check = subprocess.call(up_logs, shell=True)
+    if check != 0:
+        sys.stderr.write('Could not upload report file. Command given: ' + up_logs + '\n')
 
 
 def quant_pipe(lane, config_file, ref_mnt):
     src_cmd = '. ~/.novarc;'
-    (cont, obj, tx_index, cflag, cref, cintvl, samtools, filter_bam) = parse_config(config_file)
+    (cont, obj, tx_index, cflag, ctargets, samtools, filter_bam) = parse_config(config_file)
     mk_tmp = 'mkdir nova_temp'
     subprocess.call(mk_tmp, shell=True)
     if not os.path.isdir('BAMS'):
@@ -86,8 +98,12 @@ def quant_pipe(lane, config_file, ref_mnt):
             log(loc, date_time() + 'Merge of RNAseq bams for ' + bnid + ' failed.  Please check logs\n')
             exit(1)
         if cflag == 'Y':
-            cmd = samtools + ' view -h | ' + filter_bam + ' -i ' + cref + ' | ' + sample
-            log(loc, date_time() + 'Capture method flag is Y, pre-filtering transcript hits\n')
+            mbam = sample + '.merged.transcriptome.bam'
+            out_bam = sample + '.merged.capture_filtered.transcriptome.bam'
+            cmd = samtools + ' view -h ' + mbam + ' | ' + filter_bam + ' -i ' + ctargets + ' | ' + samtools\
+                  + ' view -bSh - > ' + out_bam + '; mv ' + mbam + ' ' + sample \
+                  + '.merged.unfiltered.transcriptome.bam; mv ' + out_bam + ' ' + mbam
+            log(loc, date_time() + 'Capture method flag is Y, pre-filtering transcript hits\n' + cmd + '\n')
         check = express_quant(bnid, inputs.config_file, ref_mnt, str(cur_mean), str(cur_std))
         if check != 0:
             log(loc, date_time() + 'Quantification of RNA failed.  Please check logs\n')
@@ -100,7 +116,7 @@ def quant_pipe(lane, config_file, ref_mnt):
         mv_cmd = 'mv *.bam BAMS/; mkdir REPORTS; mv *xpr* REPORTS/; mv BAMS/*, REPORTS, LOGS ' + obj + '/' + bnid
         subprocess.call(mv_cmd, shell=True)
         log(loc, date_time() + 'Uploading merged bam and quant files for ' + bnid + '\n')
-        upload_special(bnid, cont, obj)
+        upload_special(bnid, cont, obj, cflag)
 
 
 if __name__ == "__main__":

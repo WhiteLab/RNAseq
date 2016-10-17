@@ -33,7 +33,7 @@ def parse_config(json_config):
             exit(1)
 
 
-def upload_special(bnid, cont, obj, cflag):
+def upload_special(bnid, cont, obj):
     src_cmd = '. ~/.novarc;'
     bam = obj + '/' + bnid + '/BAMS/' + bnid + '.merged.transcriptome.bam'
 
@@ -42,13 +42,6 @@ def upload_special(bnid, cont, obj, cflag):
     check = subprocess.call(up_bam, shell=True)
     if check != 0:
         sys.stderr.write('Could not upload bam file. Command given: ' + up_bam + '\n')
-    if cflag == 'Y':
-        unfilt_bam = obj + '/' + bnid + '/BAMS/' + bnid + '.merged.unfiltered.transcriptome.bam'
-        up_unfilt = src_cmd + ' swift upload -S ' + str(ONE_GB) + ' ' + cont + ' ' + unfilt_bam
-        check = subprocess.call(up_unfilt, shell=True)
-        if check != 0:
-            sys.stderr.write('Could not upload unfiltered bam file. Command given: ' + up_unfilt + '\n')
-
     report_dir = obj + '/' + bnid + '/REPORTS/'
     up_reports = src_cmd + ' swift upload ' + cont + ' ' + report_dir
     check = subprocess.call(up_reports, shell=True)
@@ -101,8 +94,7 @@ def quant_pipe(lane, config_file, ref_mnt):
             mbam = sample + '.merged.transcriptome.bam'
             out_bam = sample + '.merged.capture_filtered.transcriptome.bam'
             cmd = samtools + ' view -h ' + mbam + ' | ' + filter_bam + ' -i ' + ctargets + ' | ' + samtools\
-                  + ' view -bSh - > ' + out_bam + '; mv ' + mbam + ' ' + sample \
-                  + '.merged.unfiltered.transcriptome.bam; mv ' + out_bam + ' ' + mbam
+                  + ' view -bSh - > ' + out_bam + '; rm ' + mbam + '; mv ' + out_bam + ' ' + mbam
             log(loc, date_time() + 'Capture method flag is Y, pre-filtering transcript hits\n' + cmd + '\n')
         check = express_quant(bnid, inputs.config_file, ref_mnt, str(cur_mean), str(cur_std))
         if check != 0:
@@ -116,7 +108,7 @@ def quant_pipe(lane, config_file, ref_mnt):
         mv_cmd = 'mv *.bam BAMS/; mkdir REPORTS; mv *xpr* REPORTS/; mv BAMS/*, REPORTS, LOGS ' + obj + '/' + bnid
         subprocess.call(mv_cmd, shell=True)
         log(loc, date_time() + 'Uploading merged bam and quant files for ' + bnid + '\n')
-        upload_special(bnid, cont, obj, cflag)
+        upload_special(bnid, cont, obj)
 
 
 if __name__ == "__main__":

@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 import sys
-import os
 sys.path.append('/home/ubuntu/TOOLS/Scripts/alignment')
 sys.path.append('/home/ubuntu/TOOLS/Scripts/annotation')
 sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
@@ -16,8 +15,7 @@ def parse_config(json_config):
     config_data = json.loads(open(json_config, 'r').read())
     try:
         return config_data['refs']['cont'], config_data['refs']['obj'], \
-               config_data['refs']['capture_flag'], config_data['params']['capture_intvl'], \
-               config_data['refs']['cap_bed'], config_data['tools']['bedtools'], \
+               config_data['refs']['capture_flag'], config_data['refs']['cap_bed'], config_data['tools']['bedtools'], \
                config_data['tools']['samtools'], config_data['tools']['java'], config_data['tools']['gatk'], \
                config_data['params']['threads'], config_data['refs']['samtools']
     except:
@@ -81,21 +79,55 @@ def base_recal(java, gatk, sample_list, th, fasta):
             return 1
 
 
+def the_big_show(java, gatk, sample_list, th, fasta):
+    filt_vcf_jobs = []
+    for sample in sample_list:
+        bam = sample + '.recalibrated.bam'
+        haplo_cmd = java + ' -jar ' + gatk + ' -nct ' + th + ' -T HaplotypeCaller -I ' + bam + ' -R ' + fasta \
+                    + ' -o ' + sample + '_haplo_calls.vcf -dontUseSoftClippedBases -stand_call_conf 20.0' \
+                                        ' -stand_emit_conf 20.0'
+        rflag = subprocess.call(haplo_cmd, shell=True)
+        if rflag != 0:
+            sys.stderr.write(date_time() + 'Haplotype calls failed for ' + sample + '\n')
+            return 1
+        filt_vcf_cmd = java + ' -jar ' + gatk + ' -nct ' + th + ' -T VariantFiltration -R ' + fasta + ' -V ' + sample\
+                       + '_haplo_calls.vcf  -window 35 -cluster 3 -filterName FS -filter "FS > 30.0" -filterName QD ' \
+                         '-filter "QD < 2.0" -o ' + sample + '.haplo_filtered.vcf'
+        filt_vcf_jobs.append(filt_vcf_cmd)
+    rflag = job_manager(filt_vcf_jobs, th)
+    if rflag != 0:
+        sys.stderr.write(date_time() + 'Variant filtering jobs failed\n')
+        return 1
+    else:
+        return 0
+
+
+def create_somatic_vcf(bedtools, pairs, th):
+    intersect_jobs = []
+    for pair in pairs:
+        cur = pair.split('_')
+        bed_int = bedtools + ' intersect -a ' + cur[0] + ' -b ' + cur[1] + ' -wa -header > ' + pair \
+                  + '.haplo_somatic.vcf'
+        intersect_jobs.append(bed_int)
+    job_manager(intersect_jobs, th)
+
+
 def gatk_call(sample_pairs, config_file, ref_mnt):
     mk_dir = 'mkdir BAM LOGS ANALYSIS ANNOTATION'
     subprocess.call(mk_dir, shell=True)
-    (cont, obj, cflag, cintvl, cap_bed, bedtools, samtools, java, gatk, th, fasta) = parse_config(config_file)
-    cintvl = ref_mnt + '/' + cintvl
+    (cont, obj, cflag, cap_bed, bedtools, samtools, java, gatk, th, fasta) = parse_config(config_file)
     cap_bed = ref_mnt + '/' + cap_bed
     fasta = ref_mnt + '/' + fasta
 
     sample_list = 'sample_list.txt'
     slist = []
+    pairs = []
     fh = open(sample_pairs, 'r')
     sl = open(sample_list, 'w')
     temp = {}
     for line in fh:
         cur = line.rstrip('\n').split('\t')
+        pairs.append(cur[0])
         if cur[1] not in temp:
             sl.write(cur[1] + '\n')
             temp[cur[1]] = 1
@@ -136,6 +168,11 @@ def gatk_call(sample_pairs, config_file, ref_mnt):
     check = base_recal(java, gatk, slist, th, fasta)
     if check != 0:
         sys.stderr.write(date_time() + 'Base recal failed\n')
+    check - the_big_show(java, gatk, sample_list, th, fasta)
+    if check != 0:
+        sys.stderr.write(date_time() + 'Haplotype calls failed failed\n')
+
+
 
 
 if __name__ == "__main__":

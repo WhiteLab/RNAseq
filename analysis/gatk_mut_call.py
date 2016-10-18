@@ -68,10 +68,18 @@ def base_recal(java, gatk, sample_list, th, fasta):
         recal_cmd = java + ' -jar ' + gatk + ' -nct ' + th + ' -T BaseRecalibrator -I ' + bam + ' -o ' + sample \
                     + '_recal_data.table -R ' + fasta
         rflag = subprocess.call(recal_cmd, shell=True)
+        if rflag != 0:
+            return 1
+        new_bam_cmd = java + ' -jar ' + gatk + ' -nct ' + th + ' -T PrintReads -I ' + bam + ' -BQSR ' + sample \
+                      + '_recal_data.table -o ' + sample + '.recalibrated.bam'
+        rflag = subprocess.call(new_bam_cmd, shell=True)
         if rflag == 0:
-            return 0;
+            rm_old_bam = 'rm ' + bam
+            subprocess.call(rm_old_bam, shell=True)
+            return 0
         else:
             return 1
+
 
 def gatk_call(sample_pairs, config_file, ref_mnt):
     mk_dir = 'mkdir BAM LOGS ANALYSIS ANNOTATION'
@@ -126,6 +134,9 @@ def gatk_call(sample_pairs, config_file, ref_mnt):
         exit(1)
 
     check = base_recal(java, gatk, slist, th, fasta)
+    if check != 0:
+        sys.stderr.write(date_time() + 'Base recal failed\n')
+
 
 if __name__ == "__main__":
     import argparse

@@ -13,6 +13,7 @@
     "mouse_filter": "/home/ubuntu/TOOLS/mouse_filter/filter_bam.py",
     "star": "/home/ubuntu/TOOLS/STAR-STAR_2.4.2a/bin/Linux_x86_64_static/STAR",
     "gatk": "/home/ubuntu/TOOLS/GATK-3.6/GenomeAnalysisTK.jar",
+    "VEP": "/home/ubuntu/TOOLS/ensembl-tools-release-85/scripts/variant_effect_predictor/variant_effect_predictor.pl",
     "cufflinks": "/home/ubuntu/TOOLS/cufflinks-2.2.1.Linux_x86_64/cufflinks",
     "htseq-count": "htseq-count"
   },
@@ -28,6 +29,8 @@
     "tx_index": "REFS/GENCODE24GRCH37/Transcript_files/gencode.v24lift37.tx_index.txt",
     "refFlat": "REFS/GENCODE24GRCH37/PICARD/gencode.v24lift37.annotation.refFlat.txt.gz",
     "rRNA_intervals": "REFS/GENCODE24GRCH37/PICARD/gencode.v24lift37.rRNA_intervals.txt",
+    "vepCache": "REFS/VEP",
+    "cadd": "REFS/CADD/RNA_capture_SNVs.tsv.bgz",
     "cap_bed": "REFS/CAPTURE_BED/S03723314_Covered.bed",
     "cap_intvl": "REFS/CAPTURE_BED/S03723314_Covered.intervals",
     "cap_targets": "REFS/CAPTURE_BED/S03723314_Targets.txt",

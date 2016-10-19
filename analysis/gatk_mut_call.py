@@ -1,15 +1,14 @@
 #!/usr/bin/env python
 import sys
-sys.path.append('/home/ubuntu/TOOLS/Scripts/alignment')
-sys.path.append('/home/ubuntu/TOOLS/Scripts/annotation')
-sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
-from date_time import date_time
-from log import log
-from job_manager import job_manager
-from novosort_merge_pe import novosort_merge_pe
+import os
+from utility.date_time import date_time
+from utility.log import log
+from utility.job_manager import job_manager
+from alignment.novosort_merge_pe import novosort_merge_pe
 import subprocess
 import json
-from vep_annot_vcf import annot_gatk_haplotype
+from glob import glob
+from annotation.vep_annot_vcf import annot_gatk_haplotype
 
 
 def parse_config(json_config):
@@ -132,6 +131,58 @@ def create_somatic_vcf(bedtools, pairs, th):
         return 0
 
 
+def upload_results(sample_list, sample_pairs, cont, th, obj):
+    up_jobs = []
+    src_cmd = '. ~/.novarc;'
+    # setup sample-specific uploads
+    for sample in sample_list:
+        # set up bam upload
+        bams = glob('BAMS/' + sample + '*')
+        for bam in bams:
+            fn = os.path.basename(bam)
+            up_jobs.append(src_cmd + 'swift upload ' + cont + '-S 1073741824 ' + bam + ' --object-name ' + obj + '/'
+                           + sample + '/BAMS/' + fn)
+        # set up analysis files upload
+        ana_list = glob('ANALYSIS/' + sample + '*')
+        for f in ana_list:
+            fn = os.path.basename(f)
+            up_jobs.append(src_cmd + 'swift upload ' + cont + '-S 1073741824 ' + f + ' --object-name ANALYSIS/'
+                           + sample + '/' + fn)
+        # setup up log file upload
+        log_list = glob('LOGS/' + sample + '*')
+        for f in log_list:
+            fn = os.path.basename(f)
+            up_jobs.append(src_cmd + 'swift upload ' + cont + '-S 1073741824 ' + f + ' --object-name LOGS/'
+                           + sample + '/' + fn)
+    # set up pair-specific uploads
+    for pair in sample_pairs:
+        ana_list = glob('ANALYSIS/' + pair + '*')
+        for f in ana_list:
+            fn = os.path.basename(f)
+            up_jobs.append(src_cmd + 'swift upload ' + cont + '-S 1073741824 ' + f + ' --object-name ANALYSIS/'
+                           + pair + '/' + fn)
+        ann_list = glob('ANNOTATION/' + pair + '*')
+        for f in ann_list:
+            fn = os.path.basename(f)
+            up_jobs.append(src_cmd + 'swift upload ' + cont + '-S 1073741824 ' + f + ' --object-name ANNOTATION/'
+                           + pair + '/' + fn)
+        rep_list = glob('REPORTS/' + pair + '*')
+        for f in rep_list:
+            fn = os.path.basename(f)
+            up_jobs.append(src_cmd + 'swift upload ' + cont + '-S 1073741824 ' + f + ' --object-name REPORTS/'
+                           + pair + '/' + fn)
+        log_list = glob('LOGS/' + pair + '*')
+        for f in log_list:
+            fn = os.path.basename(f)
+            up_jobs.append(src_cmd + 'swift upload ' + cont + '-S 1073741824 ' + f + ' --object-name LOGS/'
+                           + pair + '/' + fn)
+    rflag = job_manager(up_jobs, th)
+    if rflag != 0:
+        return 1
+    else:
+        return 0
+
+
 def gatk_call(sample_pairs, config_file, ref_mnt):
     mk_dir = 'mkdir BAMS LOGS ANALYSIS ANNOTATION REPORTS'
     subprocess.call(mk_dir, shell=True)
@@ -197,8 +248,13 @@ def gatk_call(sample_pairs, config_file, ref_mnt):
     check = annot_gatk_haplotype(config_file, sample_pairs, ref_mnt)
     if check != 0:
         sys.stderr.write(date_time() + 'VEP annotation of vcf failed\n')
-    mv_files = 'mv *.bam *.bai BAMS; mv *.log LOGS; mv *vep* ANNOTATION; mv *.vcf ANALYSIS; mv *.xls REPORTS'
+    mv_files = 'mv *.bam *.bai BAMS; mv *.log LOGS; mv *vep* ANNOTATION; mv *.vcf *.table ANALYSIS; mv *.xls REPORTS'
     subprocess.call(mv_files, shell=True)
+    check = upload_results(sample_list, sample_pairs, cont, obj, th)
+    if check != 0:
+        sys.stderr.write(date_time() + 'File uploads failed failed\n')
+    else:
+        sys.stderr.write(date_time() + 'Mutation call pipe complete\n')
     return 0
 
 

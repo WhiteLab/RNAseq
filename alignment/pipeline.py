@@ -1,14 +1,11 @@
 #!/usr/bin/env python
 import sys
-
-sys.path.append('/home/ubuntu/TOOLS/Scripts/alignment')
-sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
 import os
 import re
-from date_time import date_time
+from utility.date_time import date_time
 import subprocess
 import json
-from log import log
+from utility.log import log
 from cutadapter import cutadapter
 from fastqc import fastqc
 from bwt2_pe import bwt2_pe
@@ -17,10 +14,9 @@ from picard_insert_size import picard_insert_size
 from qc_bam import qc_bam
 from filter_wrap import filter_wrap
 from star import star
-from upload_to_swift import upload_to_swift
+from utility.upload_to_swift import upload_to_swift
 from subprocess import call
 from parse_qc import parse_qc
-import pdb
 
 
 class Pipeline():

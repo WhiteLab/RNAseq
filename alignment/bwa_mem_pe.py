@@ -1,15 +1,15 @@
 #!/usr/bin/python
 import sys
 
-sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
-from date_time import date_time
-from subprocess import call
-from log import log
+from utility.date_time import date_time
+from utility.log import log
 import subprocess
 
 
 def bwa_mem_pe(bwa_tool, RGRP, bwa_ref, end1, end2, samtools_tool, samtools_ref, sample, log_dir):
-    bwa_cmd = "(" + bwa_tool + " mem -t 8 -R \"" + RGRP + "\" -v 2 " + bwa_ref + " " + end1 + " " + end2 + " | " + samtools_tool + " view -bT " + samtools_ref + " - > " + sample + ".bam) > " + log_dir + sample + ".bwa.pe.log 2>&1"
+    bwa_cmd = "(" + bwa_tool + " mem -t 8 -R \"" + RGRP + "\" -v 2 " + bwa_ref + " " + end1 + " " + end2 + " | " \
+              + samtools_tool + " view -bT " + samtools_ref + " - > " + sample + ".bam) > " + log_dir + sample \
+              + ".bwa.pe.log 2>&1"
     loc = log_dir + sample + ".bwa.pe.log"
     log(loc, date_time() + bwa_cmd + "\n")
     try:

@@ -1,13 +1,10 @@
 #!/usr/bin/env python
 import sys
 import os
-sys.path.append('/home/ubuntu/TOOLS/Scripts/alignment')
-sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
-from date_time import date_time
+from utility.date_time import date_time
 import subprocess
 import json
-from log import log
-from job_manager import job_manager
+from utility.log import log
 
 
 def parse_config(json_config):

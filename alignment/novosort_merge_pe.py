@@ -4,11 +4,10 @@ import os
 import re
 import sys
 
-sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
-from date_time import date_time
+from utility.date_time import date_time
 from subprocess import call
 import subprocess
-from job_manager import job_manager
+from utility.job_manager import job_manager
 
 
 def parse_config(config_file):

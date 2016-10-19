@@ -1,13 +1,10 @@
 #!/usr/bin/env python
 
 import json
-import os
 import sys
-sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
-from date_time import date_time
+from utility.date_time import date_time
 import subprocess
 from subprocess import check_output
-from log import log
 
 
 def download_from_swift(cont, obj, lane_list):

@@ -4,12 +4,8 @@ import sys
 sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
 import os
 import re
-import pdb
-from date_time import date_time
-from subprocess import Popen
-from subprocess import call
-from log import log
-import pdb
+from utility.date_time import date_time
+from utility.log import log
 
 
 def report(sample, ref_gtf, tx_gtf):

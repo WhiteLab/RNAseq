@@ -1,14 +1,11 @@
 #!/usr/bin/env python
 import sys
 import os
-sys.path.append('/home/ubuntu/TOOLS/Scripts/alignment')
-sys.path.append('/home/ubuntu/TOOLS/Scripts/annotation')
-sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
-from date_time import date_time
-from log import log
+from utility.date_time import date_time
+from utility.log import log
 from express_quant import express_quant
-from novosort_merge_pe import novosort_merge_pe
-from annot_express import annot_express
+from alignment.novosort_merge_pe import novosort_merge_pe
+from annotation.annot_express import annot_express
 import subprocess
 import json
 from statistics import mean

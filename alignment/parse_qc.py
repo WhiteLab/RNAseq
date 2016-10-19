@@ -5,9 +5,8 @@ import os
 import re
 import sys
 import time
-sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
-from date_time import date_time
-from log import log
+from utility.date_time import date_time
+from utility.log import log
 
 
 def parse_config(config_file):

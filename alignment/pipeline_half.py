@@ -1,19 +1,15 @@
 #!/usr/bin/python
 import sys
 
-sys.path.append('/home/ubuntu/TOOLS/Scripts/alignment')
-sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
 import os
 import re
-from date_time import date_time
-import subprocess
+from utility.date_time import date_time
 import json
-from log import log
+from utility.log import log
 from cutadapter import cutadapter
 from fastqc_mod import fastqc
-from upload_to_swift import upload_to_swift
+from utility.upload_to_swift import upload_to_swift
 from subprocess import call
-import pdb
 
 
 class Pipeline():

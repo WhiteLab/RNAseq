@@ -13,9 +13,12 @@ def parse_config(config_file):
            config_data['params']['threads'], config_data['refs']['cadd']
 
 
-def pass_filter(sample):
+def pass_filter(sample, somatic_flag):
     in_fn = sample + 'haplo_somatic.vcf'
     out_fn = sample + '.haplo_somatic.PASS.vcf'
+    if somatic_flag == 'N':
+        in_fn = sample + 'haplo_filtered.vcf'
+        out_fn = sample + '.haplo_filtered.PASS.vcf'
     out = open(out_fn, 'w')
     infile = open(in_fn, 'r')
     for line in infile:
@@ -29,7 +32,7 @@ def pass_filter(sample):
     out.close()
 
 
-def annot_gatk_haplotype(config_file, sample_pairs, ref_mnt):
+def annot_gatk_haplotype(config_file, sample_pairs, ref_mnt, somatic_flag):
     (vep_tool, vep_cache, fasta, threads, cadd) = parse_config(config_file)
     fasta = ref_mnt + '/' + fasta
     cadd = ref_mnt + '/' + cadd
@@ -37,10 +40,16 @@ def annot_gatk_haplotype(config_file, sample_pairs, ref_mnt):
     # scale back on the forking a bit
     if int(threads) > 2:
         threads = str(int(threads)/2)
+    # make flexible for a pairs file
     for pair in open(sample_pairs, 'r'):
-        pass_filter(pair)
+        pair = pair.rstrip('\n').split('\t')[0]
+        pass_filter(pair, somatic_flag)
         in_vcf = pair + '.haplo_somatic.PASS.vcf'
         out_vcf = pair + '.haplo_somatic.PASS.vep.vcf'
+        if somatic_flag == 'N':
+            in_vcf = pair + '.haplo_filtered.PASS.vcf'
+            out_vcf = pair + '.haplo_filtered.PASS.vep.vcf'
+
         loc = pair + '.vep.log'
         run_vep = 'perl ' + vep_tool + ' --cache -i ' + in_vcf + ' --vcf -o ' + out_vcf + ' --symbol --vcf_info_field' \
                 ' ANN --canonical --html --variant_class --sift both --offline --maf_exac --no_whole_genome --fork ' \
@@ -69,12 +78,14 @@ if __name__ == "__main__":
                                                                                            ' or sample list')
     parser.add_argument('-r', '--ref_mnt', action='store', dest='ref_mnt',
                         help='Reference mount directory, i.e. /mnt/cinder/REFS_XXX')
+    parser.add_argument('-sf', '--somatic_flag', action='store', dest='somatic_flag',
+                        help='Flag whether or not to deal with somatic or single sample calls')
 
     if len(sys.argv) == 1:
         parser.print_help()
         sys.exit(1)
 
     inputs = parser.parse_args()
-    (config_file, sample_pairs, ref_mnt) = (
-        inputs.config_file, inputs.sample_pairs, inputs.ref_mnt)
-    annot_gatk_haplotype(config_file, sample_pairs, ref_mnt)
+    (config_file, sample_pairs, ref_mnt, somatic_flag) = (
+        inputs.config_file, inputs.sample_pairs, inputs.ref_mnt, inputs.somatic_flag)
+    annot_gatk_haplotype(config_file, sample_pairs, ref_mnt, somatic_flag)

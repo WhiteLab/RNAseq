@@ -50,6 +50,7 @@
     "ram": "30",
     "pdxflag": "Y",
     "capture_flag": "N",
+    "somatic_flag": "N",
     "strand": "rf-stranded",
     "stranded": "Y"
   }

@@ -17,7 +17,7 @@ def parse_config(json_config):
         return config_data['refs']['cont'], config_data['refs']['obj'], config_data['refs']['capture_flag'], \
                config_data['refs']['cap_bed'], config_data['tools']['bedtools'], config_data['tools']['samtools'], \
                config_data['tools']['java'], config_data['tools']['gatk'], config_data['params']['threads'], \
-               config_data['refs']['samtools']
+               config_data['refs']['samtools'], config_file['refs']['somatic_flag']
     except:
         try:
             sys.stderr.write(date_time() + 'Accessing keys failed.  Attempting to output current keys:\n')
@@ -120,9 +120,10 @@ def create_somatic_vcf(bedtools, pairs, th):
     intersect_jobs = []
     for pair in pairs:
         cur = pair.split('_')
+        old_suffix = '.haplo_filtered.vcf'
         loc = pair + '.bedtools.intersect.log'
-        bed_int = bedtools + ' intersect -a ' + cur[0] + ' -b ' + cur[1] + ' -wa -header -sorted > ' + pair \
-                  + '.haplo_somatic.vcf 2> ' + loc
+        bed_int = bedtools + ' intersect -a ' + cur[0] + old_suffix + ' -b ' + cur[1] + old_suffix + ' -wa -header ' \
+                '-sorted > ' + pair + '.haplo_somatic.vcf 2> ' + loc
         intersect_jobs.append(bed_int)
     rflag = job_manager(intersect_jobs, th)
     if rflag != 0:
@@ -186,7 +187,7 @@ def upload_results(sample_list, sample_pairs, cont, th, obj):
 def gatk_call(sample_pairs, config_file, ref_mnt):
     mk_dir = 'mkdir BAMS LOGS ANALYSIS ANNOTATION REPORTS'
     subprocess.call(mk_dir, shell=True)
-    (cont, obj, cflag, cap_bed, bedtools, samtools, java, gatk, th, fasta) = parse_config(config_file)
+    (cont, obj, cflag, cap_bed, bedtools, samtools, java, gatk, th, fasta, somatic_flag) = parse_config(config_file)
     cap_bed = ref_mnt + '/' + cap_bed
     fasta = ref_mnt + '/' + fasta
 
@@ -242,10 +243,12 @@ def gatk_call(sample_pairs, config_file, ref_mnt):
     check = the_big_show(java, gatk, sample_list, th, fasta)
     if check != 0:
         sys.stderr.write(date_time() + 'Haplotype calls failed\n')
-    check = create_somatic_vcf(bedtools, pairs, th)
-    if check != 0:
-        sys.stderr.write(date_time() + 'somatic vcf creation failed\n')
-    check = annot_gatk_haplotype(config_file, sample_pairs, ref_mnt)
+    # only subtract hits if T/N available
+    if somatic_flag == 'Y':
+        check = create_somatic_vcf(bedtools, pairs, th)
+        if check != 0:
+            sys.stderr.write(date_time() + 'somatic vcf creation failed\n')
+    check = annot_gatk_haplotype(config_file, sample_pairs, ref_mnt, somatic_flag)
     if check != 0:
         sys.stderr.write(date_time() + 'VEP annotation of vcf failed\n')
     mv_files = 'mv *.bam *.bai BAMS; mv *.log LOGS; mv *vep* ANNOTATION; mv *.vcf *.table ANALYSIS; mv *.xls REPORTS'

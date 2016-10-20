@@ -26,7 +26,7 @@ def list_bam(cont, obj, sample, th, in_suffix):
     bam_list = []
     bai_list = []
     for fn in re.findall('(.*)\n', flist):
-        if re.match('^\S+_\d+\.' + in_suffix + '$', fn):
+        if re.match('^\S+_\d+' + in_suffix + '$', fn):
             sys.stderr.write(date_time() + 'Downloading relevant BAM file ' + fn + '\n')
             dl_cmd = '. /home/ubuntu/.novarc;swift download ' + cont + ' --skip-identical ' + fn + ' >> LOGS/' \
                      + sample + '.novosort_merge.log'

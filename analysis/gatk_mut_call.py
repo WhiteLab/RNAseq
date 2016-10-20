@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+
 import sys
 import os
 sys.path.append('/home/ubuntu/TOOLS/Scripts/')
@@ -15,10 +16,10 @@ from annotation.vep_annot_vcf import annot_gatk_haplotype
 def parse_config(json_config):
     config_data = json.loads(open(json_config, 'r').read())
     try:
-        return config_data['refs']['cont'], config_data['refs']['obj'], config_data['refs']['capture_flag'], \
+        return config_data['refs']['cont'], config_data['refs']['obj'], config_data['params']['capture_flag'], \
                config_data['refs']['cap_bed'], config_data['tools']['bedtools'], config_data['tools']['samtools'], \
                config_data['tools']['java'], config_data['tools']['gatk'], config_data['params']['threads'], \
-               config_data['refs']['samtools'], config_file['refs']['somatic_flag']
+               config_data['refs']['samtools'], config_file['params']['somatic_flag']
     except:
         try:
             sys.stderr.write(date_time() + 'Accessing keys failed.  Attempting to output current keys:\n')

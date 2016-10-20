@@ -13,7 +13,7 @@ from utility.job_manager import job_manager
 def parse_config(config_file):
     config_data = json.load(open(config_file, 'r'))
     return config_data['tools']['novosort'], config_data['refs']['cont'], config_data['refs']['obj'],\
-           config_data['params']['threads'], config_data['params']['ram'], config_data['tools']['samtools']
+           config_data['params']['threads'], config_data['params']['ram']
 
 
 def list_bam(cont, obj, sample, th, in_suffix):
@@ -46,7 +46,7 @@ def list_bam(cont, obj, sample, th, in_suffix):
 
 
 def novosort_merge_pe(config_file, sample_list, in_suffix, out_suffix, sort_type):
-    (novosort, cont, obj, th, ram, samtools) = parse_config(config_file)
+    (novosort, cont, obj, th, ram) = parse_config(config_file)
     # gives some flexibility if giving a list of samples ot just a single one
     if os.path.isfile(sample_list):
         fh = open(sample_list, 'r')

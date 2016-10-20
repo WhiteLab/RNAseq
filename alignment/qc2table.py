@@ -2,6 +2,7 @@
 
 import json
 import sys
+sys.path.append('/home/ubuntu/TOOLS/Scripts/')
 from utility.date_time import date_time
 import subprocess
 from subprocess import check_output

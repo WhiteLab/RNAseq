@@ -1,9 +1,8 @@
 #!/usr/bin/python
 
 import sys
-
-sys.path.append('/Users/Miguel/Documents/Scripts/white_lab/RNAseq/utility')
-from date_time import date_time
+sys.path.append('/home/ubuntu/TOOLS/Scripts/')
+from utility.date_time import date_time
 
 flist = open(sys.argv[1], 'r')
 data = {}

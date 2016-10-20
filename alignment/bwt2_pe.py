@@ -1,11 +1,9 @@
 #!/usr/bin/python
 import sys
-
-sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
+sys.path.append('/home/ubuntu/TOOLS/Scripts/')
 from date_time import date_time
 from subprocess import call
 from log import log
-import subprocess
 
 
 def bwt2_pe(bwt_tool, bwt_ref, end1, end2, samtools_tool, samtools_ref, sample, t, log_dir):

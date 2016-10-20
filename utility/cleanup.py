@@ -1,10 +1,8 @@
 #!/usr/bin/python
-import sys
 
-sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
+import sys
 from date_time import date_time
 import subprocess
-import os
 
 
 def cleanup(cid, vid, bid, vip):

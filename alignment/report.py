@@ -1,7 +1,7 @@
 #!/usr/bin/python
-import sys
 
-sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
+import sys
+sys.path.append('/home/ubuntu/TOOLS/Scripts/')
 import os
 import re
 from utility.date_time import date_time

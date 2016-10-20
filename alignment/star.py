@@ -1,10 +1,10 @@
 #!/usr/bin/python
-import sys
 
-sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
-from date_time import date_time
+import sys
+sys.path.append('/home/ubuntu/TOOLS/Scripts/')
+from utility.date_time import date_time
 from subprocess import call
-from log import log
+from utility.log import log
 
 
 def star(STAR, genome, end1, end2, sample, log_dir, th, sf):

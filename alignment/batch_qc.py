@@ -2,14 +2,13 @@
 # written by Miguel Brown 2015-Feb-23. Wrapper script to loop through sequencing files and use pipeline
 
 import sys
-
+sys.path.append('/home/ubuntu/TOOLS/Scripts/')
 import os
 import re
 import argparse
 from utility.job_manager import job_manager
 from utility.date_time import date_time
 import subprocess
-import pdb
 
 
 def batch_qc(fn, cont, obj, t):

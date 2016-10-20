@@ -1,5 +1,6 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 import sys
+sys.path.append('/home/ubuntu/TOOLS/Scripts/')
 import os
 from utility.date_time import date_time
 from utility.log import log

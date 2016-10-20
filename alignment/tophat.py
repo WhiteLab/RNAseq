@@ -1,11 +1,9 @@
 #!/usr/bin/python
 import sys
-
-sys.path.append('/home/ubuntu/TOOLS/Scripts/utility')
-from date_time import date_time
+sys.path.append('/home/ubuntu/TOOLS/Scripts/')
+from utility.date_time import date_time
 from subprocess import call
-from log import log
-import subprocess
+from utility.log import log
 
 
 def RepresentsInt(s):

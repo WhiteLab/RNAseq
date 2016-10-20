@@ -149,6 +149,16 @@ def upload_results(sample_list, sample_pairs, cont, th, obj):
             fn = os.path.basename(f)
             up_jobs.append(src_cmd + 'swift upload ' + cont + '-S 1073741824 ' + f + ' --object-name ANALYSIS/'
                            + sample + '/' + fn)
+        ann_list = glob('ANNOTATION/' + sample + '*')
+        for f in ann_list:
+            fn = os.path.basename(f)
+            up_jobs.append(src_cmd + 'swift upload ' + cont + '-S 1073741824 ' + f + ' --object-name ANNOTATION/'
+                           + sample + '/' + fn)
+        rep_list = glob('REPORTS/' + sample + '*')
+        for f in rep_list:
+            fn = os.path.basename(f)
+            up_jobs.append(src_cmd + 'swift upload ' + cont + '-S 1073741824 ' + f + ' --object-name REPORTS/'
+                           + sample + '/' + fn)
         # setup up log file upload
         log_list = glob('LOGS/' + sample + '*')
         for f in log_list:

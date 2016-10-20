@@ -11,7 +11,7 @@ from utility.job_manager import job_manager
 
 
 def parse_config(config_file):
-    config_data = json.loads(open(config_file, 'r').read())
+    config_data = json.load(open(config_file, 'r'))
     return config_data['tools']['novosort'], config_data['refs']['cont'], config_data['refs']['obj'],\
            config_data['params']['threads'], config_data['params']['ram'], config_data['tools']['samtools']
 

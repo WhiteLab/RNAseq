@@ -14,7 +14,7 @@ from annotation.vep_annot_vcf import annot_gatk_haplotype
 
 
 def parse_config(json_config):
-    config_data = json.loads(open(json_config, 'r').read())
+    config_data = json.load(open(json_config, 'r'))
     try:
         return config_data['refs']['cont'], config_data['refs']['obj'], config_data['params']['capture_flag'], \
                config_data['refs']['cap_bed'], config_data['tools']['bedtools'], config_data['tools']['samtools'], \

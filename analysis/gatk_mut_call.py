@@ -19,7 +19,7 @@ def parse_config(json_config):
         return config_data['refs']['cont'], config_data['refs']['obj'], config_data['params']['capture_flag'], \
                config_data['refs']['cap_bed'], config_data['tools']['bedtools'], config_data['tools']['samtools'], \
                config_data['tools']['java'], config_data['tools']['gatk'], config_data['params']['threads'], \
-               config_data['refs']['samtools'], config_data['params']['somatic_flag'], config_data['refs']['config']
+               config_data['refs']['samtools'], config_data['params']['somatic_flag']
     except:
         try:
             sys.stderr.write(date_time() + 'Accessing keys failed.  Attempting to output current keys:\n')
@@ -200,8 +200,7 @@ def upload_results(sample_list, sample_pairs, cont, th, obj):
 def gatk_call(sample_pairs, config_file, ref_mnt):
     mk_dir = 'mkdir BAMS LOGS ANALYSIS ANNOTATION REPORTS'
     subprocess.call(mk_dir, shell=True)
-    (cont, obj, cflag, cap_bed, bedtools, samtools, java, gatk, th, fasta, somatic_flag, json_config)\
-        = parse_config(config_file)
+    (cont, obj, cflag, cap_bed, bedtools, samtools, java, gatk, th, fasta, somatic_flag)  = parse_config(config_file)
     cap_bed = ref_mnt + '/' + cap_bed
     fasta = ref_mnt + '/' + fasta
     sample_list = sample_pairs
@@ -236,7 +235,7 @@ def gatk_call(sample_pairs, config_file, ref_mnt):
     in_suffix = '.Aligned.sortedByCoord.out.bam'
     out_suffix = '.merged.sortedByCoord.bam'
     sort_type = 'coordinate'
-    check = novosort_merge_pe(sample_list, json_config, in_suffix, out_suffix, sort_type)
+    check = novosort_merge_pe(config_file, sample_list, in_suffix, out_suffix, sort_type)
     if check == 0:
         sys.stderr.write(date_time() + 'File download and merge complete!\n')
         # rm unmerged bams, no longer needed

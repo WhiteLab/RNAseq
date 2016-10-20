@@ -166,27 +166,28 @@ def upload_results(sample_list, sample_pairs, cont, th, obj):
             up_jobs.append(src_cmd + 'swift upload ' + cont + '-S 1073741824 ' + f + ' --object-name LOGS/'
                            + sample + '/' + fn)
     # set up pair-specific uploads
-    for pair in sample_pairs:
-        ana_list = glob('ANALYSIS/' + pair + '*')
-        for f in ana_list:
-            fn = os.path.basename(f)
-            up_jobs.append(src_cmd + 'swift upload ' + cont + '-S 1073741824 ' + f + ' --object-name ANALYSIS/'
-                           + pair + '/' + fn)
-        ann_list = glob('ANNOTATION/' + pair + '*')
-        for f in ann_list:
-            fn = os.path.basename(f)
-            up_jobs.append(src_cmd + 'swift upload ' + cont + '-S 1073741824 ' + f + ' --object-name ANNOTATION/'
-                           + pair + '/' + fn)
-        rep_list = glob('REPORTS/' + pair + '*')
-        for f in rep_list:
-            fn = os.path.basename(f)
-            up_jobs.append(src_cmd + 'swift upload ' + cont + '-S 1073741824 ' + f + ' --object-name REPORTS/'
-                           + pair + '/' + fn)
-        log_list = glob('LOGS/' + pair + '*')
-        for f in log_list:
-            fn = os.path.basename(f)
-            up_jobs.append(src_cmd + 'swift upload ' + cont + '-S 1073741824 ' + f + ' --object-name LOGS/'
-                           + pair + '/' + fn)
+    if len(pairs) > 0:
+        for pair in sample_pairs:
+            ana_list = glob('ANALYSIS/' + pair + '*')
+            for f in ana_list:
+                fn = os.path.basename(f)
+                up_jobs.append(src_cmd + 'swift upload ' + cont + '-S 1073741824 ' + f + ' --object-name ANALYSIS/'
+                               + pair + '/' + fn)
+            ann_list = glob('ANNOTATION/' + pair + '*')
+            for f in ann_list:
+                fn = os.path.basename(f)
+                up_jobs.append(src_cmd + 'swift upload ' + cont + '-S 1073741824 ' + f + ' --object-name ANNOTATION/'
+                               + pair + '/' + fn)
+            rep_list = glob('REPORTS/' + pair + '*')
+            for f in rep_list:
+                fn = os.path.basename(f)
+                up_jobs.append(src_cmd + 'swift upload ' + cont + '-S 1073741824 ' + f + ' --object-name REPORTS/'
+                               + pair + '/' + fn)
+            log_list = glob('LOGS/' + pair + '*')
+            for f in log_list:
+                fn = os.path.basename(f)
+                up_jobs.append(src_cmd + 'swift upload ' + cont + '-S 1073741824 ' + f + ' --object-name LOGS/'
+                               + pair + '/' + fn)
     rflag = job_manager(up_jobs, th)
     if rflag != 0:
         return 1
@@ -200,27 +201,35 @@ def gatk_call(sample_pairs, config_file, ref_mnt):
     (cont, obj, cflag, cap_bed, bedtools, samtools, java, gatk, th, fasta, somatic_flag) = parse_config(config_file)
     cap_bed = ref_mnt + '/' + cap_bed
     fasta = ref_mnt + '/' + fasta
-
-    sample_list = 'sample_list.txt'
+    sample_list = sample_pairs
     slist = []
     pairs = []
-    fh = open(sample_pairs, 'r')
-    sl = open(sample_list, 'w')
-    temp = {}
-    for line in fh:
-        cur = line.rstrip('\n').split('\t')
-        pairs.append(cur[0])
-        if cur[1] not in temp:
-            sl.write(cur[1] + '\n')
-            temp[cur[1]] = 1
-            slist.append(cur[1])
-        if cur[2] not in temp:
-            sl.write(cur[2] + '\n')
-            temp[cur[2]] = 1
-            slist.append(cur[2])
-    sl.close()
-    fh .close()
-    del temp
+    if somatic_flag == 'Y':
+        sample_list = 'sample_list.txt'
+        fh = open(sample_pairs, 'r')
+        sl = open(sample_list, 'w')
+        temp = {}
+        for line in fh:
+            cur = line.rstrip('\n').split('\t')
+            pairs.append(cur[0])
+            if cur[1] not in temp:
+                sl.write(cur[1] + '\n')
+                temp[cur[1]] = 1
+                slist.append(cur[1])
+            if cur[2] not in temp:
+                sl.write(cur[2] + '\n')
+                temp[cur[2]] = 1
+                slist.append(cur[2])
+        sl.close()
+        fh .close()
+        del temp
+    else:
+        fh = open(sample_pairs, 'r')
+        for line in fh:
+            cur = line.rstrip('\n')
+            slist.append(cur)
+        fh .close()
+
     in_suffix = '.Aligned.sortedByCoord.out.bam'
     out_suffix = '.merged.sortedByCoord.bam'
     sort_type = 'coordinate'
@@ -250,7 +259,7 @@ def gatk_call(sample_pairs, config_file, ref_mnt):
     check = base_recal(java, gatk, slist, th, fasta)
     if check != 0:
         sys.stderr.write(date_time() + 'Base recal failed\n')
-    check = the_big_show(java, gatk, sample_list, th, fasta)
+    check = the_big_show(java, gatk, slist, th, fasta)
     if check != 0:
         sys.stderr.write(date_time() + 'Haplotype calls failed\n')
     # only subtract hits if T/N available
@@ -263,7 +272,7 @@ def gatk_call(sample_pairs, config_file, ref_mnt):
         sys.stderr.write(date_time() + 'VEP annotation of vcf failed\n')
     mv_files = 'mv *.bam *.bai BAMS; mv *.log LOGS; mv *vep* ANNOTATION; mv *.vcf *.table ANALYSIS; mv *.xls REPORTS'
     subprocess.call(mv_files, shell=True)
-    check = upload_results(sample_list, sample_pairs, cont, obj, th)
+    check = upload_results(slist, pairs, cont, obj, th)
     if check != 0:
         sys.stderr.write(date_time() + 'File uploads failed failed\n')
     else:

@@ -52,7 +52,7 @@ def filter_bam(bedtools, cap_bed, sample_list, out_suffix, th):
 def splitNtrim(java, gatk, sample_list, out_suffix, fasta, th):
     cmd_list = []
     for sample in sample_list:
-        bam = sample_list + out_suffix
+        bam = sample + out_suffix
         loc = sample + '.gatk.SplitNCigarReads.log'
         split_cmd = java + ' -Djava.io.tmpdir=' + gatk_tmp + ' -jar ' + gatk + ' -T SplitNCigarReads -R ' + fasta \
                     + ' -I ' + bam + ' -o ' + sample + '.merged.split.bam -rf ReassignOneMappingQuality -RMQF 255 ' \

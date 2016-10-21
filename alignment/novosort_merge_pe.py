@@ -76,7 +76,7 @@ def novosort_merge_pe(config_file, sample_list, in_suffix, out_suffix, sort_type
                                 ' nova_temp ' + bam_string + ' 2>> LOGS/' + sample + '.novosort_merge.log'
         else:
             novosort_merge_pe_cmd = novosort + " -c " + th + " -m " + ram + "G  -o " + final_bam + ' -i -t' \
-                                ' nova_tempz` ' + bam_string + ' 2>> LOGS/' + sample + '.novosort_merge.log'
+                                ' nova_temp ' + bam_string + ' 2>> LOGS/' + sample + '.novosort_merge.log'
         sys.stderr.write(date_time() + novosort_merge_pe_cmd + "\n")
         try:
             subprocess.check_output(novosort_merge_pe_cmd, shell=True)

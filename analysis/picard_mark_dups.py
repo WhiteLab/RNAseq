@@ -19,8 +19,8 @@ def picard_mark_dups(config_file, sample, log_dir, suffix):
     loc = log_dir + root + ".picard.mark_dup.log"
     (java_tool, picard_tool, mem) = parse_config(config_file)
     tmp_dir = 'picard_tmp'
-    mktemp = 'mkdir ' + tmp_dir
-    call(mktemp, shell=True)
+    mk_temp = 'mkdir ' + tmp_dir
+    call(mk_temp, shell=True)
     picard_mark_dups_cmd = java_tool + " -Djava.io.tmpdir " + tmp_dir + " -Xmx" + mem + "g -jar " + picard_tool \
                            + " MarkDuplicates I=" + sample + suffix + " O=" + sample \
                            + ".dup_marked.bam  CREATE_INDEX=true VALIDATION_STRINGENCY=SILENT M=" + sample \

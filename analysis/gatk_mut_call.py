@@ -202,6 +202,8 @@ def upload_results(sample_list, sample_pairs, cont, th, obj):
 def gatk_call(sample_pairs, config_file, ref_mnt):
     global gatk_tmp
     gatk_tmp = 'GATK_TMP'
+    mk_temp = 'mkdir ' + gatk_tmp
+    subprocess.call(mk_temp, shell=True)
     mk_dir = 'mkdir BAMS LOGS ANALYSIS ANNOTATION REPORTS'
     subprocess.call(mk_dir, shell=True)
     (cont, obj, cflag, cap_bed, bedtools, samtools, java, gatk, th, fasta, somatic_flag) = parse_config(config_file)

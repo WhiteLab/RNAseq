@@ -51,6 +51,7 @@
     "pdxflag": "Y",
     "capture_flag": "N",
     "somatic_flag": "N",
+    "mark_dup": "Y",
     "strand": "rf-stranded",
     "stranded": "Y"
   }

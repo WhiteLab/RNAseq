@@ -7,13 +7,14 @@ sys.path.append('/home/ubuntu/TOOLS/Scripts/')
 from utility.date_time import date_time
 from subprocess import call
 import subprocess
+from picard_mark_dups import picard_mark_dups
 from utility.job_manager import job_manager
 
 
 def parse_config(config_file):
     config_data = json.load(open(config_file, 'r'))
     return config_data['tools']['novosort'], config_data['refs']['cont'], config_data['refs']['obj'], \
-           config_data['params']['threads'], config_data['params']['ram']
+           config_data['params']['threads'], config_data['params']['ram'], config_data['params']['mark_dup']
 
 
 def list_bam(cont, obj, sample, th, in_suffix):
@@ -24,7 +25,6 @@ def list_bam(cont, obj, sample, th, in_suffix):
     # Use to check on download status
     p = []
     bam_list = []
-    bai_list = []
     for fn in re.findall('(.*)\n', flist):
         if re.match('^\S+_\d+' + in_suffix + '$', fn):
             sys.stderr.write(date_time() + 'Downloading relevant BAM file ' + fn + '\n')
@@ -34,19 +34,18 @@ def list_bam(cont, obj, sample, th, in_suffix):
             if fn[-3:] == 'bam':
                 bam_list.append(fn)
                 ct = ct + 1
-            #else:
-            #    bai_list.append(fn)
+
     f = job_manager(p, th)
     if f == 0:
         sys.stderr.write(date_time() + 'BAM download complete\n')
-        return bam_list, bai_list, ct
+        return bam_list, ct
     else:
         sys.stderr.write(date_time() + 'BAM download failed\n')
         exit(1)
 
 
 def novosort_merge_pe(config_file, sample_list, in_suffix, out_suffix, sort_type):
-    (novosort, cont, obj, th, ram) = parse_config(config_file)
+    (novosort, cont, obj, th, ram, mflag) = parse_config(config_file)
     # gives some flexibility if giving a list of samples ot just a single one
     if os.path.isfile(sample_list):
         fh = open(sample_list, 'r')
@@ -58,7 +57,16 @@ def novosort_merge_pe(config_file, sample_list, in_suffix, out_suffix, sort_type
     call(mk_temp, shell=True)
     for sample in fh:
         sample = sample.rstrip('\n')
-        (bam_list, bai_list, n) = list_bam(cont, obj, sample, th, in_suffix)
+        (bam_list, n) = list_bam(cont, obj, sample, th, in_suffix)
+        if mflag == 'Y':
+            for i in xrange(0, len(bam_list), 1):
+                cur = bam_list[i].replace(in_suffix, '')
+                check = picard_mark_dups(config_file, cur, 'LOGS/', in_suffix)
+                if check != 0:
+                    sys.stderr.write('Picard mark dup failed for ' + sample + '\n')
+                    exit(1)
+
+                bam_list[i] = bam_list[i].replace(in_suffix, '.dup_marked.bam')
         bam_string = " ".join(bam_list)
         final_bam = sample + out_suffix
         if sort_type == 'name':

@@ -7,7 +7,9 @@ from utility.log import log
 
 
 def picard_insert_size(java_tool, picard_tool, sample, log_dir):
-    picard_insert_size_cmd = java_tool + " -Xmx2g -jar " + picard_tool + " CollectInsertSizeMetrics I=" + sample + ".srt.bam H=" + sample + ".insert_metrics.pdf O=" + sample + ".insert_metrics.hist  > " + log_dir + sample + ".picard.insert_size.log 2>&1"
+    picard_insert_size_cmd = java_tool + " -Xmx2g -jar " + picard_tool + " CollectInsertSizeMetrics I=" + sample \
+                             + ".srt.bam H=" + sample + ".insert_metrics.pdf O=" + sample + ".insert_metrics.hist  > " \
+                             + log_dir + sample + ".picard.insert_size.log 2>&1"
     log(log_dir + sample + ".picard.insert_size.log", date_time() + picard_insert_size_cmd + "\n")
     call(picard_insert_size_cmd, shell=True)
     # open file and return insert size
@@ -25,7 +27,8 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(
-        description='Picard collect insert size metrics module.  Gathers insert size metrics, run after removing BAM duplicates.')
+        description='Picard collect insert size metrics module.  Gathers insert size metrics, run after removing '
+                    'BAM duplicates.')
     parser.add_argument('-j', '--java', action='store', dest='java_tool',
                         help='Java location directory, version jdk1.7.0_45 preferred')
     parser.add_argument('-p', '--picard', action='store', dest='picard_tool', help='Picard jar file location')

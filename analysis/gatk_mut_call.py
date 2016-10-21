@@ -54,9 +54,9 @@ def splitNtrim(java, gatk, sample_list, out_suffix, fasta, th):
     for sample in sample_list:
         bam = sample_list + out_suffix
         loc = sample + '.gatk.SplitNCigarReads.log'
-        split_cmd = java + ' -jar ' + gatk + ' -T SplitNCigarReads -R ' + fasta + ' -I ' + bam + ' -o ' + sample \
-                    + '.merged.split.bam -rf ReassignOneMappingQuality -RMQF 255 -RMQT 60  -U ALLOW_N_CIGAR_READS 2> '\
-                    + loc
+        split_cmd = java + ' -Djava.io.tmpdir ' + gatk_tmp + ' -jar ' + gatk + ' -T SplitNCigarReads -R ' + fasta \
+                    + ' -I ' + bam + ' -o ' + sample + '.merged.split.bam -rf ReassignOneMappingQuality -RMQF 255 ' \
+                                                       '-RMQT 60  -U ALLOW_N_CIGAR_READS 2> ' + loc
         cmd_list.append(split_cmd)
     rflag = job_manager(cmd_list, th)
     if rflag == 0:
@@ -70,8 +70,9 @@ def base_recal(java, gatk, sample_list, th, fasta):
     for sample in sample_list:
         loc = sample + '.gatk.BaseRecalibrator.log'
         bam = sample + '.merged.split.bam'
-        recal_cmd = java + ' -jar ' + gatk + ' -nct ' + th + ' -T BaseRecalibrator -I ' + bam + ' -o ' + sample \
-                    + '_recal_data.table -R ' + fasta + ' 2> ' + loc
+        recal_cmd = java + ' -Djava.io.tmpdir ' + gatk_tmp + ' -jar ' + gatk + ' -nct ' + th \
+                    + ' -T BaseRecalibrator -I ' + bam + ' -o ' + sample + '_recal_data.table -R ' + fasta + ' 2> ' \
+                    + loc
         log(loc, date_time() + recal_cmd + '\n')
         rflag = subprocess.call(recal_cmd, shell=True)
         if rflag != 0:
@@ -96,18 +97,19 @@ def the_big_show(java, gatk, sample_list, th, fasta):
     for sample in sample_list:
         bam = sample + '.recalibrated.bam'
         loc = sample + '.gatk.HaplotypeCaller.log'
-        haplo_cmd = java + ' -jar ' + gatk + ' -nct ' + th + ' -T HaplotypeCaller -I ' + bam + ' -R ' + fasta \
-                    + ' -o ' + sample + '_haplo_calls.vcf -dontUseSoftClippedBases -stand_call_conf 20.0' \
-                                        ' -stand_emit_conf 20.0 2> ' + loc
+        haplo_cmd = java + ' -Djava.io.tmpdir ' + gatk_tmp + ' -jar ' + gatk + ' -nct ' + th + ' -T HaplotypeCaller ' \
+                    '-I ' + bam + ' -R ' + fasta + ' -o ' + sample + '_haplo_calls.vcf -dontUseSoftClippedBases ' \
+                    '-stand_call_conf 20.0 -stand_emit_conf 20.0 2> ' + loc
         log(loc, date_time() + haplo_cmd + '\n')
         rflag = subprocess.call(haplo_cmd, shell=True)
         if rflag != 0:
             log(loc, date_time() + 'Haplotype calls failed for ' + sample + '\n')
             return 1
         loc = sample + '.gatk.VariantFiltration.log'
-        filt_vcf_cmd = java + ' -jar ' + gatk + ' -nct ' + th + ' -T VariantFiltration -R ' + fasta + ' -V ' + sample\
-                       + '_haplo_calls.vcf  -window 35 -cluster 3 -filterName FS -filter "FS > 30.0" -filterName QD ' \
-                         '-filter "QD < 2.0" -o ' + sample + '.haplo_filtered.vcf 2> ' + loc
+        filt_vcf_cmd = java + ' -Djava.io.tmpdir ' + gatk_tmp + ' -jar ' + gatk + ' -nct ' + th \
+                       + ' -T VariantFiltration -R ' + fasta + ' -V ' + sample + '_haplo_calls.vcf  -window 35 ' \
+                        '-cluster 3 -filterName FS -filter "FS > 30.0" -filterName QD -filter "QD < 2.0" -o ' + sample\
+                       + '.haplo_filtered.vcf 2> ' + loc
         filt_vcf_jobs.append(filt_vcf_cmd)
     rflag = job_manager(filt_vcf_jobs, th)
     sys.stderr.write(date_time() + 'Filtering variants\n')
@@ -198,9 +200,11 @@ def upload_results(sample_list, sample_pairs, cont, th, obj):
 
 
 def gatk_call(sample_pairs, config_file, ref_mnt):
+    global gatk_tmp
+    gatk_tmp = 'GATK_TMP'
     mk_dir = 'mkdir BAMS LOGS ANALYSIS ANNOTATION REPORTS'
     subprocess.call(mk_dir, shell=True)
-    (cont, obj, cflag, cap_bed, bedtools, samtools, java, gatk, th, fasta, somatic_flag)  = parse_config(config_file)
+    (cont, obj, cflag, cap_bed, bedtools, samtools, java, gatk, th, fasta, somatic_flag) = parse_config(config_file)
     cap_bed = ref_mnt + '/' + cap_bed
     fasta = ref_mnt + '/' + fasta
     sample_list = sample_pairs
@@ -279,6 +283,8 @@ def gatk_call(sample_pairs, config_file, ref_mnt):
         sys.stderr.write(date_time() + 'File uploads failed failed\n')
     else:
         sys.stderr.write(date_time() + 'Mutation call pipe complete\n')
+    rm_tmp = 'rm -rf ' + gatk_tmp
+    subprocess.call(rm_tmp, shell=True)
     return 0
 
 

@@ -37,10 +37,10 @@ def list_bam(cont, obj, sample, th, in_suffix):
 
     f = job_manager(p, th)
     if f == 0:
-        sys.stderr.write(date_time() + 'BAM download complete\n')
+        sys.stderr.write(date_time() + 'BAM download complete for sample ' + sample + '\n')
         return bam_list, ct
     else:
-        sys.stderr.write(date_time() + 'BAM download failed\n')
+        sys.stderr.write(date_time() + 'BAM download failed for sample ' + sample + '\n')
         exit(1)
 
 
@@ -59,6 +59,8 @@ def novosort_merge_pe(config_file, sample_list, in_suffix, out_suffix, sort_type
         sample = sample.rstrip('\n')
         (bam_list, n) = list_bam(cont, obj, sample, th, in_suffix)
         if mflag == 'Y':
+            sys.stderr.write(date_time() + 'Mark duplicates flag given.  Running picard on bams for sample' + sample
+                             + '\n')
             for i in xrange(0, len(bam_list), 1):
                 cur = bam_list[i].replace(in_suffix, '')
                 check = picard_mark_dups(config_file, cur, 'LOGS/', in_suffix)
@@ -74,7 +76,7 @@ def novosort_merge_pe(config_file, sample_list, in_suffix, out_suffix, sort_type
                                 ' nova_temp ' + bam_string + ' 2>> LOGS/' + sample + '.novosort_merge.log'
         else:
             novosort_merge_pe_cmd = novosort + " -c " + th + " -m " + ram + "G  -o " + final_bam + ' -i -t' \
-                                ' nova_temp --md ' + bam_string + ' 2>> LOGS/' + sample + '.novosort_merge.log'
+                                ' nova_temp ' + bam_string + ' 2>> LOGS/' + sample + '.novosort_merge.log'
         sys.stderr.write(date_time() + novosort_merge_pe_cmd + "\n")
         try:
             subprocess.check_output(novosort_merge_pe_cmd, shell=True)

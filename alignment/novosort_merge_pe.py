@@ -7,7 +7,7 @@ sys.path.append('/home/ubuntu/TOOLS/Scripts/')
 from utility.date_time import date_time
 from subprocess import call
 import subprocess
-from picard_mark_dups import picard_mark_dups
+from analysis.picard_mark_dups import picard_mark_dups
 from utility.job_manager import job_manager
 
 

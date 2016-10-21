@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import sys
+import os
 import json
 sys.path.append('/home/ubuntu/TOOLS/Scripts/')
 from utility.date_time import date_time
@@ -14,7 +15,8 @@ def parse_config(config_file):
 
 
 def picard_mark_dups(config_file, sample, log_dir, suffix):
-    loc = log_dir + sample + ".picard.mark_dup.log"
+    root = os.path.basename(sample)
+    loc = log_dir + root + ".picard.mark_dup.log"
     (java_tool, picard_tool, mem) = parse_config(config_file)
     picard_mark_dups_cmd = java_tool + " -Xmx" + mem + "g -jar " + picard_tool + " MarkDuplicates I=" + sample \
                            + suffix + " O=" + sample + ".dup_marked.bam  CREATE_INDEX=true " \

@@ -72,7 +72,7 @@ def base_recal(java, gatk, sample_list, th, fasta):
         loc = sample + '.gatk.BaseRecalibrator.log'
         bam = sample + '.merged.split.bam'
         tmp_dir = sample + '_gatk_tmp'
-        recal_cmd = java + ' -Djava.io.tmpdir=' + tmp_dir + '-jar ' + gatk + ' -nct ' + th \
+        recal_cmd = java + ' -Djava.io.tmpdir=' + tmp_dir + ' -jar ' + gatk + ' -nct ' + th \
                     + ' -T BaseRecalibrator -I ' + bam + ' -o ' + sample + '_recal_data.table -R ' + fasta + ' 2> ' \
                     + loc + '; rm -rf ' + tmp_dir
         log(loc, date_time() + recal_cmd + '\n')
@@ -100,7 +100,7 @@ def the_big_show(java, gatk, sample_list, th, fasta):
         bam = sample + '.recalibrated.bam'
         loc = sample + '.gatk.HaplotypeCaller.log'
         tmp_dir = sample + '_gatk_tmp'
-        haplo_cmd = java + ' -Djava.io.tmpdir=' + tmp_dir + '-jar ' + gatk + ' -nct ' + th + ' -T HaplotypeCaller ' \
+        haplo_cmd = java + ' -Djava.io.tmpdir=' + tmp_dir + ' -jar ' + gatk + ' -nct ' + th + ' -T HaplotypeCaller ' \
                     '-I ' + bam + ' -R ' + fasta + ' -o ' + sample + '_haplo_calls.vcf -dontUseSoftClippedBases ' \
                     '-stand_call_conf 20.0 -stand_emit_conf 20.0 2> ' + loc + '; rm -rf ' + tmp_dir
         log(loc, date_time() + haplo_cmd + '\n')
@@ -109,7 +109,7 @@ def the_big_show(java, gatk, sample_list, th, fasta):
             log(loc, date_time() + 'Haplotype calls failed for ' + sample + '\n')
             return 1
         loc = sample + '.gatk.VariantFiltration.log'
-        filt_vcf_cmd = java + ' -Djava.io.tmpdir=' + tmp_dir + '-jar ' + gatk + ' -nct ' + th \
+        filt_vcf_cmd = java + ' -Djava.io.tmpdir=' + tmp_dir + ' -jar ' + gatk + ' -nct ' + th \
                        + ' -T VariantFiltration -R ' + fasta + ' -V ' + sample + '_haplo_calls.vcf  -window 35 ' \
                         '-cluster 3 -filterName FS -filter "FS > 30.0" -filterName QD -filter "QD < 2.0" -o ' + sample\
                        + '.haplo_filtered.vcf 2> ' + loc

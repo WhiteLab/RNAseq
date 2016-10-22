@@ -83,7 +83,7 @@ def base_recal(java, gatk, sample_list, th, fasta, vcf):
             return 1
         loc = sample + '.gatk.PrintReads.log'
         new_bam_cmd = java + ' -jar ' + gatk + ' -nct ' + th + ' -T PrintReads -I ' + bam + ' -BQSR ' + sample \
-                      + '_recal_data.table -o ' + sample + '.recalibrated.bam 2> ' + loc
+                      + '_recal_data.table -o ' + sample + '.recalibrated.bam -R ' + fasta + ' 2> ' + loc
         log(loc, date_time() + new_bam_cmd + '\n')
         rflag = subprocess.call(new_bam_cmd, shell=True)
         if rflag == 0:

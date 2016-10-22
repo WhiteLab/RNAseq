@@ -89,10 +89,10 @@ def base_recal(java, gatk, sample_list, th, fasta, vcf):
         if rflag == 0:
             rm_old_bam = 'rm ' + bam
             subprocess.call(rm_old_bam, shell=True)
-            return 0
         else:
             sys.stderr.write('Print recalibrated bam failed for sample ' + sample + '\n')
             return 1
+    return 0
 
 
 def the_big_show(java, gatk, sample_list, th, fasta):
@@ -120,8 +120,7 @@ def the_big_show(java, gatk, sample_list, th, fasta):
     if rflag != 0:
         sys.stderr.write(date_time() + 'Variant filtering jobs failed\n')
         return 1
-    else:
-        return 0
+    return 0
 
 
 def create_somatic_vcf(bedtools, pairs, th):
@@ -136,8 +135,7 @@ def create_somatic_vcf(bedtools, pairs, th):
     rflag = job_manager(intersect_jobs, th)
     if rflag != 0:
         sys.stderr.write(date_time() + 'Somatic vcf by intersect failed\n')
-    else:
-        return 0
+    return 0
 
 
 def upload_results(sample_list, sample_pairs, cont, th, obj):

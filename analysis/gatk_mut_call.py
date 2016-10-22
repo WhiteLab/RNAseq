@@ -210,6 +210,7 @@ def gatk_call(sample_pairs, config_file, ref_mnt):
         parse_config(config_file)
     cap_bed = ref_mnt + '/' + cap_bed
     fasta = ref_mnt + '/' + fasta
+    vcf = ref_mnt + '/' + vcf
     sample_list = sample_pairs
     slist = []
     pairs = []

@@ -19,7 +19,7 @@ def parse_config(json_config):
         return config_data['refs']['cont'], config_data['refs']['obj'], config_data['params']['capture_flag'], \
                config_data['refs']['cap_bed'], config_data['tools']['bedtools'], config_data['tools']['samtools'], \
                config_data['tools']['java'], config_data['tools']['gatk'], config_data['params']['threads'], \
-               config_data['refs']['samtools'], config_data['params']['somatic_flag']
+               config_data['refs']['samtools'], config_data['params']['somatic_flag'], config_data['refs']['dbSnp_vcf']
     except:
         try:
             sys.stderr.write(date_time() + 'Accessing keys failed.  Attempting to output current keys:\n')
@@ -67,13 +67,14 @@ def splitNtrim(java, gatk, sample_list, out_suffix, fasta, th):
         return 1
 
 
-def base_recal(java, gatk, sample_list, th, fasta):
+def base_recal(java, gatk, sample_list, th, fasta, vcf):
     for sample in sample_list:
         loc = sample + '.gatk.BaseRecalibrator.log'
         bam = sample + '.merged.split.bam'
         tmp_dir = sample + '_gatk_tmp'
         recal_cmd = java + ' -Djava.io.tmpdir=' + tmp_dir + ' -jar ' + gatk + ' -nct ' + th \
-                    + ' -T BaseRecalibrator -I ' + bam + ' -o ' + sample + '_recal_data.table -R ' + fasta + ' 2> ' \
+                    + ' -T BaseRecalibrator -I ' + bam + ' -o ' + sample + '_recal_data.table -R ' + fasta \
+                    + ' -knownSites ' + vcf + ' 2> ' \
                     + loc + '; rm -rf ' + tmp_dir
         log(loc, date_time() + recal_cmd + '\n')
         rflag = subprocess.call(recal_cmd, shell=True)
@@ -205,7 +206,8 @@ def upload_results(sample_list, sample_pairs, cont, th, obj):
 def gatk_call(sample_pairs, config_file, ref_mnt):
     mk_dir = 'mkdir BAMS LOGS ANALYSIS ANNOTATION REPORTS'
     subprocess.call(mk_dir, shell=True)
-    (cont, obj, cflag, cap_bed, bedtools, samtools, java, gatk, th, fasta, somatic_flag) = parse_config(config_file)
+    (cont, obj, cflag, cap_bed, bedtools, samtools, java, gatk, th, fasta, somatic_flag, vcf) = \
+        parse_config(config_file)
     cap_bed = ref_mnt + '/' + cap_bed
     fasta = ref_mnt + '/' + fasta
     sample_list = sample_pairs
@@ -263,7 +265,7 @@ def gatk_call(sample_pairs, config_file, ref_mnt):
         sys.stderr.write(date_time() + 'Split n trim failed\n')
         exit(1)
 
-    check = base_recal(java, gatk, slist, th, fasta)
+    check = base_recal(java, gatk, slist, th, fasta, vcf)
     if check != 0:
         sys.stderr.write(date_time() + 'Base recal failed\n')
     check = the_big_show(java, gatk, slist, th, fasta)

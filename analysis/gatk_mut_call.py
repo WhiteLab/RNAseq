@@ -87,7 +87,8 @@ def base_recal(java, gatk, sample_list, th, fasta, vcf):
         log(loc, date_time() + new_bam_cmd + '\n')
         rflag = subprocess.call(new_bam_cmd, shell=True)
         if rflag == 0:
-            rm_old_bam = 'rm ' + bam
+            bai = bam.replace('bam', 'bai')
+            rm_old_bam = 'rm ' + bam + '; rm ' + bai
             subprocess.call(rm_old_bam, shell=True)
         else:
             sys.stderr.write('Print recalibrated bam failed for sample ' + sample + '\n')

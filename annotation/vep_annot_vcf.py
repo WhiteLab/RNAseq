@@ -11,7 +11,7 @@ from vep_report import gen_report
 def parse_config(config_file):
     config_data = json.loads(open(config_file, 'r').read())
     return config_data['tools']['VEP'], config_data['refs']['vepCache'], config_data['refs']['samtools'],\
-           config_data['params']['threads'], config_data['refs']['cadd']
+           config_data['params']['threads'], config_data['refs']['cadd'], config_data['refs']['cacheVersion']
 
 
 def pass_filter(sample, somatic_flag):
@@ -34,7 +34,7 @@ def pass_filter(sample, somatic_flag):
 
 
 def annot_gatk_haplotype(config_file, sample_pairs, ref_mnt, somatic_flag):
-    (vep_tool, vep_cache, fasta, threads, cadd) = parse_config(config_file)
+    (vep_tool, vep_cache, fasta, threads, cadd, cacheVersion) = parse_config(config_file)
     fasta = ref_mnt + '/' + fasta
     cadd = ref_mnt + '/' + cadd
     vep_cache = ref_mnt + '/' + vep_cache
@@ -54,8 +54,8 @@ def annot_gatk_haplotype(config_file, sample_pairs, ref_mnt, somatic_flag):
         loc = pair + '.vep.log'
         run_vep = 'perl ' + vep_tool + ' --cache -i ' + in_vcf + ' --vcf -o ' + out_vcf + ' --symbol --vcf_info_field' \
                 ' ANN --canonical --html --variant_class --sift both --offline --maf_exac --no_whole_genome --fork ' \
-                + threads + ' --fasta ' + fasta + ' --dir_cache ' + vep_cache + ' --plugin CADD,' + cadd + ' 2>> ' \
-                  + loc + ' >> ' + loc
+                + threads + ' --fasta ' + fasta + ' --dir_cache ' + vep_cache + ' --plugin CADD,' + cadd \
+                  + ' --cache_version ' + cacheVersion + ' 2> ' + loc + ' >> ' + loc
         log(loc, date_time() + run_vep + '\n')
         check = subprocess.call(run_vep, shell=True)
         if check != 0:

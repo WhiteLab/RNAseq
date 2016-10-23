@@ -15,7 +15,7 @@ def parse_config(config_file):
 
 
 def pass_filter(sample, somatic_flag):
-    in_fn = sample + 'haplo_somatic.vcf'
+    in_fn = sample + '.haplo_somatic.vcf'
     out_fn = sample + '.haplo_somatic.PASS.vcf'
     if somatic_flag == 'N':
         in_fn = sample + 'haplo_filtered.vcf'

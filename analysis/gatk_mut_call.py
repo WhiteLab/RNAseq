@@ -111,10 +111,9 @@ def the_big_show(java, gatk, sample_list, th, fasta):
             log(loc, date_time() + 'Haplotype calls failed for ' + sample + '\n')
             return 1
         loc = sample + '.gatk.VariantFiltration.log'
-        filt_vcf_cmd = java + ' -Djava.io.tmpdir=' + tmp_dir + ' -jar ' + gatk + ' -nct ' + th \
-                       + ' -T VariantFiltration -R ' + fasta + ' -V ' + sample + '_haplo_calls.vcf  -window 35 ' \
-                        '-cluster 3 -filterName FS -filter "FS > 30.0" -filterName QD -filter "QD < 2.0" -o ' + sample\
-                       + '.haplo_filtered.vcf 2> ' + loc
+        filt_vcf_cmd = java + ' -Djava.io.tmpdir=' + tmp_dir + ' -jar ' + gatk + ' -T VariantFiltration -R ' + fasta \
+                       + ' -V ' + sample + '_haplo_calls.vcf  -window 35 -cluster 3 -filterName FS -filter "FS > ' \
+                       '30.0" -filterName QD -filter "QD < 2.0" -o ' + sample + '.haplo_filtered.vcf 2> ' + loc
         filt_vcf_jobs.append(filt_vcf_cmd)
     rflag = job_manager(filt_vcf_jobs, th)
     sys.stderr.write(date_time() + 'Filtering variants\n')

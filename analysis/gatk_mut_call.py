@@ -137,8 +137,7 @@ def create_somatic_vcf(bedtools, pairs, th):
         sys.stderr.write(date_time() + 'Somatic vcf by intersect failed\n')
     return 0
 
-
-def upload_results(sample_list, sample_pairs, cont, th, obj):
+def upload_results(sample_list, sample_pairs, cont, obj, th):
     up_jobs = []
     src_cmd = '. ~/.novarc;'
     # setup sample-specific uploads
@@ -147,29 +146,29 @@ def upload_results(sample_list, sample_pairs, cont, th, obj):
         bams = glob('BAMS/' + sample + '*')
         for bam in bams:
             fn = os.path.basename(bam)
-            up_jobs.append(src_cmd + 'swift upload ' + cont + '-S 1073741824 ' + bam + ' --object-name ' + obj + '/'
+            up_jobs.append(src_cmd + 'swift upload ' + cont + ' -S 1073741824 ' + bam + ' --object-name ' + obj + '/'
                            + sample + '/BAMS/' + fn)
         # set up analysis files upload
         ana_list = glob('ANALYSIS/' + sample + '*')
         for f in ana_list:
             fn = os.path.basename(f)
-            up_jobs.append(src_cmd + 'swift upload ' + cont + '-S 1073741824 ' + f + ' --object-name ANALYSIS/'
+            up_jobs.append(src_cmd + 'swift upload ' + cont + ' -S 1073741824 ' + f + ' --object-name ANALYSIS/'
                            + sample + '/' + fn)
         ann_list = glob('ANNOTATION/' + sample + '*')
         for f in ann_list:
             fn = os.path.basename(f)
-            up_jobs.append(src_cmd + 'swift upload ' + cont + '-S 1073741824 ' + f + ' --object-name ANNOTATION/'
+            up_jobs.append(src_cmd + 'swift upload ' + cont + ' -S 1073741824 ' + f + ' --object-name ANNOTATION/'
                            + sample + '/' + fn)
         rep_list = glob('REPORTS/' + sample + '*')
         for f in rep_list:
             fn = os.path.basename(f)
-            up_jobs.append(src_cmd + 'swift upload ' + cont + '-S 1073741824 ' + f + ' --object-name REPORTS/'
+            up_jobs.append(src_cmd + 'swift upload ' + cont + ' -S 1073741824 ' + f + ' --object-name REPORTS/'
                            + sample + '/' + fn)
         # setup up log file upload
         log_list = glob('LOGS/' + sample + '*')
         for f in log_list:
             fn = os.path.basename(f)
-            up_jobs.append(src_cmd + 'swift upload ' + cont + '-S 1073741824 ' + f + ' --object-name LOGS/'
+            up_jobs.append(src_cmd + 'swift upload ' + cont + ' -S 1073741824 ' + f + ' --object-name LOGS/'
                            + sample + '/' + fn)
     # set up pair-specific uploads
     if len(sample_pairs) > 0:
@@ -177,22 +176,22 @@ def upload_results(sample_list, sample_pairs, cont, th, obj):
             ana_list = glob('ANALYSIS/' + pair + '*')
             for f in ana_list:
                 fn = os.path.basename(f)
-                up_jobs.append(src_cmd + 'swift upload ' + cont + '-S 1073741824 ' + f + ' --object-name ANALYSIS/'
+                up_jobs.append(src_cmd + 'swift upload ' + cont + ' -S 1073741824 ' + f + ' --object-name ANALYSIS/'
                                + pair + '/' + fn)
             ann_list = glob('ANNOTATION/' + pair + '*')
             for f in ann_list:
                 fn = os.path.basename(f)
-                up_jobs.append(src_cmd + 'swift upload ' + cont + '-S 1073741824 ' + f + ' --object-name ANNOTATION/'
+                up_jobs.append(src_cmd + 'swift upload ' + cont + ' -S 1073741824 ' + f + ' --object-name ANNOTATION/'
                                + pair + '/' + fn)
             rep_list = glob('REPORTS/' + pair + '*')
             for f in rep_list:
                 fn = os.path.basename(f)
-                up_jobs.append(src_cmd + 'swift upload ' + cont + '-S 1073741824 ' + f + ' --object-name REPORTS/'
+                up_jobs.append(src_cmd + 'swift upload ' + cont + ' -S 1073741824 ' + f + ' --object-name REPORTS/'
                                + pair + '/' + fn)
             log_list = glob('LOGS/' + pair + '*')
             for f in log_list:
                 fn = os.path.basename(f)
-                up_jobs.append(src_cmd + 'swift upload ' + cont + '-S 1073741824 ' + f + ' --object-name LOGS/'
+                up_jobs.append(src_cmd + 'swift upload ' + cont + ' -S 1073741824 ' + f + ' --object-name LOGS/'
                                + pair + '/' + fn)
     rflag = job_manager(up_jobs, th)
     if rflag != 0:

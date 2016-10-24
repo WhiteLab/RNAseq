@@ -59,7 +59,7 @@ def novosort_merge_pe(config_file, sample_list, in_suffix, out_suffix, sort_type
         sample = sample.rstrip('\n')
         (bam_list, n) = list_bam(cont, obj, sample, th, in_suffix)
         if mflag == 'Y':
-            sys.stderr.write(date_time() + 'Mark duplicates flag given.  Running picard on bams for sample' + sample
+            sys.stderr.write(date_time() + 'Mark duplicates flag given.  Running picard on bams for sample ' + sample
                              + '\n')
             for i in xrange(0, len(bam_list), 1):
                 cur = bam_list[i].replace(in_suffix, '')

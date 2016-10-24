@@ -172,7 +172,7 @@ def upload_results(sample_list, sample_pairs, cont, th, obj):
             up_jobs.append(src_cmd + 'swift upload ' + cont + '-S 1073741824 ' + f + ' --object-name LOGS/'
                            + sample + '/' + fn)
     # set up pair-specific uploads
-    if len(pairs) > 0:
+    if len(sample_pairs) > 0:
         for pair in sample_pairs:
             ana_list = glob('ANALYSIS/' + pair + '*')
             for f in ana_list:
@@ -278,7 +278,8 @@ def gatk_call(sample_pairs, config_file, ref_mnt):
     check = annot_gatk_haplotype(config_file, sample_pairs, ref_mnt, somatic_flag)
     if check != 0:
         sys.stderr.write(date_time() + 'VEP annotation of vcf failed\n')
-    mv_files = 'mv *.bam *.bai BAMS; mv *.log LOGS; mv *vep* ANNOTATION; mv *.vcf *.table ANALYSIS; mv *.xls REPORTS'
+    mv_files = 'mv *.bam *.bai BAMS; mv *.log LOGS; mv *vep* ANNOTATION; mv *.vcf *.table *.idx ANALYSIS; mv *.xls ' \
+               'REPORTS'
     subprocess.call(mv_files, shell=True)
     check = upload_results(slist, pairs, cont, obj, th)
     if check != 0:

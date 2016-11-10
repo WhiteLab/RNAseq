@@ -19,7 +19,8 @@ def parse_config(json_config):
         return config_data['refs']['cont'], config_data['refs']['obj'], config_data['params']['capture_flag'], \
                config_data['refs']['cap_bed'], config_data['tools']['bedtools'], config_data['tools']['samtools'], \
                config_data['tools']['java'], config_data['tools']['gatk'], config_data['params']['threads'], \
-               config_data['refs']['samtools'], config_data['params']['somatic_flag'], config_data['refs']['dbSnp_vcf']
+               config_data['refs']['samtools'], config_data['params']['somatic_flag'], \
+               config_data['refs']['dbSnp_vcf'], config_data['params']['run_base_recal']
     except:
         try:
             sys.stderr.write(date_time() + 'Accessing keys failed.  Attempting to output current keys:\n')
@@ -96,10 +97,12 @@ def base_recal(java, gatk, sample_list, th, fasta, vcf):
     return 0
 
 
-def the_big_show(java, gatk, sample_list, th, fasta):
+def the_big_show(java, gatk, sample_list, th, fasta, recal_flag):
     filt_vcf_jobs = []
     for sample in sample_list:
         bam = sample + '.recalibrated.bam'
+        if recal_flag == 'N':
+            bam = sample + '.merged.split.bam'
         loc = sample + '.gatk.HaplotypeCaller.log'
         tmp_dir = sample + '_gatk_tmp'
         haplo_cmd = java + ' -Djava.io.tmpdir=' + tmp_dir + ' -jar ' + gatk + ' -nct ' + th + ' -T HaplotypeCaller ' \
@@ -136,6 +139,7 @@ def create_somatic_vcf(bedtools, pairs, th):
     if rflag != 0:
         sys.stderr.write(date_time() + 'Somatic vcf by intersect failed\n')
     return 0
+
 
 def upload_results(sample_list, sample_pairs, cont, obj, th):
     up_jobs = []
@@ -203,7 +207,7 @@ def upload_results(sample_list, sample_pairs, cont, obj, th):
 def gatk_call(sample_pairs, config_file, ref_mnt):
     mk_dir = 'mkdir BAMS LOGS ANALYSIS ANNOTATION REPORTS'
     subprocess.call(mk_dir, shell=True)
-    (cont, obj, cflag, cap_bed, bedtools, samtools, java, gatk, th, fasta, somatic_flag, vcf) = \
+    (cont, obj, cflag, cap_bed, bedtools, samtools, java, gatk, th, fasta, somatic_flag, vcf, recal_flag) = \
         parse_config(config_file)
     cap_bed = ref_mnt + '/' + cap_bed
     fasta = ref_mnt + '/' + fasta
@@ -262,11 +266,12 @@ def gatk_call(sample_pairs, config_file, ref_mnt):
     if check != 0:
         sys.stderr.write(date_time() + 'Split n trim failed\n')
         exit(1)
-
-    check = base_recal(java, gatk, slist, th, fasta, vcf)
-    if check != 0:
-        sys.stderr.write(date_time() + 'Base recal failed\n')
-    check = the_big_show(java, gatk, slist, th, fasta)
+    if recal_flag == 'Y':
+        check = base_recal(java, gatk, slist, th, fasta, vcf)
+        if check != 0:
+            sys.stderr.write(date_time() + 'Base recal failed\n')
+            exit(1)
+    check = the_big_show(java, gatk, slist, th, fasta, recal_flag)
     if check != 0:
         sys.stderr.write(date_time() + 'Haplotype calls failed\n')
     # only subtract hits if T/N available

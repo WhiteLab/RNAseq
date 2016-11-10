@@ -53,6 +53,7 @@
     "capture_flag": "N",
     "somatic_flag": "N",
     "mark_dup": "Y",
+    "run_base_recal": "N",
     "strand": "rf-stranded",
     "stranded": "Y"
   }

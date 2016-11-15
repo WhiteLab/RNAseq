@@ -77,7 +77,7 @@ def gen_report(vcf, sample):
                     'CLIN_SIG\tCADD_PHRED\n')
     for record in vcf_in.fetch():
         (chrom, pos, ref, alt, alt_ct) = '\t'.join((record.contig, str(record.pos), record.ref, str(record.alts[0]),
-                            str(record.info['DP'])))
+                                                    str(record.info['DP'])))
         ann_list = [_.split('|') for _ in record.info['ANN'].split(',')]
 
         output_highest_impact(chrom, pos, ref, alt, alt_ct, ann_list, desired, out)

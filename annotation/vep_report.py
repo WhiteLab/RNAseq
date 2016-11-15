@@ -58,9 +58,9 @@ def output_highest_impact(chrom, pos, ref, alt, pos_cov, ann_list, loc_dict, out
 def gen_report(vcf, sample):
     vcf_in = VariantFile(vcf)
     out = open(sample + '.haplotype_pass.xls', 'w')
-    desired = {'Consequence': 0, 'IMPACT': 0, 'SYMBOL': 0, 'Protein_position': 0, 'Amino_acids': 0, 'Codons': 0,
-               'BIOTYPE': 0, 'SIFT': 0, 'Existing_variation': 0, 'VARIANT_CLASS': 0, 'ExAC_MAF': 0, 'CLIN_SIG': 0,
-               'CADD_PHRED': 0}
+    desired = {'Consequence': 0, 'IMPACT': 0, 'SYMBOL': 0, 'Feature': 0, 'Protein_position': 0, 'Amino_acids': 0,
+               'Codons': 0, 'BIOTYPE': 0, 'SIFT': 0, 'Existing_variation': 0, 'VARIANT_CLASS': 0, 'ExAC_MAF': 0,
+               'CLIN_SIG': 0, 'CADD_PHRED': 0}
     desc_string = vcf_in.header.info['ANN'].header.attrs[3][1]
     desc_string = desc_string.lstrip('"')
     desc_string = desc_string.rstrip('"')

@@ -33,7 +33,7 @@ def list_bam(cont, obj, sample, th, in_suffix):
             p.append(dl_cmd)
             if fn[-3:] == 'bam':
                 bam_list.append(fn)
-                ct = ct + 1
+                ct += 1
 
     f = job_manager(p, th)
     if f == 0:

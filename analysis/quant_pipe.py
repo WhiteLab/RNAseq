@@ -89,6 +89,9 @@ def quant_pipe(lane, config_file, ref_mnt):
         out_suffix = '.merged.transcriptome.bam'
         sort_type = 'name'
         check = novosort_merge_pe(inputs.config_file, bnid, in_suffix, out_suffix, sort_type)
+        # remove downloaded bam directory after merging
+        rm_bam_dir = 'rm -rf ' + obj + '/' + bnid + '/BAMS'
+        subprocess.call(rm_bam_dir, shell=True)
         if check != 0:
             log(loc, date_time() + 'Merge of RNAseq bams for ' + bnid + ' failed.  Please check logs\n')
             exit(1)
@@ -107,9 +110,9 @@ def quant_pipe(lane, config_file, ref_mnt):
         if check != 0:
             log(loc, date_time() + 'Annotation of eXpress file.  Please check logs\n')
             exit(1)
-        mv_cmd = 'mv *.bam BAMS/; mkdir REPORTS; mv *xpr* REPORTS/; mv BAMS/*, REPORTS, LOGS ' + obj + '/' + bnid
+        mv_cmd = 'mv *.bam BAMS/; mkdir REPORTS; mv *xpr* REPORTS/; mv BAMS REPORTS LOGS ' + obj + '/' + bnid
         subprocess.call(mv_cmd, shell=True)
-        log(loc, date_time() + 'Uploading merged bam and quant files for ' + bnid + '\n')
+        sys.stderr.write(date_time() + 'Uploading merged bam and quant files for ' + bnid + '\n')
         upload_special(bnid, cont, obj)
 
 

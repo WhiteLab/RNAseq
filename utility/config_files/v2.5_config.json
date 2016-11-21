@@ -11,6 +11,7 @@
     "express" : "/home/ubuntu/TOOLS/express-1.5.1-linux_x86_64/express",
     "tophat": "/home/ubuntu/TOOLS/tophat-2.0.14.Linux_x86_64/tophat",
     "mouse_filter": "/home/ubuntu/TOOLS/mouse_filter/filter_bam.py",
+    "filter_bam": "/home/ubuntu/utilities/filter_bam_by_transcript.py",
     "star": "/home/ubuntu/TOOLS/STAR-STAR_2.4.2a/bin/Linux_x86_64_static/STAR",
     "gatk": "/home/ubuntu/TOOLS/GATK-3.6/GenomeAnalysisTK.jar",
     "VEP": "/home/ubuntu/TOOLS/ensembl-tools-release-85/scripts/variant_effect_predictor/variant_effect_predictor.pl",

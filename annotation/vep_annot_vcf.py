@@ -11,7 +11,7 @@ from vep_report import gen_report
 def parse_config(config_file):
     config_data = json.loads(open(config_file, 'r').read())
     return config_data['tools']['VEP'], config_data['refs']['vepCache'], config_data['refs']['samtools'],\
-           config_data['params']['threads'], config_data['refs']['cadd'], config_data['refs']['cacheVersion']
+           config_data['params']['threads'], config_data['refs']['cadd'], config_data['refs']['vep_cache_version']
 
 
 def pass_filter(sample, somatic_flag):

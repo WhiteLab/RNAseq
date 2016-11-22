@@ -296,7 +296,7 @@ def gatk_call(sample_pairs, config_file, ref_mnt):
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description='Use GATK haplotype caller best practices for mutation calls')
-    parser.add_argument('-sp', '--pairs', action='store', dest='pairs', help='Sample piars')
+    parser.add_argument('-sp', '--pairs', action='store', dest='pairs', help='Sample pairs')
     parser.add_argument('-j', '--json', action='store', dest='config_file',
                         help='JSON config file containing tool and reference locations')
     parser.add_argument('-m', '--mount', action='store', dest='ref_mnt',

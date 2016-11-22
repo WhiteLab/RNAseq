@@ -31,6 +31,7 @@
     "refFlat": "REFS/GENCODE24GRCH37/PICARD/gencode.v24lift37.annotation.refFlat.txt.gz",
     "rRNA_intervals": "REFS/GENCODE24GRCH37/PICARD/gencode.v24lift37.rRNA_intervals.txt",
     "vepCache": "REFS/VEP",
+    "vep_cache_version":"84",
     "cadd": "REFS/CADD/RNA_capture_SNVs.tsv.bgz",
     "cap_bed": "REFS/CAPTURE_BED/S03723314_Covered.bed",
     "cap_intvl": "REFS/CAPTURE_BED/S03723314_Covered.intervals",

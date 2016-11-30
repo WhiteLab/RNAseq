@@ -41,10 +41,10 @@ def parse_config(config_file):
 def download_skip(cont, sf1, sf2, end1, end2, cur_dir, src_cmd):
     get_sf1 = src_cmd + 'swift download ' + cont + ' ' + sf1 + ' --object-name ' + cur_dir + '/TRIMMED_FQ/' + end1
     sys.stderr.write(date_time() + get_sf1 + '\n')
-    check = subprocess.call(get_sf1)
+    check = subprocess.call(get_sf1, shell=True)
     get_sf2 = src_cmd + 'swift download ' + cont + ' ' + sf2 + ' --object-name ' + cur_dir + '/TRIMMED_FQ/' + end2
     sys.stderr.write(date_time() + get_sf2 + '\n')
-    check += subprocess.call(get_sf2)
+    check += subprocess.call(get_sf2, shell=True)
     return check
 
 

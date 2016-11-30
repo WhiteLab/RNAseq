@@ -117,13 +117,14 @@ for line in fh:
             lane_status[lane] = 'Download failed'
             continue
             # pipeline needs to be run in same directory as sequencing files
-        if os.path.isfile(cur_dir + '/' + end1) and os.path.isfile(cur_dir + '/' + end2):
-            lane_status[lane] = 'Sequencing file download successful'
-        else:
-            lane_status[lane] = 'Sequencing file download failed'
-            log(loc, lane + '\t' + lane_status[lane] + '\n')
-            exit(3)
-        # CUR POS SCRATCH/RAW/bnid
+        if skip_pdx == 'N':
+            if os.path.isfile(cur_dir + '/' + end1) and os.path.isfile(cur_dir + '/' + end2):
+                lane_status[lane] = 'Sequencing file download successful'
+            else:
+                lane_status[lane] = 'Sequencing file download failed'
+                log(loc, lane + '\t' + lane_status[lane] + '\n')
+                exit(3)
+            # CUR POS SCRATCH/RAW/bnid
         try:
             os.chdir(cur_dir)
             l_dir = cur_dir + '/LOGS'

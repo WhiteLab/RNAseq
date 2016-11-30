@@ -169,11 +169,12 @@ class Pipeline():
             log(self.loc, date_time() + 'bam qc process failure for ' + self.sample + '\n')
             self.status = 1
             exit(1)
-        check = parse_qc(self.json_config, self.sample)
-        if check != 0:
-            log(self.loc, date_time() + 'qc summary failure for ' + self.sample + '\n')
-            self.status = 1
-            exit(1)
+        if self.skip_pdx == 'N':
+            check = parse_qc(self.json_config, self.sample)
+            if check != 0:
+                log(self.loc, date_time() + 'qc summary failure for ' + self.sample + '\n')
+                self.status = 1
+                exit(1)
         # move outputs to correct directories and upload
         log(self.loc, date_time() + 'Organizing outputs\n')
         mv_bams = 'mv *.bam *.bai ' + bam_dir

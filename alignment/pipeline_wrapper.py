@@ -33,11 +33,20 @@ ref_mnt = inputs.ref_mnt
 
 def parse_config(config_file):
     config_data = json.loads(open(config_file, 'r').read())
+    # skip pdx flag allows to pick up from post-filtering step to save substantial time of just human align need repeat
     return (config_data['refs']['cont'], config_data['refs']['obj'], config_data['refs']['config'],
-            config_data['tools']['star'], config_data['refs']['genome'])
+            config_data['tools']['star'], config_data['refs']['genome'], config_data['params']['skip_pdx'])
 
 
-(cont, obj, pipe_cfg, star, genome) = parse_config(inputs.config_file)
+def download_skip(cont, sf1, sf2, end1, end2, cur_dir, src_cmd):
+    get_sf1 = src_cmd + 'swift download ' + cont + ' ' + sf1 + ' --object-name ' + cur_dir + '/TRIMMED_FQ/' + end1
+    check = subprocess.call(get_sf1)
+    get_sf2 = src_cmd + 'swift download ' + cont + ' ' + sf2 + ' --object-name ' + cur_dir + '/TRIMMED_FQ/' + end2
+    check += subprocess.call(get_sf2)
+    return check
+
+
+(cont, obj, pipe_cfg, star, genome, skip_pdx) = parse_config(inputs.config_file)
 genome = ref_mnt + '/' + genome
 
 for line in fh:
@@ -60,6 +69,8 @@ for line in fh:
     # All files for current bid to be stored in cwd
 
     obj1 = 'RAW/' + bid + '/' + bid + '_'
+    if skip_pdx == 'Y':
+        obj1 = obj + '/' + bid + '/TRIMMED_FQ/' + bid + '_'
     cur_dir = cwd + '/RAW/' + bid
     # iterate through sample/lane pairs
     # dictionary to track status of success of pipelines for each sample and lane to help troubleshoot any failures
@@ -90,7 +101,12 @@ for line in fh:
 
         # attempt to download sequencing files
         try:
-            download_from_swift(cont, prefix)
+            if skip_pdx == 'N':
+                download_from_swift(cont, prefix)
+            else:
+                sys.stderr.write(date_time() + 'Skip PDX flag detected.  Will try to download alread trimmed and '
+                                               'filtered fastqs and skip cutadapt, and start from there.\n')
+                download_skip(cont, sf1, sf2, end1, end2, cur_dir, src_cmd)
         except:
             log(loc, date_time() + 'Getting sequencing files ' + sf1 + ' and ' + sf2 + ' failed.  Moving on\n')
             lane_status[lane] = 'Download failed'

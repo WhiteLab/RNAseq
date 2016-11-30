@@ -50,6 +50,7 @@ class Pipeline():
         self.picard_tmp = 'picard_tmp'
         self.star_tool = self.config_data['tools']['star']
         self.pdxflag = self.config_data['params']['pdxflag']
+        self.skip_pdx = self.config_data['params']['skip_pdx']
         if self.pdxflag == 'Y':
             self.mmu_filter = self.config_data['tools']['mouse_filter']
             self.mmu_star_ref = self.ref_mnt + '/' + self.config_data['refs']['mmu_star']
@@ -107,54 +108,54 @@ class Pipeline():
         SAMPLES[self.sample]['f1'] = self.end1
         SAMPLES[self.sample]['f2'] = self.end2
         # remove adapters
-
-        check = cutadapter(self.sample, self.end1, self.end2, self.json_config)
-        if check != 0:
-            log(self.loc, date_time() + 'cutadapt failure for ' + self.sample + '\n')
-            exit(1)
-        # remove original fastqs as they are no longer needed
-        rm_fq = 'rm ../' + self.end1 + ' ../' + self.end2
-        log(self.loc, date_time() + 'deleting untrimmed fastqs, no longer needed\n' + rm_fq + '\n')
-        call(rm_fq, shell=True)
-        # start fastqc, will run while insert size being calculated
-        if self.pdxflag == 'Y':
-            log(self.loc, date_time() + 'Aligning and filtering reads for mouse contamination')
-            check = filter_wrap(self.mmu_filter, self.star_tool, self.mmu_star_ref, self.end1, self.end2,
-                            self.sample, log_dir, self.threads, self.novosort)
+        if self.skip_pdx == 'N':
+            check = cutadapter(self.sample, self.end1, self.end2, self.json_config)
             if check != 0:
-                log(self.loc, date_time() + 'Read filter failure for ' + self.sample + '\n')
+                log(self.loc, date_time() + 'cutadapt failure for ' + self.sample + '\n')
                 exit(1)
-        end_ss1 = self.sample + '_1.subset.fastq'
-        end_ss2 = self.sample + '_2.subset.fastq'
-        subset = self.sample + '_subset'
+            # remove original fastqs as they are no longer needed
+            rm_fq = 'rm ../' + self.end1 + ' ../' + self.end2
+            log(self.loc, date_time() + 'deleting untrimmed fastqs, no longer needed\n' + rm_fq + '\n')
+            call(rm_fq, shell=True)
+            # start fastqc, will run while insert size being calculated
+            if self.pdxflag == 'Y':
+                log(self.loc, date_time() + 'Aligning and filtering reads for mouse contamination')
+                check = filter_wrap(self.mmu_filter, self.star_tool, self.mmu_star_ref, self.end1, self.end2,
+                                self.sample, log_dir, self.threads, self.novosort)
+                if check != 0:
+                    log(self.loc, date_time() + 'Read filter failure for ' + self.sample + '\n')
+                    exit(1)
+            end_ss1 = self.sample + '_1.subset.fastq'
+            end_ss2 = self.sample + '_2.subset.fastq'
+            subset = self.sample + '_subset'
 
-        ss_cmd = 'gunzip -c ' + self.end1 + ' | head -n 4000000 > ' + end_ss1
-        subprocess.call(ss_cmd, shell=True)
-        ss_cmd = 'gunzip -c ' + self.end2 + ' | head -n 4000000 > ' + end_ss2
-        subprocess.call(ss_cmd, shell=True)
-        # check certain key processes
+            ss_cmd = 'gunzip -c ' + self.end1 + ' | head -n 4000000 > ' + end_ss1
+            subprocess.call(ss_cmd, shell=True)
+            ss_cmd = 'gunzip -c ' + self.end2 + ' | head -n 4000000 > ' + end_ss2
+            subprocess.call(ss_cmd, shell=True)
+            # check certain key processes
 
-        check = bwt2_pe(self.bwt2_tool, self.tx, end_ss1, end_ss2, self.samtools_tool, self.samtools_ref, subset,
-                        self.threads, log_dir)
-        if check != 0:
-            log(self.loc, date_time() + 'Bowtie2 failure for ' + self.sample + '\n')
-            self.status = 1
-            exit(1)
-        check = novosort_sort_pe(self.novosort, subset, log_dir, self.threads,
-                                 self.ram)  # rest won't run until completed
-        if check != 0:
-            log(self.loc, date_time() + 'novosort sort failure for ' + self.sample + '\n')
-            self.status = 1
-            exit(1)
-        (self.x, self.s) = picard_insert_size(self.java_tool, self.picard_tool, subset, log_dir)
-        log(self.loc, date_time() + 'Running qc on fastq file\n')
-        fastqc(self.fastqc_tool, self.sample, self.end1, self.end2, self.threads)
-        log(self.loc, date_time() + 'Performing star alignment ' + self.sample + '\n')
+            check = bwt2_pe(self.bwt2_tool, self.tx, end_ss1, end_ss2, self.samtools_tool, self.samtools_ref, subset,
+                            self.threads, log_dir)
+            if check != 0:
+                log(self.loc, date_time() + 'Bowtie2 failure for ' + self.sample + '\n')
+                self.status = 1
+                exit(1)
+            check = novosort_sort_pe(self.novosort, subset, log_dir, self.threads,
+                                     self.ram)  # rest won't run until completed
+            if check != 0:
+                log(self.loc, date_time() + 'novosort sort failure for ' + self.sample + '\n')
+                self.status = 1
+                exit(1)
+            (self.x, self.s) = picard_insert_size(self.java_tool, self.picard_tool, subset, log_dir)
+            log(self.loc, date_time() + 'Running qc on fastq file\n')
+            fastqc(self.fastqc_tool, self.sample, self.end1, self.end2, self.threads)
+            log(self.loc, date_time() + 'Performing star alignment ' + self.sample + '\n')
         if self.pdxflag == 'Y':
             check = star(self.star_tool, self.hsa_star_ref, self.end1, self.end2, self.sample, log_dir, self.threads,
                      self.sf)
         else:
-            log(self.loc, date_time() + 'Starting BWA align\n')
+            log(self.loc, date_time() + 'Starting star align\n')
             check = star(self.star_tool, self.genome_ref, self.end1, self.end2, self.sample, log_dir, self.threads,
                      self.sf)
 

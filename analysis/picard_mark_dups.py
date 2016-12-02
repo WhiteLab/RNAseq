@@ -28,7 +28,7 @@ def picard_mark_dups(config_file, sample, log_dir, suffix):
     if check == 0:
         return 0
     else:
-        exit(1)
+        return 1
 
 
 if __name__ == "__main__":

@@ -58,14 +58,15 @@ def quant_pipe(lane, config_file, ref_mnt):
     (cont, obj, tx_index, cflag, ctargets, samtools, filter_bam) = parse_config(config_file)
     mk_tmp = 'mkdir nova_temp'
     subprocess.call(mk_tmp, shell=True)
-    if not os.path.isdir('BAMS'):
-        mk_bam_dir = 'mkdir BAMS'
-        subprocess.call(mk_bam_dir, shell=True)
+
     if not os.path.isdir('REPORTS'):
         mk_rpt_dir = 'mkdir REPORTS'
         subprocess.call(mk_rpt_dir, shell=True)
     fh = open(lane, 'r')
     for sample in fh:
+        if not os.path.isdir('BAMS'):
+            mk_bam_dir = 'mkdir BAMS'
+            subprocess.call(mk_bam_dir, shell=True)
         (bnid, stype, lanes) = sample.rstrip('\n').split('\t')
         log_dir = 'LOGS/'
         if not os.path.isdir(log_dir):

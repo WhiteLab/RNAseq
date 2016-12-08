@@ -35,7 +35,7 @@ def parse_config(config_file):
     config_data = json.loads(open(config_file, 'r').read())
     # skip pdx flag allows to pick up from post-filtering step to save substantial time of just human align need repeat
     return (config_data['refs']['cont'], config_data['refs']['obj'], config_data['refs']['config'],
-            config_data['tools']['star'], config_data['refs']['genome'], config_data['params']['skip_pdx'])
+            config_data['tools']['star'], config_data['refs']['genome'], config_data['params']['skip_cut'])
 
 
 def download_skip(cont, sf1, sf2, end1, end2, cur_dir, src_cmd):
@@ -51,7 +51,7 @@ def download_skip(cont, sf1, sf2, end1, end2, cur_dir, src_cmd):
     return check
 
 
-(cont, obj, pipe_cfg, star, genome, skip_pdx) = parse_config(inputs.config_file)
+(cont, obj, pipe_cfg, star, genome, skip_cut) = parse_config(inputs.config_file)
 genome = ref_mnt + '/' + genome
 
 for line in fh:
@@ -74,7 +74,7 @@ for line in fh:
     # All files for current bid to be stored in cwd
 
     obj1 = 'RAW/' + bid + '/' + bid + '_'
-    if skip_pdx == 'Y':
+    if skip_cut == 'Y':
         obj1 = obj + '/' + bid + '/TRIMMED_FQ/' + bid + '_'
     cur_dir = cwd + '/RAW/' + bid
     # iterate through sample/lane pairs
@@ -106,7 +106,7 @@ for line in fh:
 
         # attempt to download sequencing files
         try:
-            if skip_pdx == 'N':
+            if skip_cut == 'N':
                 download_from_swift(cont, prefix)
             else:
                 sys.stderr.write(date_time() + 'Skip PDX flag detected.  Will try to download alread trimmed and '
@@ -117,7 +117,7 @@ for line in fh:
             lane_status[lane] = 'Download failed'
             continue
             # pipeline needs to be run in same directory as sequencing files
-        if skip_pdx == 'N':
+        if skip_cut == 'N':
             if os.path.isfile(cur_dir + '/' + end1) and os.path.isfile(cur_dir + '/' + end2):
                 lane_status[lane] = 'Sequencing file download successful'
             else:

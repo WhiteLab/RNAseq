@@ -50,7 +50,7 @@ class Pipeline():
         self.picard_tmp = 'picard_tmp'
         self.star_tool = self.config_data['tools']['star']
         self.pdxflag = self.config_data['params']['pdxflag']
-        self.skip_pdx = self.config_data['params']['skip_pdx']
+        self.skip_cut = self.config_data['params']['skip_cut']
         if self.pdxflag == 'Y':
             self.mmu_filter = self.config_data['tools']['mouse_filter']
             self.mmu_star_ref = self.ref_mnt + '/' + self.config_data['refs']['mmu_star']
@@ -108,7 +108,7 @@ class Pipeline():
         SAMPLES[self.sample]['f1'] = self.end1
         SAMPLES[self.sample]['f2'] = self.end2
         # remove adapters
-        if self.skip_pdx == 'N':
+        if self.skip_cut == 'N':
             check = cutadapter(self.sample, self.end1, self.end2, self.json_config)
             if check != 0:
                 log(self.loc, date_time() + 'cutadapt failure for ' + self.sample + '\n')
@@ -150,8 +150,8 @@ class Pipeline():
             (self.x, self.s) = picard_insert_size(self.java_tool, self.picard_tool, subset, log_dir)
             log(self.loc, date_time() + 'Running qc on fastq file\n')
             fastqc(self.fastqc_tool, self.sample, self.end1, self.end2, self.threads)
-            log(self.loc, date_time() + 'Performing star alignment ' + self.sample + '\n')
         if self.pdxflag == 'Y':
+            log(self.loc, date_time() + 'Performing star alignment ' + self.sample + '\n')
             check = star(self.star_tool, self.hsa_star_ref, self.end1, self.end2, self.sample, log_dir, self.threads,
                      self.sf)
         else:
@@ -169,7 +169,7 @@ class Pipeline():
             log(self.loc, date_time() + 'bam qc process failure for ' + self.sample + '\n')
             self.status = 1
             exit(1)
-        if self.skip_pdx == 'N':
+        if self.skip_cut == 'N':
             check = parse_qc(self.json_config, self.sample)
             if check != 0:
                 log(self.loc, date_time() + 'qc summary failure for ' + self.sample + '\n')

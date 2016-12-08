@@ -52,7 +52,7 @@
     "threads": "8",
     "ram": "30",
     "pdxflag": "Y",
-    "skip_pdx":"N",
+    "skip_cut":"N",
     "capture_flag": "N",
     "somatic_flag": "N",
     "mark_dup": "Y",

@@ -118,13 +118,7 @@ class Pipeline():
             log(self.loc, date_time() + 'deleting untrimmed fastqs, no longer needed\n' + rm_fq + '\n')
             call(rm_fq, shell=True)
             # start fastqc, will run while insert size being calculated
-            if self.pdxflag == 'Y':
-                log(self.loc, date_time() + 'Aligning and filtering reads for mouse contamination')
-                check = filter_wrap(self.mmu_filter, self.star_tool, self.mmu_star_ref, self.end1, self.end2,
-                                self.sample, log_dir, self.threads, self.novosort)
-                if check != 0:
-                    log(self.loc, date_time() + 'Read filter failure for ' + self.sample + '\n')
-                    exit(1)
+
             end_ss1 = self.sample + '_1.subset.fastq'
             end_ss2 = self.sample + '_2.subset.fastq'
             subset = self.sample + '_subset'
@@ -151,6 +145,12 @@ class Pipeline():
             log(self.loc, date_time() + 'Running qc on fastq file\n')
             fastqc(self.fastqc_tool, self.sample, self.end1, self.end2, self.threads)
         if self.pdxflag == 'Y':
+            log(self.loc, date_time() + 'Aligning and filtering reads for mouse contamination')
+            check = filter_wrap(self.mmu_filter, self.star_tool, self.mmu_star_ref, self.end1, self.end2,
+                                self.sample, log_dir, self.threads, self.novosort)
+            if check != 0:
+                log(self.loc, date_time() + 'Read filter failure for ' + self.sample + '\n')
+                exit(1)
             log(self.loc, date_time() + 'Performing star alignment ' + self.sample + '\n')
             check = star(self.star_tool, self.hsa_star_ref, self.end1, self.end2, self.sample, log_dir, self.threads,
                      self.sf)

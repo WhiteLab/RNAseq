@@ -7,13 +7,15 @@ from utility.log import log
 
 
 def bwt2_pe(bwt_tool, bwt_ref, end1, end2, samtools_tool, samtools_ref, sample, t, log_dir):
-    bwt_cmd = "(" + bwt_tool + " --fr -p " + t + " -I 0 -X 500 -x " + bwt_ref + " -1 " + end1 + " -2 " + end2 + " | " + samtools_tool + " view -bT " + samtools_ref + " - > " + sample + ".bam) > " + log_dir + sample + ".bwt.pe.log 2>&1"
+    bwt_cmd = "(" + bwt_tool + " --fr -p " + t + " -I 0 -X 500 -x " + bwt_ref + " -1 " + end1 + " -2 " + end2 + " | " \
+              + samtools_tool + " view -bT " + samtools_ref + " - > " + sample + ".bam) > " + log_dir + sample \
+              + ".bwt.pe.log 2>&1"
     loc = log_dir + sample + ".bwt.pe.log"
     log(loc, date_time() + bwt_cmd + "\n")
     try:
         call(bwt_cmd, shell=True)
     except:
-        exit(1)
+        return 1
     return 0
 
 
@@ -21,7 +23,8 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(
-        description='Bowtie2 paired-end alignment module.  Used for insert size estimation toward beginning using read subset.')
+        description='Bowtie2 paired-end alignment module.  Used for insert size estimation toward beginning using read '
+                    'subset.')
     parser.add_argument('-b', '--bwt', action='store', dest='bwt_tool', help='Location of bowtie2 alignment tool.')
     parser.add_argument('-br', '--bwt_reference', action='store', dest='bwt_ref', help='Location of bwt reference file')
     parser.add_argument('-f1', '--file1', action='store', dest='end1', help='First of paired-end fastq file')

@@ -103,7 +103,10 @@ def quant_pipe(lane, config_file, ref_mnt):
             cmd = samtools + ' view -h ' + mbam + ' | ' + filter_bam + ' -i ' + ctargets + ' | ' + samtools\
                   + ' view -bSh - > ' + out_bam + '; rm ' + mbam + '; mv ' + out_bam + ' ' + mbam
             log(loc, date_time() + 'Capture method flag is Y, pre-filtering transcript hits\n' + cmd + '\n')
-            subprocess.call(cmd, shell=True)
+            check = subprocess.call(cmd, shell=True)
+            if check != 0:
+                sys.stderr.write('Prefilter hits failed for sample ' + bnid + '\n')
+                exit(1)
         check = express_quant(bnid, inputs.config_file, ref_mnt, str(cur_mean), str(cur_std))
         if check != 0:
             log(loc, date_time() + 'Quantification of RNA failed.  Please check logs\n')

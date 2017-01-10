@@ -56,6 +56,7 @@ def upload_special(bnid, cont, obj):
 def quant_pipe(lane, config_file, ref_mnt):
     src_cmd = '. ~/.novarc;'
     (cont, obj, tx_index, cflag, ctargets, samtools, filter_bam) = parse_config(config_file)
+    ctargets = ref_mnt + '/' + ctargets
     mk_tmp = 'mkdir nova_temp'
     subprocess.call(mk_tmp, shell=True)
 
@@ -97,11 +98,12 @@ def quant_pipe(lane, config_file, ref_mnt):
             log(loc, date_time() + 'Merge of RNAseq bams for ' + bnid + ' failed.  Please check logs\n')
             exit(1)
         if cflag == 'Y':
-            mbam = sample + out_suffix
-            out_bam = sample + '.merged.capture_filtered.transcriptome.bam'
+            mbam = bnid + out_suffix
+            out_bam = bnid + '.merged.capture_filtered.transcriptome.bam'
             cmd = samtools + ' view -h ' + mbam + ' | ' + filter_bam + ' -i ' + ctargets + ' | ' + samtools\
                   + ' view -bSh - > ' + out_bam + '; rm ' + mbam + '; mv ' + out_bam + ' ' + mbam
             log(loc, date_time() + 'Capture method flag is Y, pre-filtering transcript hits\n' + cmd + '\n')
+            subprocess.call(cmd, shell=True)
         check = express_quant(bnid, inputs.config_file, ref_mnt, str(cur_mean), str(cur_std))
         if check != 0:
             log(loc, date_time() + 'Quantification of RNA failed.  Please check logs\n')

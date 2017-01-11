@@ -10,7 +10,7 @@ from date_time import date_time
 def upload_to_swift(cont, obj):
     ONE_GB = 1073741824
     src_cmd = ". /home/ubuntu/.novarc;"
-    swift_cmd = src_cmd + "swift upload " + cont + " ./ --skip-identical --object-name " + obj + " -S " + str(ONE_GB)
+    swift_cmd = src_cmd + "swift upload " + cont + " ./ --object-name " + obj + " -S " + str(ONE_GB)
     sys.stderr.write(date_time() + swift_cmd + "\n")
     try:
         check = check_output(swift_cmd, shell=True, stderr=subprocess.PIPE)

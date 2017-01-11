@@ -169,13 +169,29 @@ class Pipeline():
             log(self.loc, date_time() + 'bam qc process failure for ' + self.sample + '\n')
             self.status = 1
             exit(1)
-        if self.skip_cut == 'N':
-            check = parse_qc(self.json_config, self.sample)
-            if check != 0:
-                log(self.loc, date_time() + 'qc summary failure for ' + self.sample + '\n')
-                self.status = 1
-                exit(1)
-        # move outputs to correct directories and upload
+        if self.skip_cut == 'Y':
+            # download old fastqc stats and insert size stats to populate parse qc
+            src_cmd = '. /home/ubuntu/.novarc;'
+            insert = self.sample + '_subset.insert_metrics.hist'
+            fastqc_data = self.sample + '_1_sequence_fastqc/fastqc_data.txt'
+            cut_file = self.sample + '.cutadapt.log'
+            root = self.obj + '/' + self.bid
+            get_fastqc = src_cmd + 'swift download ' + self.cont + ' --prefix ' + root + '/QC/' + fastqc_data \
+                         + ' --output QC/' + fastqc_data
+            subprocess.call(get_fastqc, shell=True)
+            get_cut_file = src_cmd + 'swift download ' + self.cont + ' --prefix ' + root + '/LOGS/' \
+                           + cut_file + ' --output LOGS/' + cut_file
+            subprocess.call(get_cut_file, shell=True)
+            get_insert = src_cmd + 'swift download ' + self.cont + ' --prefix ' + root + '/QC/' + insert \
+                         + ' --output ' + insert
+            subprocess.call(get_insert, shell=True)
+
+        check = parse_qc(self.json_config, self.sample)
+        if check != 0:
+            log(self.loc, date_time() + 'qc summary failure for ' + self.sample + '\n')
+            self.status = 1
+            exit(1)
+    # move outputs to correct directories and upload
         log(self.loc, date_time() + 'Organizing outputs\n')
         mv_bams = 'mv *.bam *.bai ' + bam_dir
         call(mv_bams, shell=True)

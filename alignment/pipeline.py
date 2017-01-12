@@ -176,8 +176,8 @@ class Pipeline():
             fastqc_data = self.sample + '_1_sequence_fastqc/fastqc_data.txt'
             cut_file = self.sample + '.cutadapt.log'
             root = self.obj + '/' + self.bid
-            get_fastqc = src_cmd + 'swift download ' + self.cont + ' ' + root + '/QC/' + fastqc_data \
-                         + ' --output QC/' + fastqc_data
+            get_fastqc = 'mkdir QC/' + self.sample + '_1_sequence_fastqc;' + src_cmd + 'swift download ' + self.cont \
+                         + ' ' + root + '/QC/' + fastqc_data + ' --output QC/' + fastqc_data
             subprocess.call(get_fastqc, shell=True)
             get_cut_file = src_cmd + 'swift download ' + self.cont + ' ' + root + '/LOGS/' \
                            + cut_file + ' --output LOGS/' + cut_file

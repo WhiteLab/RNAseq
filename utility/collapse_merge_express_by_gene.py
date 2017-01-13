@@ -39,7 +39,7 @@ for report in open(args['<ct_list>']):
     fh = open(report)
     head = next(fh)
     for line in fh:
-        info = line.rstrip('\n').split('\t')
+        info = line.rstrip('\n').split()
         gene = re.sub('-\d+$', '', info[0])
         if ty_flag == 'N' or info[1] in ty_dict:
             if gene not in g_dict:

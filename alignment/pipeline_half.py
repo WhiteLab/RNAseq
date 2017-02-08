@@ -42,12 +42,12 @@ class Pipeline():
 
     def pipeline(self):
         log_dir = 'LOGS/'
-        if os.path.isdir(log_dir) == False:
+        if os.path.isdir(log_dir) is False:
             mk_log_dir = 'mkdir ' + log_dir
             call(mk_log_dir, shell=True)
             log(self.loc, date_time() + 'Made log directory ' + log_dir + "\n")
         fq_dir = 'TRIMMED_FQ'
-        if os.path.isdir(fq_dir) == False:
+        if os.path.isdir(fq_dir) is False:
             mk_fq_dir = 'mkdir ' + fq_dir
             call(mk_fq_dir, shell=True)
             log(self.loc, date_time() + 'Made fastq trimmed directory ' + fq_dir + "\n")
@@ -57,7 +57,7 @@ class Pipeline():
         log(self.loc, date_time() + 'Changed into ' + fq_dir + " and moved log directory there\n")
         # create QC directories if they don't exist already
         qc_dir = 'QC/'
-        if os.path.isdir(qc_dir) == False:
+        if os.path.isdir(qc_dir) is False:
             mk_qc_dir = 'mkdir ' + qc_dir
             call(mk_qc_dir, shell=True)
             log(self.loc, date_time() + 'Made qc directory ' + qc_dir + "\n")
@@ -72,7 +72,7 @@ class Pipeline():
         # remove adapters
 
         check = cutadapter(self.sample, self.end1, self.end2, self.json_config)
-        if (check != 0):
+        if check != 0:
             log(self.loc, date_time() + 'cutadapt failure for ' + self.sample + '\n')
             exit(1)
 
@@ -91,7 +91,7 @@ class Pipeline():
         sys.stderr.write(date_time() + 'Uploading results for ' + self.sample + '\n')
         check = upload_to_swift(self.cont, self.obj)
         if (check != 0):
-            sys, stderr, write(date_time() + 'Upload failure for ' + self.sample + '\n')
+            sys.stderr.write(date_time() + 'Upload failure for ' + self.sample + '\n')
             self.status = 1
             exit(1)
         sys.stderr.write(date_time() + 'Pipeline complete for ' + self.sample + '\n')

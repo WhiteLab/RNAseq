@@ -21,14 +21,17 @@ def qc_bam(sample, config_file, ref_mnt):
     if os.path.isdir('LOGS'):
         loc = 'LOGS/' + loc
     (java, ram, picard, refFlat, intervals, strand) = parse_config(config_file)
+    # recalc ram to be a bit lower
+    ram = str(round(int(ram) * 0.75))
 
     st_dict = {'N': 'NONE', 'fr-stranded': 'FIRST_READ_TRANSCRIPTION_STRAND',
                'rf-stranded': 'SECOND_READ_TRANSCRIPTION_STRAND'}
 
     refFlat = ref_mnt + '/' + refFlat
     intervals = ref_mnt + '/' + intervals
-    picard_cmd = java + ' -Xmx' + ram + 'g -jar ' + picard + ' CollectRnaSeqMetrics REF_FLAT=' + refFlat + ' STRAND=' \
-                 + st_dict[strand] + ' CHART=' + sample + '.pos_v_cov.pdf I=' + sample \
+    picard_cmd = java + ' -Xmx' + ram + 'g -XX:+UseConcMarkSweepGC -XX:ParallelGCThreads=8 ' \
+                 '-XX:MaxGCPauseMillis=10000 -jar ' + picard + ' CollectRnaSeqMetrics REF_FLAT=' + refFlat \
+                 + ' STRAND=' + st_dict[strand] + ' CHART=' + sample + '.pos_v_cov.pdf I=' + sample \
                  + '.Aligned.sortedByCoord.out.bam O=' + sample + '.picard_RNAseq_qc.txt RIBOSOMAL_INTERVALS=' \
                  + intervals + ' VALIDATION_STRINGENCY=SILENT 2>> ' + loc + ' >> ' + loc
     # job_list.append(picard_cmd)

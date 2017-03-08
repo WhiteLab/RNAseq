@@ -12,7 +12,8 @@ from utility.log import log
 def parse_config(json_config):
     config_data = json.loads(open(json_config, 'r').read())
     return config_data['tools']['java'], config_data['params']['ram'], config_data['tools']['picard'],\
-           config_data['refs']['refFlat'], config_data['refs']['rRNA_intervals'], config_data['params']['strand']
+           config_data['refs']['refFlat'], config_data['refs']['rRNA_intervals'], config_data['params']['strand'], \
+           config_data['params']['threads']
 
 
 def qc_bam(sample, config_file, ref_mnt):
@@ -20,7 +21,7 @@ def qc_bam(sample, config_file, ref_mnt):
     loc = sample + '.bam_qc.log'
     if os.path.isdir('LOGS'):
         loc = 'LOGS/' + loc
-    (java, ram, picard, refFlat, intervals, strand) = parse_config(config_file)
+    (java, ram, picard, refFlat, intervals, strand, threads) = parse_config(config_file)
     # recalc ram to be a bit lower
     ram = str(int(round(int(ram) * 0.75)))
 
@@ -29,8 +30,8 @@ def qc_bam(sample, config_file, ref_mnt):
 
     refFlat = ref_mnt + '/' + refFlat
     intervals = ref_mnt + '/' + intervals
-    picard_cmd = java + ' -Xmx' + ram + 'g -XX:+UseConcMarkSweepGC -XX:ParallelGCThreads=8 ' \
-                 '-XX:MaxGCPauseMillis=10000 -jar ' + picard + ' CollectRnaSeqMetrics REF_FLAT=' + refFlat \
+    picard_cmd = java + ' -Xmx' + ram + 'g -XX:+UseConcMarkSweepGC -XX:ParallelGCThreads=' + threads +  \
+                 ' -XX:MaxGCPauseMillis=10000 -jar ' + picard + ' CollectRnaSeqMetrics REF_FLAT=' + refFlat \
                  + ' STRAND=' + st_dict[strand] + ' CHART=' + sample + '.pos_v_cov.pdf I=' + sample \
                  + '.Aligned.sortedByCoord.out.bam O=' + sample + '.picard_RNAseq_qc.txt RIBOSOMAL_INTERVALS=' \
                  + intervals + ' VALIDATION_STRINGENCY=SILENT 2>> ' + loc + ' >> ' + loc

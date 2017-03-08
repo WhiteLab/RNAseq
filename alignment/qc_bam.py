@@ -22,7 +22,7 @@ def qc_bam(sample, config_file, ref_mnt):
         loc = 'LOGS/' + loc
     (java, ram, picard, refFlat, intervals, strand) = parse_config(config_file)
     # recalc ram to be a bit lower
-    ram = str(round(int(ram) * 0.75))
+    ram = str(int(round(int(ram) * 0.75)))
 
     st_dict = {'N': 'NONE', 'fr-stranded': 'FIRST_READ_TRANSCRIPTION_STRAND',
                'rf-stranded': 'SECOND_READ_TRANSCRIPTION_STRAND'}

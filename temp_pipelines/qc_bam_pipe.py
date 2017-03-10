@@ -20,7 +20,7 @@ def qc_bam_pipe(sample_list, config_file, ref_mnt):
         parts = sample.split('_')
         bam = sample + '.Aligned.sortedByCoord.out.bam'
         dl_list = (log_dir + sample + '.cutadapt.log', log_dir + sample + '.Log.final.out', 'QC/' + sample
-                   + '_subset.insert_metrics.hist', 'QC/' + sample + '_sequence_fastqc/fastqc_data.txt', 'BAMS/'
+                   + '_subset.insert_metrics.hist', 'QC/' + sample + '_1_sequence_fastqc/fastqc_data.txt', 'BAMS/'
                    + bam)
         dl_cmd = ''
         prefix = obj + '/' + parts[0] + '/'

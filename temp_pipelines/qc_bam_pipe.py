@@ -33,7 +33,7 @@ def qc_bam_pipe(sample_list, config_file, ref_mnt):
                  + ' LOGS/;mv ' + prefix + dl_list[1] + ' LOGS;mv ' + prefix + 'QC/* QC/;'
         qc_cmd = '~/TOOLS/Scripts/alignment/qc_bam.py -sa ' + sample + ' -j ' + config_file + ' -m ' + ref_mnt + ';'
         rm_cmd = 'rm ' + bam + ';'
-        parse_qc_cmd = '~/TOOLS/Scripts/alignment/qc_bam.py -j ' + config_file + ' -sa ' + sample + ';'
+        parse_qc_cmd = '~/TOOLS/Scripts/alignment/parse_qc.py -j ' + config_file + ' -sa ' + sample + ';'
         full_cmd = dl_cmd + mv_cmd + qc_cmd + rm_cmd + parse_qc_cmd
         job_list.append(full_cmd)
     job_manager(job_list, 4)

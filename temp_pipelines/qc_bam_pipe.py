@@ -20,14 +20,14 @@ def qc_bam_pipe(sample_list, config_file, ref_mnt):
         parts = sample.split('_')
         bam = sample + '.Aligned.sortedByCoord.out.bam'
         dl_list = (log_dir + sample + '.cutadapt.log', log_dir + sample + '.Log.final.out', 'QC/' + sample
-                   + '_subset.insert_metrics.hist', 'QC/' + sample + '_1_sequence_fastqc/fastqc_data.txt', 'BAMS/'
+                   + '_subset.insert_metrics.hist', 'QC/' + sample + '_sequence_fastqc/fastqc_data.txt', 'BAMS/'
                    + bam)
         dl_cmd = ''
         prefix = obj + '/' + parts[0] + '/'
         for fn in dl_list:
             dl_cmd += src_cmd + 'swift download ' + cont + ' ' + prefix + fn + ';'
         mv_cmd = 'mv ' + prefix + dl_list[2] + ' .;mv ' + prefix + dl_list[4] + ' .;mv ' + prefix + dl_list[0] \
-                 + ' LOGS/;mv ' + prefix + dl_list[1] + ' LOGS;mv ' + prefix + dl_list[3] + ' QC/;'
+                 + ' LOGS/;mv ' + prefix + dl_list[1] + ' LOGS;mv ' + prefix + 'QC/* QC/;'
         qc_cmd = '~/TOOLS/Scripts/alignment/qc_bam.py -sa ' + sample + ' -j ' + config_file + ' -m ' + ref_mnt + ';'
         rm_cmd = 'rm ' + bam + ';'
         parse_qc_cmd = '~/TOOLS/Scripts/alignment/qc_bam.py -j ' + config_file + ' -sa ' + sample + ';'

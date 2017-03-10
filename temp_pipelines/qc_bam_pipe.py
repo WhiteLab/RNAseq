@@ -3,6 +3,7 @@ import sys
 sys.path.append('/home/ubuntu/TOOLS/Scripts/')
 import json
 from utility.job_manager import job_manager
+import subprocess
 
 
 def parse_config(config_file):
@@ -15,6 +16,8 @@ def qc_bam_pipe(sample_list, config_file, ref_mnt):
     job_list = []
     log_dir = 'LOGS/'
     src_cmd = '. ~/.novarc;'
+    create_start_dirs = 'mkdir LOGS QC'
+    subprocess.call(create_start_dirs, shell=True)
     for sample in open(sample_list):
         sample = sample.rstrip('\n')
         parts = sample.split('_')

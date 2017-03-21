@@ -30,7 +30,7 @@ def qc_bam_pipe(sample_list, config_file, ref_mnt):
         for fn in dl_list:
             dl_cmd += 'swift download ' + cont + ' ' + prefix + fn + ';'
         mv_cmd = 'mv ' + prefix + dl_list[2] + ' .;mv ' + prefix + dl_list[4] + ' .;mv ' + prefix + dl_list[0] \
-                 + ' LOGS/;mv ' + prefix + dl_list[1] + ' LOGS;mv ' + prefix + 'QC/* QC/;'
+                 + ' LOGS/;mv ' + prefix + dl_list[1] + ' LOGS;mv ' + prefix + 'QC/' + sample + '* QC/;'
         qc_cmd = '~/TOOLS/Scripts/alignment/qc_bam.py -sa ' + sample + ' -j ' + config_file + ' -m ' + ref_mnt + ';'
         rm_cmd = 'rm ' + bam + ';'
         parse_qc_cmd = '~/TOOLS/Scripts/alignment/parse_qc.py -j ' + config_file + ' -sa ' + sample + ';'

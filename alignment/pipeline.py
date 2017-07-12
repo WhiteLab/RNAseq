@@ -193,7 +193,7 @@ class Pipeline():
             exit(1)
         # move outputs to correct directories and upload
         log(self.loc, date_time() + 'Organizing outputs\n')
-        mv_bams = 'mv *ALIGN*.bam  ' + bam_dir
+        mv_bams = 'mv *Aligned*.bam  ' + bam_dir
         call(mv_bams, shell=True)
         mv_star = 'mv  *.tab ' + star_dir
         call(mv_star, shell=True)
@@ -202,7 +202,7 @@ class Pipeline():
         # mv subdirectories to right place
         mv_dir = 'mv ' + ' '.join((bam_dir, log_dir, qc_dir, star_dir)) + ' ../'
         call(mv_dir, shell=True)
-        rm_tmp = 'rm -rf *STAR* *.subset.fastq'
+        rm_tmp = 'rm -rf *STAR* *subset*'
         call(rm_tmp, shell=True)
 
         #CUR POS SCRATCH/RAW/

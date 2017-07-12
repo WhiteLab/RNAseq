@@ -191,21 +191,20 @@ class Pipeline():
             log(self.loc, date_time() + 'qc summary failure for ' + self.sample + '\n')
             self.status = 1
             exit(1)
-    # move outputs to correct directories and upload
+        # move outputs to correct directories and upload
         log(self.loc, date_time() + 'Organizing outputs\n')
-        mv_bams = 'mv *.bam *.bai ' + bam_dir
+        mv_bams = 'mv *ALIGN*.bam  ' + bam_dir
         call(mv_bams, shell=True)
         mv_star = 'mv  *.tab ' + star_dir
         call(mv_star, shell=True)
-        mv_sub = 'mv *subset* *.txt *.pdf *.json ' + qc_dir + '; cp ' + self.json_config + ' ' + qc_dir
+        mv_sub = 'mv *subset.insert* *.txt *.pdf *.json ' + qc_dir + '; cp ' + self.json_config + ' ' + qc_dir
         call(mv_sub, shell=True)
-        org_mv = 'mv BAMS STAR_OUT QC LOGS ../'
-        call(org_mv, shell=True)
-        rm_tmp = 'rm -rf *STAR* .subset.fastq'
-        call(rm_tmp, shell=True)
         # mv subdirectories to right place
-        mv_dir = 'mv ' + ' '.join((bam_dir, log_dir, qc_dir)) + ' ../'
+        mv_dir = 'mv ' + ' '.join((bam_dir, log_dir, qc_dir, star_dir)) + ' ../'
         call(mv_dir, shell=True)
+        rm_tmp = 'rm -rf *STAR* *.subset.fastq'
+        call(rm_tmp, shell=True)
+
         #CUR POS SCRATCH/RAW/
         os.chdir('../../')
         sys.stderr.write(date_time() + 'Uploading results for ' + self.sample + '\n')

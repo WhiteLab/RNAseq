@@ -1,3 +1,5 @@
+# allows for use with Rscript bash functionality
+args <- commandArgs(TRUE)
 # if using half-rack VM, enviromental proxy setting is required
 Sys.setenv(http_proxy="http://cloud-proxy:3128")
 Sys.setenv(https_proxy="http://cloud-proxy:3128")
@@ -16,7 +18,7 @@ library(gplots)
 
 # output_file is the name of the PDF the user would like to create and write to
 # the pdf() function actually creates the pdf
-output_file = "/mnt/de_control_bp/test-UC-UIC-RNAseq-BP-control-subset-raw-gene-counts-data-only.pdf"
+output_file = args[1]
 pdf(file = output_file)
 
 # counts_file is the FULL path to the counts matrix in CSV format--MUST HAVE HEADER AND ROW NAMES!!!
@@ -28,12 +30,15 @@ pdf(file = output_file)
 #             headers should be the name of the metadata measurement (i.e. sex, diagnosis, chrM contamination, etc...)
 # to keep it straight, it makes sense to have n x m counts files and a m x u because the matrices can be multiplied since
 # their inner components are the same dimensions ( nxm matrix [dotproduct] mxu matrix = nxu matrix)
-counts_file = "/mnt/express_effective_counts_matrix_rounded_gene_level.csv"
-meta_file = "/mnt/synapse-meta-clinical-technical-data-BrainGVEX-RNAseq-TonyaCurrated-V2-MISSING-DATA-FILLED-WITH-AVERAGES.csv"
+counts_file = args[2]
+meta_file = args[3]
+# give two variable list files pertaining to which are categorical and which are continuous
+cat_list <- scan(args[4], what="", sep="\n")
+cont_list <- scan(args[5], what="", sep="\n")
 
 # read in gene expression table and metadata row.names needs to be set to the column number where the row names are listed
 # it is important to set check.names=FALSE so that R doesn't try to change any numerical names into odd characters
-total_raw_counts <- read.table(counts_file, header=TRUE, row.names=432, check.names=FALSE, sep=",")
+total_raw_counts <- read.table(counts_file, header=TRUE, row.names=1, check.names=FALSE, sep=",")
 metadata <- read.table(meta_file, header=TRUE, row.names=1, check.names=FALSE, sep=",")
 
 # converts each table into a data frame
@@ -50,19 +55,19 @@ total_raw_read_counts_dataframe <- total_raw_read_counts_dataframe + 1
 transformed_dataframe <- log(total_raw_read_counts_dataframe)
 
 # remove BIDs that have missing or strange data
-transformed_dataframe <- within(transformed_dataframe, rm('nothing'))
-metadata_dataframe <- metadata_dataframe[!rownames(metadata_dataframe) %in% c('nothing'), ]
+# transformed_dataframe <- within(transformed_dataframe, rm('nothing'))
+# metadata_dataframe <- metadata_dataframe[!rownames(metadata_dataframe) %in% c('nothing'), ]
 
 # The remaining block of code can be uncommented out if you are going to use a SUBSET of the data for PCA
 # in the metadata_to_be_removed variable you can indicate in which() statment the column with the specified variable
 # of all the samples to remove for analysis.  For example, in this case we go to the column 'Diagnosis' and remove
 # all samples that are listed as 'Control'.  This can be changed to anything.
-metadata_to_be_removed <- metadata_dataframe[which(metadata_dataframe$Diagnosis=='SCZ'), ]
-sample_removal <- levels(droplevels(metadata_to_be_removed$BID))
-transformed_dataframe <-transformed_dataframe[,-which(names(transformed_dataframe) %in% sample_removal)]
-metadata_dataframe <- metadata_dataframe[!rownames(metadata_dataframe) %in% sample_removal, ]
-print("Samples to be removed from counts matrix and metadata")
-print(sample_removal)
+# metadata_to_be_removed <- metadata_dataframe[which(metadata_dataframe$Diagnosis=='SCZ'), ]
+# sample_removal <- levels(droplevels(metadata_to_be_removed$BID))
+# transformed_dataframe <-transformed_dataframe[,-which(names(transformed_dataframe) %in% sample_removal)]
+# metadata_dataframe <- metadata_dataframe[!rownames(metadata_dataframe) %in% sample_removal, ]
+# print("Samples to be removed from counts matrix and metadata")
+# print(sample_removal)
 
 
 #remove rows that have a sum of zero
@@ -94,7 +99,22 @@ pca_matrix <- prcomp(t(counts_sorted), center=TRUE, scale. = TRUE)
 # just regress out the variable rather than the PC
 plot(pca_matrix, type ="l")
 
+# helper function to iterate through desired fields to regress in two modes - categorical and continuous
+build_categorical_model <- function(factors_affecting_pcs, category, metadata_sorted, pca_matrix, pc){
+    linear_model <- lm(pca_matrix$x[,pc] ~ na.omit(as.factor(metadata_sorted[,category])))
+    factors_affecting_pcs[[category]][[as.character(pc)]]=list()
+    factors_affecting_pcs[[category]][[as.character(pc)]][['adj.r.squared']]=summary(linear_model)$adj.r.squared
+    factors_affecting_pcs[[category]][[as.character(pc)]][['-log10Pval']]=-log10(anova(linear_model)$Pr[1])
+    return(factors_affecting_pcs)
+}
 
+build_continuous_model <- function(linear_model, factors_affecting_pcs, continuous_variable, metadata_sorted, pca_matrix, pc){
+    linear_model <- lm(pca_matrix$x[,pc] ~ na.omit(metadata_sorted[,continuous_variable]))
+    factors_affecting_pcs[[continuous_variable]][[as.character(pc)]]=list()
+    factors_affecting_pcs[[continuous_variable]][[as.character(pc)]][['adj.r.squared']]=summary(linear_model)$adj.r.squared
+    factors_affecting_pcs[[continuous_variable]][[as.character(pc)]][['-log10Pval']]=-log10(anova(linear_model)$Pr[1])
+    return(factors_affecting_pcs)
+}
 # ***************************Function to correlate PCs with metadata******************************
 model_pcs <- function(pca_matrix){
   # this block of code will need to be changed depending on the metadata columns available 
@@ -107,205 +127,12 @@ model_pcs <- function(pca_matrix){
     # to determine if any PC is strongly correlated to Sex.  If yes, regress sex out in model
     # Note: in the linear model as.factor() should be placed around categorical variables, while it can be omitted
     # in continuous non-discrete variables
-    linear_model <- lm(pca_matrix$x[,pc] ~ na.omit(as.factor(metadata_sorted[,'Sex'])))
-    factors_affecting_pcs[['Sex']][[as.character(pc)]]=list()
-    factors_affecting_pcs[['Sex']][[as.character(pc)]][['adj.r.squared']]=summary(linear_model)$adj.r.squared
-    factors_affecting_pcs[['Sex']][[as.character(pc)]][['-log10Pval']]=-log10(anova(linear_model)$Pr[1]) # -log10(pval)
-    
-    # correlation PCs on factor BrainBank
-    linear_model <- lm(pca_matrix$x[,pc] ~ na.omit(as.factor(metadata_sorted[,'BrainBank'])))
-    factors_affecting_pcs[['BrainBank']][[as.character(pc)]]=list()
-    factors_affecting_pcs[['BrainBank']][[as.character(pc)]][['adj.r.squared']]=summary(linear_model)$adj.r.squared
-    factors_affecting_pcs[['BrainBank']][[as.character(pc)]][['-log10Pval']]=-log10(anova(linear_model)$Pr[1]) # -log10(pval)
-    
-    # correlation PCs on factor Hemisphere
-    linear_model <- lm(pca_matrix$x[,pc] ~ na.omit(as.factor(metadata_sorted[,'Hemisphere'])))
-    factors_affecting_pcs[['Hemisphere']][[as.character(pc)]]=list()
-    factors_affecting_pcs[['Hemisphere']][[as.character(pc)]][['adj.r.squared']]=summary(linear_model)$adj.r.squared
-    factors_affecting_pcs[['Hemisphere']][[as.character(pc)]][['-log10Pval']]=-log10(anova(linear_model)$Pr[1]) # -log10(pval)
-    
-    # correlation PCs on factor LibraryBatch
-    linear_model <- lm(pca_matrix$x[,pc] ~ na.omit(as.factor(metadata_sorted[,'LibraryBatch'])))
-    factors_affecting_pcs[['LibraryBatch']][[as.character(pc)]]=list()
-    factors_affecting_pcs[['LibraryBatch']][[as.character(pc)]][['adj.r.squared']]=summary(linear_model)$adj.r.squared
-    factors_affecting_pcs[['LibraryBatch']][[as.character(pc)]][['-log10Pval']]=-log10(anova(linear_model)$Pr[1]) # -log10(pval)
-    
-    # correlation PCs on factor UF_MEDIAN_5PRIME_TO_3PRIME_BIAS
-    linear_model <- lm(pca_matrix$x[,pc] ~ na.omit(metadata_sorted[,'UF_MEDIAN_5PRIME_TO_3PRIME_BIAS']))
-    factors_affecting_pcs[['UF_MEDIAN_5PRIME_TO_3PRIME_BIAS']][[as.character(pc)]]=list()
-    factors_affecting_pcs[['UF_MEDIAN_5PRIME_TO_3PRIME_BIAS']][[as.character(pc)]][['adj.r.squared']]=summary(linear_model)$adj.r.squared
-    factors_affecting_pcs[['UF_MEDIAN_5PRIME_TO_3PRIME_BIAS']][[as.character(pc)]][['-log10Pval']]=-log10(anova(linear_model)$Pr[1]) # -log10(pval)
-    
-    # correlation PCs on factor Ethnicity
-    linear_model <- lm(pca_matrix$x[,pc] ~ na.omit(as.factor(metadata_sorted[,'Ethnicity'])))
-    factors_affecting_pcs[['Ethnicity']][[as.character(pc)]]=list()
-    factors_affecting_pcs[['Ethnicity']][[as.character(pc)]][['adj.r.squared']]=summary(linear_model)$adj.r.squared
-    factors_affecting_pcs[['Ethnicity']][[as.character(pc)]][['-log10Pval']]=-log10(anova(linear_model)$Pr[1]) # -log10(pval)
-    
-    
-    # correlation PCs on factor volume_RNA_starting_material_used_uL
-    linear_model <- lm(pca_matrix$x[,pc] ~ na.omit(metadata_sorted[,'volume_RNA_starting_material_used_uL']))
-    factors_affecting_pcs[['volume_RNA_starting_material_used_uL']][[as.character(pc)]]=list()
-    factors_affecting_pcs[['volume_RNA_starting_material_used_uL']][[as.character(pc)]][['adj.r.squared']]=summary(linear_model)$adj.r.squared
-    factors_affecting_pcs[['volume_RNA_starting_material_used_uL']][[as.character(pc)]][['-log10Pval']]=-log10(anova(linear_model)$Pr[1]) # -log10(pval)
-    
-    # correlation PCs on factor Multiplex_Oligo_Number
-    linear_model <- lm(pca_matrix$x[,pc] ~ na.omit(as.factor(metadata_sorted[,'Multiplex_Oligo_Number'])))
-    factors_affecting_pcs[['Multiplex_Oligo_Number']][[as.character(pc)]]=list()
-    factors_affecting_pcs[['Multiplex_Oligo_Number']][[as.character(pc)]][['adj.r.squared']]=summary(linear_model)$adj.r.squared
-    factors_affecting_pcs[['Multiplex_Oligo_Number']][[as.character(pc)]][['-log10Pval']]=-log10(anova(linear_model)$Pr[1]) # -log10(pval)
-    
-    # correlation PCs on factor Final_Bead_Size_Selection_Ratio
-    linear_model <- lm(pca_matrix$x[,pc] ~ na.omit(as.factor(metadata_sorted[,'Final_Bead_Size_Selection_Ratio'])))
-    factors_affecting_pcs[['Final_Bead_Size_Selection_Ratio']][[as.character(pc)]]=list()
-    factors_affecting_pcs[['Final_Bead_Size_Selection_Ratio']][[as.character(pc)]][['adj.r.squared']]=summary(linear_model)$adj.r.squared
-    factors_affecting_pcs[['Final_Bead_Size_Selection_Ratio']][[as.character(pc)]][['-log10Pval']]=-log10(anova(linear_model)$Pr[1]) # -log10(pval)
-    
-    # correlation PCs on factor Final_Library_Bioanalyzer_Concentration_ng_per_uL
-    linear_model <- lm(pca_matrix$x[,pc] ~ na.omit(metadata_sorted[,'Final_Library_Bioanalyzer_Concentration_ng_per_uL']))
-    factors_affecting_pcs[['Final_Library_Bioanalyzer_Concentration_ng_per_uL']][[as.character(pc)]]=list()
-    factors_affecting_pcs[['Final_Library_Bioanalyzer_Concentration_ng_per_uL']][[as.character(pc)]][['adj.r.squared']]=summary(linear_model)$adj.r.squared
-    factors_affecting_pcs[['Final_Library_Bioanalyzer_Concentration_ng_per_uL']][[as.character(pc)]][['-log10Pval']]=-log10(anova(linear_model)$Pr[1]) # -log10(pval)
-    
-    # correlation PCs on factor RIN
-    linear_model <- lm(pca_matrix$x[,pc] ~ na.omit(metadata_sorted[,'RIN']))
-    factors_affecting_pcs[['RIN']][[as.character(pc)]]=list()
-    factors_affecting_pcs[['RIN']][[as.character(pc)]][['adj.r.squared']]=summary(linear_model)$adj.r.squared
-    factors_affecting_pcs[['RIN']][[as.character(pc)]][['-log10Pval']]=-log10(anova(linear_model)$Pr[1]) # -log10(pval)
-    
-    # correlation PCs on factor PMI
-    linear_model <- lm(pca_matrix$x[,pc] ~ na.omit(metadata_sorted[,'PMI']))
-    factors_affecting_pcs[['PMI']][[as.character(pc)]]=list()
-    factors_affecting_pcs[['PMI']][[as.character(pc)]][['adj.r.squared']]=summary(linear_model)$adj.r.squared
-    factors_affecting_pcs[['PMI']][[as.character(pc)]][['-log10Pval']]=-log10(anova(linear_model)$Pr[1]) # -log10(pval)
-    
-    # correlation PCs on factor BrainWeight
-    linear_model <- lm(pca_matrix$x[,pc] ~ na.omit(metadata_sorted[,'BrainWeight']))
-    factors_affecting_pcs[['BrainWeight']][[as.character(pc)]]=list()
-    factors_affecting_pcs[['BrainWeight']][[as.character(pc)]][['adj.r.squared']]=summary(linear_model)$adj.r.squared
-    factors_affecting_pcs[['BrainWeight']][[as.character(pc)]][['-log10Pval']]=-log10(anova(linear_model)$Pr[1]) # -log10(pval)
-    
-    # correlation PCs on factor TIN_median
-    linear_model <- lm(pca_matrix$x[,pc] ~ na.omit(metadata_sorted[,'TIN_median']))
-    factors_affecting_pcs[['TIN_median']][[as.character(pc)]]=list()
-    factors_affecting_pcs[['TIN_median']][[as.character(pc)]][['adj.r.squared']]=summary(linear_model)$adj.r.squared
-    factors_affecting_pcs[['TIN_median']][[as.character(pc)]][['-log10Pval']]=-log10(anova(linear_model)$Pr[1]) # -log10(pval)
-    
-    # correlation PCs on factor Average_bp_size_of_Library
-    linear_model <- lm(pca_matrix$x[,pc] ~ na.omit(metadata_sorted[,'Average_bp_size_of_Library']))
-    factors_affecting_pcs[['Average_bp_size_of_Library']][[as.character(pc)]]=list()
-    factors_affecting_pcs[['Average_bp_size_of_Library']][[as.character(pc)]][['adj.r.squared']]=summary(linear_model)$adj.r.squared
-    factors_affecting_pcs[['Average_bp_size_of_Library']][[as.character(pc)]][['-log10Pval']]=-log10(anova(linear_model)$Pr[1]) # -log10(pval)
-    
-    # correlation PCs on factor UF_MEDIAN_3PRIME_BIAS
-    linear_model <- lm(pca_matrix$x[,pc] ~ na.omit(metadata_sorted[,'UF_MEDIAN_3PRIME_BIAS']))
-    factors_affecting_pcs[['UF_MEDIAN_3PRIME_BIAS']][[as.character(pc)]]=list()
-    factors_affecting_pcs[['UF_MEDIAN_3PRIME_BIAS']][[as.character(pc)]][['adj.r.squared']]=summary(linear_model)$adj.r.squared
-    factors_affecting_pcs[['UF_MEDIAN_3PRIME_BIAS']][[as.character(pc)]][['-log10Pval']]=-log10(anova(linear_model)$Pr[1]) # -log10(pval)
-    
-    # correlation PCs on factor UF_MEDIAN_5PRIME_BIAS
-    linear_model <- lm(pca_matrix$x[,pc] ~ na.omit(metadata_sorted[,'UF_MEDIAN_5PRIME_BIAS']))
-    factors_affecting_pcs[['UF_MEDIAN_5PRIME_BIAS']][[as.character(pc)]]=list()
-    factors_affecting_pcs[['UF_MEDIAN_5PRIME_BIAS']][[as.character(pc)]][['adj.r.squared']]=summary(linear_model)$adj.r.squared
-    factors_affecting_pcs[['UF_MEDIAN_5PRIME_BIAS']][[as.character(pc)]][['-log10Pval']]=-log10(anova(linear_model)$Pr[1]) # -log10(pval)
-    
-    # correlation PCs on factor Total_Yield_ng
-    linear_model <- lm(pca_matrix$x[,pc] ~ na.omit(metadata_sorted[,'Total_Yield_ng']))
-    factors_affecting_pcs[['Total_Yield_ng']][[as.character(pc)]]=list()
-    factors_affecting_pcs[['Total_Yield_ng']][[as.character(pc)]][['adj.r.squared']]=summary(linear_model)$adj.r.squared
-    factors_affecting_pcs[['Total_Yield_ng']][[as.character(pc)]][['-log10Pval']]=-log10(anova(linear_model)$Pr[1]) # -log10(pval)
-    
-    # correlation PCs on factor SequencingPlatform
-    linear_model <- lm(pca_matrix$x[,pc] ~ na.omit(as.factor(metadata_sorted[,'SequencingPlatform'])))
-    factors_affecting_pcs[['SequencingPlatform']][[as.character(pc)]]=list()
-    factors_affecting_pcs[['SequencingPlatform']][[as.character(pc)]][['adj.r.squared']]=summary(linear_model)$adj.r.squared
-    factors_affecting_pcs[['SequencingPlatform']][[as.character(pc)]][['-log10Pval']]=-log10(anova(linear_model)$Pr[1]) # -log10(pval)
-    
-    
-    # correlation PCs on factor FlowcellBatch
-    linear_model <- lm(pca_matrix$x[,pc] ~ na.omit(as.factor(metadata_sorted[,'FlowcellBatch'])))
-    factors_affecting_pcs[['FlowcellBatch']][[as.character(pc)]]=list()
-    factors_affecting_pcs[['FlowcellBatch']][[as.character(pc)]][['adj.r.squared']]=summary(linear_model)$adj.r.squared
-    factors_affecting_pcs[['FlowcellBatch']][[as.character(pc)]][['-log10Pval']]=-log10(anova(linear_model)$Pr[1]) # -log10(pval)
-    
-    # correlation PCs on factor TotalReads
-    linear_model <- lm(pca_matrix$x[,pc] ~ na.omit(metadata_sorted[,'TotalReads']))
-    factors_affecting_pcs[['TotalReads']][[as.character(pc)]]=list()
-    factors_affecting_pcs[['TotalReads']][[as.character(pc)]][['adj.r.squared']]=summary(linear_model)$adj.r.squared
-    factors_affecting_pcs[['TotalReads']][[as.character(pc)]][['-log10Pval']]=-log10(anova(linear_model)$Pr[1]) # -log10(pval)
-    
-    # correlation PCs on factor MappedReads_Primary
-    linear_model <- lm(pca_matrix$x[,pc] ~ na.omit(metadata_sorted[,'MappedReads_Primary']))
-    factors_affecting_pcs[['MappedReads_Primary']][[as.character(pc)]]=list()
-    factors_affecting_pcs[['MappedReads_Primary']][[as.character(pc)]][['adj.r.squared']]=summary(linear_model)$adj.r.squared
-    factors_affecting_pcs[['MappedReads_Primary']][[as.character(pc)]][['-log10Pval']]=-log10(anova(linear_model)$Pr[1]) # -log10(pval)
-    
-    # correlation PCs on factor MappedReads_Multimapped
-    linear_model <- lm(pca_matrix$x[,pc] ~ na.omit(metadata_sorted[,'MappedReads_Multimapped']))
-    factors_affecting_pcs[['MappedReads_Multimapped']][[as.character(pc)]]=list()
-    factors_affecting_pcs[['MappedReads_Multimapped']][[as.character(pc)]][['adj.r.squared']]=summary(linear_model)$adj.r.squared
-    factors_affecting_pcs[['MappedReads_Multimapped']][[as.character(pc)]][['-log10Pval']]=-log10(anova(linear_model)$Pr[1]) # -log10(pval)
-    
-    # correlation PCs on factor UF_MEDIAN_CV_COVERAGE
-    linear_model <- lm(pca_matrix$x[,pc] ~ na.omit(metadata_sorted[,'UF_MEDIAN_CV_COVERAGE']))
-    factors_affecting_pcs[['UF_MEDIAN_CV_COVERAGE']][[as.character(pc)]]=list()
-    factors_affecting_pcs[['UF_MEDIAN_CV_COVERAGE']][[as.character(pc)]][['adj.r.squared']]=summary(linear_model)$adj.r.squared
-    factors_affecting_pcs[['UF_MEDIAN_CV_COVERAGE']][[as.character(pc)]][['-log10Pval']]=-log10(anova(linear_model)$Pr[1]) # -log10(pval)
-    
-    # correlation PCs on factor UF_PCT_RIBOSOMAL_BASES
-    linear_model <- lm(pca_matrix$x[,pc] ~ na.omit(metadata_sorted[,'UF_PCT_RIBOSOMAL_BASES']))
-    factors_affecting_pcs[['UF_PCT_RIBOSOMAL_BASES']][[as.character(pc)]]=list()
-    factors_affecting_pcs[['UF_PCT_RIBOSOMAL_BASES']][[as.character(pc)]][['adj.r.squared']]=summary(linear_model)$adj.r.squared
-    factors_affecting_pcs[['UF_PCT_RIBOSOMAL_BASES']][[as.character(pc)]][['-log10Pval']]=-log10(anova(linear_model)$Pr[1]) # -log10(pval)
-    
-    # correlation PCs on factor UF_PCT_CODING_BASES
-    linear_model <- lm(pca_matrix$x[,pc] ~ na.omit(metadata_sorted[,'UF_PCT_CODING_BASES']))
-    factors_affecting_pcs[['UF_PCT_CODING_BASES']][[as.character(pc)]]=list()
-    factors_affecting_pcs[['UF_PCT_CODING_BASES']][[as.character(pc)]][['adj.r.squared']]=summary(linear_model)$adj.r.squared
-    factors_affecting_pcs[['UF_PCT_CODING_BASES']][[as.character(pc)]][['-log10Pval']]=-log10(anova(linear_model)$Pr[1]) # -log10(pval)
-    
-    # correlation PCs on factor UF_PCT_UTR_BASES
-    linear_model <- lm(pca_matrix$x[,pc] ~ na.omit(metadata_sorted[,'UF_PCT_UTR_BASES']))
-    factors_affecting_pcs[['UF_PCT_UTR_BASES']][[as.character(pc)]]=list()
-    factors_affecting_pcs[['UF_PCT_UTR_BASES']][[as.character(pc)]][['adj.r.squared']]=summary(linear_model)$adj.r.squared
-    factors_affecting_pcs[['UF_PCT_UTR_BASES']][[as.character(pc)]][['-log10Pval']]=-log10(anova(linear_model)$Pr[1]) # -log10(pval)
-    
-    # correlation PCs on factor UF_PCT_INTRONIC_BASES
-    linear_model <- lm(pca_matrix$x[,pc] ~ na.omit(metadata_sorted[,'UF_PCT_INTRONIC_BASES']))
-    factors_affecting_pcs[['UF_PCT_INTRONIC_BASES']][[as.character(pc)]]=list()
-    factors_affecting_pcs[['UF_PCT_INTRONIC_BASES']][[as.character(pc)]][['adj.r.squared']]=summary(linear_model)$adj.r.squared
-    factors_affecting_pcs[['UF_PCT_INTRONIC_BASES']][[as.character(pc)]][['-log10Pval']]=-log10(anova(linear_model)$Pr[1]) # -log10(pval)
-    
-    # correlation PCs on factor UF_PCT_INTERGENIC_BASES
-    linear_model <- lm(pca_matrix$x[,pc] ~ na.omit(metadata_sorted[,'UF_PCT_INTERGENIC_BASES']))
-    factors_affecting_pcs[['UF_PCT_INTERGENIC_BASES']][[as.character(pc)]]=list()
-    factors_affecting_pcs[['UF_PCT_INTERGENIC_BASES']][[as.character(pc)]][['adj.r.squared']]=summary(linear_model)$adj.r.squared
-    factors_affecting_pcs[['UF_PCT_INTERGENIC_BASES']][[as.character(pc)]][['-log10Pval']]=-log10(anova(linear_model)$Pr[1]) # -log10(pval)
-    
-    # correlation PCs on factor UF_PCT_MRNA_BASES
-    linear_model <- lm(pca_matrix$x[,pc] ~ na.omit(metadata_sorted[,'UF_PCT_MRNA_BASES']))
-    factors_affecting_pcs[['UF_PCT_MRNA_BASES']][[as.character(pc)]]=list()
-    factors_affecting_pcs[['UF_PCT_MRNA_BASES']][[as.character(pc)]][['adj.r.squared']]=summary(linear_model)$adj.r.squared
-    factors_affecting_pcs[['UF_PCT_MRNA_BASES']][[as.character(pc)]][['-log10Pval']]=-log10(anova(linear_model)$Pr[1]) # -log10(pval)
-    
-    
-    # correlation PCs on factor UF_PCT_USABLE_BASES
-    linear_model <- lm(pca_matrix$x[,pc] ~ na.omit(metadata_sorted[,'UF_PCT_USABLE_BASES']))
-    factors_affecting_pcs[['UF_PCT_USABLE_BASES']][[as.character(pc)]]=list()
-    factors_affecting_pcs[['UF_PCT_USABLE_BASES']][[as.character(pc)]][['adj.r.squared']]=summary(linear_model)$adj.r.squared
-    factors_affecting_pcs[['UF_PCT_USABLE_BASES']][[as.character(pc)]][['-log10Pval']]=-log10(anova(linear_model)$Pr[1]) # -log10(pval)
-    
-    # correlation PCs on factor AgeDeath
-    linear_model <- lm(pca_matrix$x[,pc] ~ na.omit(metadata_sorted[,'AgeDeath']))
-    factors_affecting_pcs[['AgeDeath']][[as.character(pc)]]=list()
-    factors_affecting_pcs[['AgeDeath']][[as.character(pc)]][['adj.r.squared']]=summary(linear_model)$adj.r.squared
-    factors_affecting_pcs[['AgeDeath']][[as.character(pc)]][['-log10Pval']]=-log10(anova(linear_model)$Pr[1]) # -log10(pval)
-    
-    # correlation PCs on factor Diagnosis
-    linear_model <- lm(pca_matrix$x[,pc] ~ na.omit(as.factor(metadata_sorted[,'Diagnosis'])))
-    factors_affecting_pcs[['Diagnosis']][[as.character(pc)]]=list()
-    factors_affecting_pcs[['Diagnosis']][[as.character(pc)]][['adj.r.squared']]=summary(linear_model)$adj.r.squared
-    factors_affecting_pcs[['Diagnosis']][[as.character(pc)]][['-log10Pval']]=-log10(anova(linear_model)$Pr[1]) # -log10(pval)
+    for (category in cat_list){
+        factors_affecting_pcs = build_categorical_model(factors_affecting_pcs, category, metadata_sorted, pca_matrix, pc)
+    }
+    for (continuous_variable in cont_list){
+        factors_affecting_pcs = build_continuous_model(factors_affecting_pcs, continuous_variable, metadata_sorted, pca_matrix, pc)
+    }
   }
   
   # create heatmeap to visualize PC and metadata correlations

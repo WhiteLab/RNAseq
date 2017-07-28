@@ -81,7 +81,7 @@ if sort_type == 'col':
             sys.stdout.write(','.join(unsort_head))
             for i in sort_key:
                 sys.stdout.write(',' + to_sort_head[i])
-                print
+        print
     fh.close()
 
 

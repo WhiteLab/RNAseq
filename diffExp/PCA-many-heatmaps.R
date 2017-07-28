@@ -99,6 +99,7 @@ pca_matrix <- prcomp(t(counts_sorted), center=TRUE, scale. = TRUE)
 # just regress out the variable rather than the PC
 plot(pca_matrix, type ="l")
 
+#********************************************Model functions***************************************
 # helper function to iterate through desired fields to regress in two modes - categorical and continuous
 build_categorical_model <- function(factors_affecting_pcs, category, metadata_sorted, pca_matrix, pc){
     linear_model <- lm(pca_matrix$x[,pc] ~ na.omit(as.factor(metadata_sorted[,category])))
@@ -115,9 +116,10 @@ build_continuous_model <- function(linear_model, factors_affecting_pcs, continuo
     factors_affecting_pcs[[continuous_variable]][[as.character(pc)]][['-log10Pval']]=-log10(anova(linear_model)$Pr[1])
     return(factors_affecting_pcs)
 }
+# ************************End model functions*****************************************************
 # ***************************Function to correlate PCs with metadata******************************
 model_pcs <- function(pca_matrix){
-  # this block of code will need to be changed depending on the metadata columns available 
+  # this block of code will need to be changed depending on the metadata columns available
   factors_affecting_pcs=list()
   # iterate through all PCs and get -log10(p-value) and adjusted R-squared value to every PC correlated to each
   # metadata column listed
@@ -134,12 +136,12 @@ model_pcs <- function(pca_matrix){
         factors_affecting_pcs = build_continuous_model(factors_affecting_pcs, continuous_variable, metadata_sorted, pca_matrix, pc)
     }
   }
-  
+
   # create heatmeap to visualize PC and metadata correlations
   # create a dataframe to store all the -log10 p-values and adjusted R squared vals for the visualization of PCA data
   pvalues <- data.frame()
   adjRsq <- data.frame()
-  
+
   # iterate only through the look first 10 PCs and extract their -log10(pval) and adj R-sq values
   for (all_factors in seq(1,length(factors_affecting_pcs))){
     for (pc in seq(1,10)){
@@ -147,24 +149,51 @@ model_pcs <- function(pca_matrix){
       adjRsq[all_factors, pc] <- unlist(factors_affecting_pcs[all_factors][[1]][[pc]][[1]])
     }
   }
-  
+
   # get the row and column names match the p-values
   rownames(pvalues) <- names(factors_affecting_pcs)
   colnames(pvalues) <- unlist(lapply(seq(1,10),function(x) paste(c('PC',x),collapse='')))
-  
+
   # get the row and column names matching the adj R-sq values
   rownames(adjRsq) <- names(factors_affecting_pcs)
   colnames(adjRsq) <- unlist(lapply(seq(1,10),function(x) paste(c('PC',x),collapse='')))
-  
+
   # round all -log10(pvalue) in the dataframe to three decimal places
   is.num <- sapply(pvalues, is.numeric)
   pvalues[is.num] <- lapply(pvalues[is.num], round, 3)
-  
+
   # create a heatmap of these values, value is -log10(p-val) and color is the adj R-sq value
   heatmap.2(as.matrix(adjRsq), cellnote=pvalues, notecol = "black", notecex = 0.5, cexRow = 0.3, dendrogram = "none", col=colorRampPalette(c("white", "yellow", "red"))(10))
   print("heatmap completed")
 }
-#*********************************************End of function*********************************************
+#*********************************************End of function*******************************************
+
+# ********************************************Regression functions**************************************
+regress_categorical <- function(pca_matrix, metadata_sorted, category){
+    for (pc in seq(1,dim(pca_matrix$rotation)[2])){
+        linear_model <- lm(pca_matrix$x[,pc] ~ na.omit(as.factor(metadata_sorted[,category])))
+        pca_matrix$x[,pc]  <- linear_model$residuals
+    }
+
+    # call function again on regressed out variables
+    model_pcs(pca_matrix)
+    # writes the variables that were regressed out, NOTE this must be changed manually!!!!!!
+    mtext(paste0("vars regressed: ", category), side=3, line=0)
+
+}
+regress_continuous <- function(pca_matrix, metadata_sorted, continuous){
+    for (pc in seq(1,dim(pca_matrix$rotation)[2])){
+  linear_model <- lm(pca_matrix$x[,pc] ~ na.omit(metadata_sorted[,continuous]))
+  pca_matrix$x[,pc]  <- linear_model$residuals    }
+
+    # call function again on regressed out variables
+    model_pcs(pca_matrix)
+    # writes the variables that were regressed out, NOTE this must be changed manually!!!!!!
+    mtext(paste0("vars regressed: ", continuous), side=3, line=0)
+}
+
+# ********************************************End regression functions**********************************
+
 
 model_pcs(pca_matrix)
 
@@ -172,95 +201,13 @@ model_pcs(pca_matrix)
 # for each variable that is to be regressed a linear model must be made and the residuals of the linear model
 # must be extract and replace the old PC matrix
 # regress out FlowcellBatch
-for (pc in seq(1,dim(pca_matrix$rotation)[2])){
-  linear_model <- lm(pca_matrix$x[,pc] ~ na.omit(as.factor(metadata_sorted[,'FlowcellBatch'])))
-  pca_matrix$x[,pc]  <- linear_model$residuals
+for (category in cat_list){
+    regress_categorical(pca_matrix, metadata_sorted, category)
+}
+for (cont in cont_list){
+    regress_continuous(pca_matrix, metadata_sorted, cont)
 }
 
-# call function again on regressed out variables
-model_pcs(pca_matrix)
-# writes the variables that were regressed out, NOTE this must be changed manually!!!!!!
-mtext("vars regressed: FlowcellBatch", side=3, line=0)
-
-
-# regress out Sex
-for (pc in seq(1,dim(pca_matrix$rotation)[2])){
-  linear_model <- lm(pca_matrix$x[,pc] ~ na.omit(as.factor(metadata_sorted[,'Sex'])))
-  pca_matrix$x[,pc]  <- linear_model$residuals
-}
-
-# call function again on regressed out variables
-model_pcs(pca_matrix)
-# writes the variables that were regressed out, NOTE this must be changed manually!!!!!!
-mtext("vars regressed: Sex", side=3, line=0)
-
-
-# regress out 5 prime to 3 prime bias
-for (pc in seq(1,dim(pca_matrix$rotation)[2])){
-  linear_model <- lm(pca_matrix$x[,pc] ~ na.omit(metadata_sorted[,'UF_MEDIAN_5PRIME_TO_3PRIME_BIAS']))
-  pca_matrix$x[,pc]  <- linear_model$residuals
-}
-
-# call function again on regressed out variables
-model_pcs(pca_matrix)
-# writes the variables that were regressed out, NOTE this must be changed manually!!!!!!
-mtext("vars regressed:  UF 5-3 bias", side=3, line=0)
-
-# regress out RIN
-for (pc in seq(1,dim(pca_matrix$rotation)[2])){
-  linear_model <- lm(pca_matrix$x[,pc] ~ na.omit(metadata_sorted[,'RIN']))
-  pca_matrix$x[,pc]  <- linear_model$residuals
-}
-
-# call function again on regressed out variables
-model_pcs(pca_matrix)
-# writes the variables that were regressed out, NOTE this must be changed manually!!!!!!
-mtext("vars regressed: RIN", side=3, line=0)
-
-# regress out PMI
-for (pc in seq(1,dim(pca_matrix$rotation)[2])){
-  linear_model <- lm(pca_matrix$x[,pc] ~ na.omit(metadata_sorted[,'PMI']))
-  pca_matrix$x[,pc]  <- linear_model$residuals
-}
-
-# call function again on regressed out variables
-model_pcs(pca_matrix)
-# writes the variables that were regressed out, NOTE this must be changed manually!!!!!!
-mtext("vars regressed: PMI",side=3, line=0)
-
-# regress out AgeDeath
-for (pc in seq(1,dim(pca_matrix$rotation)[2])){
-  linear_model <- lm(pca_matrix$x[,pc] ~ na.omit(metadata_sorted[,'AgeDeath']))
-  pca_matrix$x[,pc]  <- linear_model$residuals
-}
-
-# call function again on regressed out variables
-model_pcs(pca_matrix)
-# writes the variables that were regressed out, NOTE this must be changed manually!!!!!!
-mtext("vars regressed: AgeDeath", side=3, line=0)
-
-
-# regress out TissueState
-for (pc in seq(1,dim(pca_matrix$rotation)[2])){
-  linear_model <- lm(pca_matrix$x[,pc] ~ na.omit(metadata_sorted[,'TissueState']))
-  pca_matrix$x[,pc]  <- linear_model$residuals
-}
-
-# call function again on regressed out variables
-model_pcs(pca_matrix)
-# writes the variables that were regressed out, NOTE this must be changed manually!!!!!!
-mtext("vars regressed: TissueState", side=3, line=0)
-
-# regress out BrainBank
-for (pc in seq(1,dim(pca_matrix$rotation)[2])){
-  linear_model <- lm(pca_matrix$x[,pc] ~ na.omit(metadata_sorted[,'BrainBank']))
-  pca_matrix$x[,pc]  <- linear_model$residuals
-}
-
-# call function again on regressed out variables
-model_pcs(pca_matrix)
-# writes the variables that were regressed out, NOTE this must be changed manually!!!!!!
-mtext("vars regressed: BrainBank", side=3, line=0)
 # saves and closes newly created PDF
 dev.off()
 

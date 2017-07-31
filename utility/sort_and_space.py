@@ -5,6 +5,9 @@
 import sys
 import re
 # row or column
+if len(sys.argv) < 5:
+    sys.stderr.write('Usage: {row|col}{csv|tsv}{start_pos_0base}{table}')
+    exit(1)
 sort_type = sys.argv[1]
 # for now, csv or tsv
 space_type = sys.argv[2]

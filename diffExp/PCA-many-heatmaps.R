@@ -109,7 +109,7 @@ build_categorical_model <- function(factors_affecting_pcs, category, metadata_so
     return(factors_affecting_pcs)
 }
 
-build_continuous_model <- function(linear_model, factors_affecting_pcs, continuous_variable, metadata_sorted, pca_matrix, pc){
+build_continuous_model <- function(factors_affecting_pcs, continuous_variable, metadata_sorted, pca_matrix, pc){
     linear_model <- lm(pca_matrix$x[,pc] ~ na.omit(metadata_sorted[,continuous_variable]))
     factors_affecting_pcs[[continuous_variable]][[as.character(pc)]]=list()
     factors_affecting_pcs[[continuous_variable]][[as.character(pc)]][['adj.r.squared']]=summary(linear_model)$adj.r.squared

@@ -35,6 +35,8 @@ meta_file = args[3]
 # give two variable list files pertaining to which are categorical and which are continuous
 cat_list <- scan(args[4], what="", sep="\n")
 cont_list <- scan(args[5], what="", sep="\n")
+# set stopping point for
+sub_stop = args[6]
 
 # read in gene expression table and metadata row.names needs to be set to the column number where the row names are listed
 # it is important to set check.names=FALSE so that R doesn't try to change any numerical names into odd characters
@@ -144,7 +146,7 @@ model_pcs <- function(pca_matrix){
 
   # iterate only through the look first 10 PCs and extract their -log10(pval) and adj R-sq values
   for (all_factors in seq(1,length(factors_affecting_pcs))){
-    for (pc in seq(1,10)){
+    for (pc in seq(1,sub_stop)){
       pvalues[all_factors, pc] <- unlist(factors_affecting_pcs[all_factors][[1]][[pc]][[2]])
       adjRsq[all_factors, pc] <- unlist(factors_affecting_pcs[all_factors][[1]][[pc]][[1]])
     }
@@ -152,11 +154,11 @@ model_pcs <- function(pca_matrix){
 
   # get the row and column names match the p-values
   rownames(pvalues) <- names(factors_affecting_pcs)
-  colnames(pvalues) <- unlist(lapply(seq(1,10),function(x) paste(c('PC',x),collapse='')))
+  colnames(pvalues) <- unlist(lapply(seq(1,sub_stop),function(x) paste(c('PC',x),collapse='')))
 
   # get the row and column names matching the adj R-sq values
   rownames(adjRsq) <- names(factors_affecting_pcs)
-  colnames(adjRsq) <- unlist(lapply(seq(1,10),function(x) paste(c('PC',x),collapse='')))
+  colnames(adjRsq) <- unlist(lapply(seq(1,sub_stop),function(x) paste(c('PC',x),collapse='')))
 
   # round all -log10(pvalue) in the dataframe to three decimal places
   is.num <- sapply(pvalues, is.numeric)
@@ -183,8 +185,9 @@ regress_categorical <- function(pca_matrix, metadata_sorted, category){
 }
 regress_continuous <- function(pca_matrix, metadata_sorted, continuous){
     for (pc in seq(1,dim(pca_matrix$rotation)[2])){
-  linear_model <- lm(pca_matrix$x[,pc] ~ na.omit(metadata_sorted[,continuous]))
-  pca_matrix$x[,pc]  <- linear_model$residuals    }
+      linear_model <- lm(pca_matrix$x[,pc] ~ na.omit(metadata_sorted[,continuous]))
+      pca_matrix$x[,pc]  <- linear_model$residuals
+  }
 
     # call function again on regressed out variables
     model_pcs(pca_matrix)

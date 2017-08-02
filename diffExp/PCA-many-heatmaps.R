@@ -18,6 +18,8 @@ library(gplots)
 
 # output_file is the name of the PDF the user would like to create and write to
 # the pdf() function actually creates the pdf
+# temp args array to test script
+#args = c("U049MAI_pca.pdf", "U049MAI_gene_eff_cts.csv", "test_metadata.csv", "cat_list.txt", "cont_list.txt", 6)
 output_file = args[1]
 pdf(file = output_file)
 
@@ -108,7 +110,7 @@ build_categorical_model <- function(factors_affecting_pcs, category, metadata_so
     factors_affecting_pcs[[category]][[as.character(pc)]]=list()
     factors_affecting_pcs[[category]][[as.character(pc)]][['adj.r.squared']]=summary(linear_model)$adj.r.squared
     factors_affecting_pcs[[category]][[as.character(pc)]][['-log10Pval']]=-log10(anova(linear_model)$Pr[1])
-    # return(factors_affecting_pcs)
+    return(factors_affecting_pcs)
 }
 
 build_continuous_model <- function(factors_affecting_pcs, continuous_variable, metadata_sorted, pca_matrix, pc){
@@ -116,7 +118,7 @@ build_continuous_model <- function(factors_affecting_pcs, continuous_variable, m
     factors_affecting_pcs[[continuous_variable]][[as.character(pc)]]=list()
     factors_affecting_pcs[[continuous_variable]][[as.character(pc)]][['adj.r.squared']]=summary(linear_model)$adj.r.squared
     factors_affecting_pcs[[continuous_variable]][[as.character(pc)]][['-log10Pval']]=-log10(anova(linear_model)$Pr[1])
-    # return(factors_affecting_pcs)
+    return(factors_affecting_pcs)
 }
 # ************************End model functions*****************************************************
 # ***************************Function to correlate PCs with metadata******************************
@@ -132,10 +134,10 @@ model_pcs <- function(pca_matrix){
     # Note: in the linear model as.factor() should be placed around categorical variables, while it can be omitted
     # in continuous non-discrete variables
     for (category in cat_list){
-        build_categorical_model(factors_affecting_pcs, category, metadata_sorted, pca_matrix, pc)
+        factors_affecting_pcs = build_categorical_model(factors_affecting_pcs, category, metadata_sorted, pca_matrix, pc)
     }
     for (continuous_variable in cont_list){
-        build_continuous_model(factors_affecting_pcs, continuous_variable, metadata_sorted, pca_matrix, pc)
+        factors_affecting_pcs = build_continuous_model(factors_affecting_pcs, continuous_variable, metadata_sorted, pca_matrix, pc)
     }
   }
 

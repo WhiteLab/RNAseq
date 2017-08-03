@@ -1,6 +1,7 @@
 RNAseq Paired End pipeline
 ===========================
 RNAseq analysis pipeline in two parts, alignment QC and qunatification.  Tools featured are cutadapt, STAR, eXpress, picard.
+Disclaimer:  There are other modes and tools in progress outside of what's outlined here.  Use at your own risk!
 
 ## Quick Start - (ain't nobody got time for that!)
 ## CRASH COURSE RUN:
@@ -117,3 +118,40 @@ Arguments:
   <ct_list> list of express count files
   <type_list> list of transcript types to accept. Type None not to use one
   <field> name of field to collapse on or default for est_counts
+
+
+# Software requirements
+If you are starting from scratch, with some modification, this pipeline can be run on a blank vm running linux or a server that does'nt use an object store.  Be aware that new versions of all likely exist now.  You can use them but you'd have to validate the options and functionality in this framework yourself!
+
+##Current setup:
+
+####cutadapt v1.8.1
+Purpose: Adapter and base quality trimming
+can be installed using:
+```
+pip install cutadapt
+```
+####bowtie2 2.2.3
+Purpose:  Used quickly at the start for insert size estimation
+Download and build from https://sourceforge.net/projects/bowtie-bio/files/bowtie2/
+
+####picard v2.0.1
+Purpose: Insert size estimation and RNAseq QC metrics
+Download jar from https://broadinstitute.github.io/picard/.  Requires java jdk
+
+####novosort 1.03.09
+Purpose:  Merge and sort bams
+Note, this is proprietary software.  Definitely worth it to shave time off of this step as the software is capable of using specified memory and processors to the full extent,  Otherwise, us picard.
+Obtain from http://www.novocraft.com/products/novosort/
+
+####fastqc 0.11.5
+Purpose: Fastq QC metrics
+Download from https://www.bioinformatics.babraham.ac.uk/projects/fastqc/
+
+####STAR v2.4.2a
+Purpose: RNAseq aligner
+Download pre-built binary from https://github.com/alexdobin/STAR
+
+####express 1.5.1
+Purpose: Transcript-level quantification
+Download from https://pachterlab.github.io/eXpress/

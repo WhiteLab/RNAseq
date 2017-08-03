@@ -8,7 +8,7 @@ Disclaimer:  There are other modes and tools in progress outside of what's outli
 You don't have time to read through what each script does, and you're a BAMF.  However, being familiar with OpenStack 
 is highly recommended.
 
-#####1) Set up vm - on head node, will give updates on set up
+##### 1) Set up vm - on head node, will give updates on set up
 VMs related to this pipeline have an image with the suffix RNAseqvx.xx and a date prefix.  Best to choose the latest.
 Image list can be viewed using:
 ```
@@ -32,7 +32,7 @@ nova list
 ```
 Be sure to transfer your .novarc credential files upon boot.
 
-#####2) Get reference files from object store
+##### 2) Get reference files from object store
 Most can be found in the container MB_TEST, object prefix GENCODE24GRCH37/ should get most of what is needed for alignment.
 **Be certain not to download to the root drive.  Ephemeral space is in /mnt, recommended to make a working directory
 there**
@@ -41,7 +41,7 @@ sudo mkdir /mnt/WORK; sudo chown ubuntu:ubuntu /mnt/WORK; swift download MB_TEST
 REFS;
 ```
 
-#####2) Create job run files
+##### 3) Create job run files
 ##### a) Get list of fastq files to process from swift, one file per line, using a new-line seprated list of bionimbus ids:
 ```
 /home/ubuntu/utility/bid_swift_list.py -c <swift container> -o <object prefix> -l <bnids list> > fastq_list 
@@ -87,7 +87,7 @@ Resultant lane_list:
     "stranded": "Y" # related flag to above, change to N if not
     }
 
-#####3) Pipeline run - QC:
+##### 4) Pipeline run - QC:
 
 ```
 /home/ubuntu/TOOLS/Scripts/alignment/pipeline_wrapper.py -f lane_list.txt -j modified_config.json -m location_of_volume_mount 2> run.log
@@ -102,7 +102,7 @@ The pipeline will iterate throught the list upload files to swift, and delete on
 /home/ubuntu/TOOLS/Scripts/alignment/qc2table.py -f <lane_list> -c <swift container> -o <swift object prefix> > qc_table.txt 2> log.txt
 ```
 
-#####4) Pipline run - Quantification:
+##### 5) Pipline run - Quantification:
 This will take the same pipeline run files from alignment and run eXpress for transcript-level quantification
 
 ```
@@ -123,35 +123,37 @@ Arguments:
 # Software requirements
 If you are starting from scratch, with some modification, this pipeline can be run on a blank vm running linux or a server that does'nt use an object store.  Be aware that new versions of all likely exist now.  You can use them but you'd have to validate the options and functionality in this framework yourself!
 
-##Current setup:
+## Current setup:
 
-####cutadapt v1.8.1
+#### cutadapt v1.8.1
 Purpose: Adapter and base quality trimming
 can be installed using:
+
 ```
 pip install cutadapt
 ```
-####bowtie2 2.2.3
+
+#### bowtie2 2.2.3
 Purpose:  Used quickly at the start for insert size estimation
 Download and build from https://sourceforge.net/projects/bowtie-bio/files/bowtie2/
 
-####picard v2.0.1
+#### picard v2.0.1
 Purpose: Insert size estimation and RNAseq QC metrics
 Download jar from https://broadinstitute.github.io/picard/.  Requires java jdk
 
-####novosort 1.03.09
+#### novosort 1.03.09
 Purpose:  Merge and sort bams
 Note, this is proprietary software.  Definitely worth it to shave time off of this step as the software is capable of using specified memory and processors to the full extent,  Otherwise, us picard.
 Obtain from http://www.novocraft.com/products/novosort/
 
-####fastqc 0.11.5
+#### fastqc 0.11.5
 Purpose: Fastq QC metrics
 Download from https://www.bioinformatics.babraham.ac.uk/projects/fastqc/
 
-####STAR v2.4.2a
+#### STAR v2.4.2a
 Purpose: RNAseq aligner
 Download pre-built binary from https://github.com/alexdobin/STAR
 
-####express 1.5.1
+#### express 1.5.1
 Purpose: Transcript-level quantification
 Download from https://pachterlab.github.io/eXpress/

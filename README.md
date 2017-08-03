@@ -1,6 +1,105 @@
 RNAseq Paired End pipeline
 ===========================
-Adapted from Xiyao's pipeline to run on PDC by Miguel Brown, 2015 May
+RNAseq analysis pipeline in two parts, alignment QC and qunatification.  Tools featured are cutadapt, STAR, eXpress, picard.
+
+## Quick Start - (ain't nobody got time for that!)
+## CRASH COURSE RUN:
+You don't have time to read through what each script does, and you're a BAMF.  However, being familiar with OpenStack 
+is highly recommended.
+
+#####1) Set up vm - on head node, will give updates on set up
+VMs related to this pipeline have an image with the suffix RNAseqvx.xx and a date prefix.  Best to choose the latest.
+Image list can be viewed using:
+```
+nova image-list
+```
+Find the ID of the image and boot a vm from it.  You can get a list of "flavors;" this sets up number of cpus, ram, and
+ disk space.  An flavor with 8 cpus, 32GB RAM, and 400GB ephemeral is recommended.  Flavors can be listed using the 
+ following:
+```
+nova flavor-list
+```
+Boot vm with your open stack key:
+```
+nova boot --image <image-id> --flavor <flavor-id> --key-name your_key DESIRED_VM_NAME
+```
+
+After issuing the command, you'll get an ID for your vm.  You can use this to track boot progress, listing the 
+current servers:
+```
+nova list
+```
+Be sure to transfer your .novarc credential files upon boot.
+
+#####2) Get reference files from object store
+Most can be found in the container MB_TEST, object prefix GENCODE24GRCH37/ should get most of what is needed for alignment.
+**Be certain not to download to the root drive.  Ephemeral space is in /mnt, recommended to make a working directory
+there**
+```
+sudo mkdir /mnt/WORK; sudo chown ubuntu:ubuntu /mnt/WORK; swift download MB_TEST --prefix GENCODE24GRCH37/; mv GENCODE24GRCH37
+REFS;
+```
+
+#####2) Create job run files
+##### a) Get list of fastq files to process from swift, one file per line, using a new-line seprated list of bionimbus ids:
+```
+/home/ubuntu/utility/bid_swift_list.py -c <swift container> -o <object prefix> -l <bnids list> > fastq_list 
+```
+##### b) Use this list to create a run file, in this example for custom capture:
+```
+/home/ubuntu/utility/fq2lane.py -f <fastq_list> -s <seq type> > lane_list
+```
+Typical fastq list:
+
+RAW/2014-2230/2014-2230_141212_SN1070_0312_BHB5BNADXX_2_1_sequence.txt.gz
+RAW/2014-2230/2014-2230_141212_SN1070_0312_BHB5BNADXX_2_2_sequence.txt.gz
+RAW/2014-2231/2014-2231_141212_SN1070_0312_BHB5BNADXX_2_1_sequence.txt.gz
+RAW/2014-2231/2014-2231_141212_SN1070_0312_BHB5BNADXX_2_2_sequence.txt.gz
+RAW/2014-2232/2014-2232_141212_SN1070_0312_BHB5BNADXX_2_1_sequence.txt.gz
+RAW/2014-2232/2014-2232_141212_SN1070_0312_BHB5BNADXX_2_2_sequence.txt.gz
+RAW/2014-2232/2014-2232_150501_SN1070_0375_AH3L5KBCXX_1_1_sequence.txt.gz
+RAW/2014-2232/2014-2232_150501_SN1070_0375_AH3L5KBCXX_1_2_sequence.txt.gz
+RAW/2014-2233/2014-2233_141212_SN1070_0312_BHB5BNADXX_2_1_sequence.txt.gz
+RAW/2014-2233/2014-2233_141212_SN1070_0312_BHB5BNADXX_2_2_sequence.txt.gz
+
+Resultant lane_list:
+
+2014-2232	polyA	141212_SN1070_0312_BHB5BNADXX_2, 150501_SN1070_0375_AH3L5KBCXX_1
+2014-2233	polyA	141212_SN1070_0312_BHB5BNADXX_2
+2014-2230	polyA	141212_SN1070_0312_BHB5BNADXX_2
+2014-2231	polyA	141212_SN1070_0312_BHB5BNADXX_2
+
+##### c) Check config file - this file is typically in ~/TOOLS/Scripts/utility/config_files/v2.5_config.json, and can be copied and modified.  Fields that are likely to be adjusted:
+
+    "refs":{
+	"cont":"PANCAN", # container
+	"obj":"ALIGN", # object prefix
+
+	"config":"/home/ubuntu/TOOLS/Scripts/utility/config_files/complete_config.json" # this file location
+    },
+    "params":{
+	"threads":"8",
+	"ram":"30",
+    "r1adapt": "AGATCGGAAGAGCACACGTCTGAACTCCAGTCA", # adapter to trim from read 1
+    "r2adapt": "AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT", # adapter to trim from read2
+     "strand": "rf-stranded", # strandedness for QC and future qunatification.  change to N if not
+    "stranded": "Y" # related flag to above, change to N if not
+    }
+
+#####3) Pipeline run - QC:
+
+```
+/home/ubuntu/TOOLS/Scripts/alignment/pipeline_wrapper.py -f lane_list.txt -j modified_config.json -m location_of_volume_mount 2> run.log
+```
+-m clarification:
+ -m REF_MNT, --mount REF_MNT
+                        Reference drive mount location. Example would be
+                        /mnt/cinder/REFS_XXX
+
+The pipeline will iterate throught the list upload files to swift, and delete on the volume for next run.  Logs track most of the steps.  Multiple qc tables can ba concatenated for convenience after run using /home/ubuntu/TOOLS/Scripts/alignment/merge_qc_stats.py:
+```
+/home/ubuntu/TOOLS/Scripts/alignment/qc2table.py -f <lane_list> -c <swift container> -o <swift object prefix> > qc_table.txt 2> log.txt
+```
 
 ## UTILITY:
 

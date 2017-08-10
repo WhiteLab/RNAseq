@@ -1,7 +1,7 @@
 # allows for use with Rscript bash functionality
 args <- commandArgs(TRUE)
 if (length(args) < 4){
-    stop('Usage: Rscript RNA-seq-normalization-DE-analyis-MB_edit.R {counts.csv} {metadata.csv} {patient_name} {regression values.txt} {control_value}')
+    stop('Usage: Rscript RNA-seq-normalization-DE-analyis-MB_edit.R {counts.csv} {metadata.csv} {patient_name} {control_value}')
 }
 # if using half-rack VM, enviromental proxy setting is required
 Sys.setenv(http_proxy="http://cloud-proxy:3128")
@@ -9,7 +9,7 @@ Sys.setenv(https_proxy="http://cloud-proxy:3128")
 library(data.table)
 options(BioC_mirror="http://master.bioconductor.org")
 source("http://master.bioconductor.org/biocLite.R")
-biocLite(c("DESeq2", "GenomicFeatures", "AnnotationDbi", "limma"))
+# biocLite(c("DESeq2", "GenomicFeatures", "AnnotationDbi", "limma"))
 library("DESeq2")
 library("limma")
 library("BiocParallel")

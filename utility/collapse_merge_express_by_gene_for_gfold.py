@@ -18,6 +18,7 @@ args = docopt(__doc__)
 import sys
 import os
 import re
+import pdb
 
 s_list = []
 g_dict = {}
@@ -82,7 +83,7 @@ for gene in g_list:
             length = tbl_dict[gene][samp]['len']
             tx_ct = tbl_dict[gene][samp]['tct']
             if tx_ct > 1:
-                length = length**(1/tx_ct)
+                length = length**(1/float(tx_ct))
             length = str(int(round(length)))
             out_fh[samp].write('\t' + ct + '\t' + length + '\t' + ct + '\n')
         else:

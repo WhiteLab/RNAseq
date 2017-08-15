@@ -35,7 +35,7 @@ metadata_dataframe <- as.data.frame(metadata)
 
 # sorts dataframes so columns and rows are in same BID order for count data and metadata
 counts_sorted <- total_raw_read_counts_dataframe[,order(colnames(total_raw_read_counts_dataframe))]
-metadata_sorted <- metadata_dataframe[order(rownames(metadata_dataframe)),]
+metadata_sorted <- metadata_dataframe[order(rownames(metadata_dataframe))]
 
 # below statement should result in TRUE, else the two dataframes are not properly sorted
 all(rownames(metadata_sorted)==colnames(counts_sorted))
@@ -49,7 +49,7 @@ all(rownames(metadata_sorted)==colnames(counts_sorted))
 #   4)  Any variable that appears in the design formula must be present as a column in the metadata
 
 # hard code factors for now
-deseq_obj <- DESeqDataSetFromMatrix(countData= counts_sorted, colData=metadata_sorted , design= ~ as.factor(Kit) + Biotype)
+deseq_obj <- DESeqDataSetFromMatrix(countData= counts_sorted, colData=metadata_sorted , design= ~ Biotype)
 
 #set comparison reference/control
 # remember to change the relevel when comparing non-controls
@@ -75,7 +75,7 @@ boxplot(log10(assays(deseq_obj)[["cooks"]]), range=0, las=2)
 # output normalized count data
 # write.csv(file="") Input the FULL Path and file name of the normalized counts matrix
 norm_counts <- counts(deseq_obj, normalized=TRUE)
-write.csv(norm_counts, file=paste(patient, '_norm_counts.csv'))
+write.csv(norm_counts, file=paste(patient, 'norm_counts.csv', sep="_"))
 
 for (btype in metadata_sorted$Biotype){
     if (btype != control){
@@ -98,7 +98,7 @@ for (btype in metadata_sorted$Biotype){
         # in at least 3 or more biological replicates
         resOrdered_c_bp <- de_results_control_bp[order(de_results_control_bp$padj),]
         summary(de_results_control_bp)
-        write.csv(as.data.frame(resOrdered_c_bp), file=paste(patient, btype, "vs", control, "_diff_exp.csv", sep="_"))
+        write.csv(as.data.frame(resOrdered_c_bp), file=paste(patient, btype, "vs", control, "diff_exp.csv", sep="_"))
 
     }
 }

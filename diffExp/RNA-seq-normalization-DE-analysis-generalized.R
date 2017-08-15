@@ -17,9 +17,9 @@ register(MulticoreParam(7)) # this can be changed to the number of processors/th
 # metadata MUST have a header and row names and be in CSV format, header=metric names (i.e. sex, diagnosis, RIN, etc...), and row names are the unique sampleIDs or BIDs
 # NOTE! row.names=<INTEGER> specifies which column in the data sheets have row names listed, this should be changed depending on the location
 # IMPORTANT!  All gene counts MUST BE INTEGERS, no floats, so please round all counts to nearest INT
-total_raw_counts <- read.table("/mnt/express_effective_counts_matrix_rounded_gene_level.csv", header=TRUE, row.names=432, check.names=FALSE, sep=",")
+total_raw_counts <- read.table("/mnt/WORK/2017-Aug-9_org_proj_rnaseq/study_eff_counts.csv", header=TRUE, row.names=1, check.names=FALSE, sep=",")
 total_raw_counts <- total_raw_counts[ , -which(names(total_raw_counts) %in% c("nothing"))]
-metadata <- read.table("/mnt/synapse-meta-clinical-technical-data-BrainGVEX-RNAseq-TonyaCurrated-V2-MISSING-DATA-FILLED-WITH-AVERAGES.csv", header=TRUE, row.names=1, check.names=FALSE, sep=",")
+metadata <- read.table("/mnt/WORK/2017-Aug-9_org_proj_rnaseq/metadata_clean.csv", header=TRUE, row.names=1, check.names=FALSE, sep=",")
 
 # UNCOMMMENT IF ONLY USING A SUBSET OF DATA!! 
 # if using a SUBSET of the entire data please provide a metadata sheet with the removed samples
@@ -60,14 +60,14 @@ all(rownames(metadata_sorted)==colnames(counts_sorted))
 #   3)  any covariates in the model that are CATEGORIGAL must have the as.factor() function applied to it or
 #       it will treat it as a coninuous variable
 #   4)  Any variable that appears in the design formula must be present as a column in the metadata
-deseq_obj <- DESeqDataSetFromMatrix(countData= counts_sorted, colData=metadata_sorted , design= ~ PC1 + as.factor(FlowcellBatch) + UF_MEDIAN_5PRIME_TO_3PRIME_BIAS + PMI + as.factor(Sex) + RIN + AgeDeath + Diagnosis)
+deseq_obj <- DESeqDataSetFromMatrix(countData= counts_sorted, colData=metadata_sorted , design= ~ as.factor(Kit) + Biotype)
 
 #set comparison reference/control
 # remember to change the relevel when comparing non-controls
 # this tells DESeq what the baseline sample should be, in this case it the Control labeled patients located in the
 # Diagnosis column of the deseq_object
 print("Releveling reference to Control")
-deseq_obj$Diagnosis <- relevel(factor(deseq_obj$Diagnosis), ref="Control")
+deseq_obj$Biotype <- relevel(factor(deseq_obj$Biotype), ref="Normal")
 
 # pre-filtering, remove rows in count data with 0 or 1 reads, this can be changes to anything you want to filter out
 # keep if mind for example if you are looking to remove all genes that have only 1 count in 80% of all samples, the 
@@ -79,14 +79,14 @@ deseq_obj <- deseq_obj[rowSums(counts(deseq_obj)) > 1, ]
 # parallel means the process will be parallelized depening on how many processors were specified for use above
 # at this step, all total reads will be normalized, variance and dispersion normalization via negative binomial distribution
 # will be performed
-deseq_obj <- DESeq(deseq_obj, parallel=TRUE, betaPrior=FALSE)
+deseq_obj <- DESeq(deseq_obj, parallel=FALSE, betaPrior=FALSE)
 
 # At this step the results will be extracted.  Parallel refers to the number of processor that will be used to
 # speed up the extraction, if TRUE it means to use parallelization. Contrast tells DESeq how to present the results
 # In this case, it means go to the Diagnosis column of the metadata and put "BP" as the numerator, and "Control"
 # as the denominator when reporting up- and down-regulation of expression.  The essentially means to use "Control"
 # as the baseline level of counts
-de_results_control_bp <- results(deseq_obj, parallel=TRUE, contrast=c("Diagnosis", "BP", "Control"))
+de_results_control_bp <- results(deseq_obj, parallel=FALSE, contrast=c("Biotype", "Tumor", "Normal"))
 
 #de_results_control_bp <- results(deseq_obj, parallel=TRUE)
 
@@ -97,7 +97,7 @@ de_results_control_bp <- results(deseq_obj, parallel=TRUE, contrast=c("Diagnosis
 # in at least 3 or more biological replicates
 resOrdered_c_bp <- de_results_control_bp[order(de_results_control_bp$padj),]
 summary(de_results_control_bp)
-write.csv(as.data.frame(resOrdered_c_bp), file="/mnt/de_control_bp/final-all-bp-control-samples-pc1_noERCC_53bias-PMI-sex-FlowcellBatch-RIN-AgeDeath-Diagnosis_categorical_design_as_factor.csv")
+write.csv(as.data.frame(resOrdered_c_bp), file="/mnt/WORK/2017-Aug-9_org_proj_rnaseq/T_v_N_kit_regressed_all.csv")
 
 # output Cook Distance for outlier detection on a sample level
 par(mar=c(8,5,2,2))
@@ -106,4 +106,4 @@ boxplot(log10(assays(deseq_obj)[["cooks"]]), range=0, las=2)
 # output normalized count data
 # write.csv(file="") Input the FULL Path and file name of the normalized counts matrix
 norm_counts <- counts(deseq_obj, normalized=TRUE)
-write.csv(norm_counts, file='/mnt/de_control_bp/final-normalized-counts-bp-control-samples-pc1_noERCC_PMI-sex-brainbank-53bias-FlowcellBatch-RIN-AgeDeath-Diagnosis-only-in-model_categorical_design_test_as_factor.csv')
+write.csv(norm_counts, file='/mnt/WORK/2017-Aug-9_org_proj_rnaseq/T_v_N_kit_regressed_norm_cts.csv')

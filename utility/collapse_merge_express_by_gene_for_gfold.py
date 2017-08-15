@@ -60,11 +60,17 @@ for report in open(args['<ct_list>']):
                 g_dict[gene] = 1
                 tbl_dict[gene] = {}
             if parts[0] not in tbl_dict[gene]:
-                tbl_dict[gene][parts[0]] = 0.0
-            tbl_dict[gene][parts[0]] += float(info[f])
+                tbl_dict[gene][parts[0]] = {}
+                tbl_dict[gene][parts[0]]['ct'] = 0.0
+                tbl_dict[gene][parts[0]]['len'] = float(info[5])
+                tbl_dict[gene][parts[0]]['tct'] = 0
+            else:
+                tbl_dict[gene][parts[0]]['len'] = tbl_dict[gene][parts[0]]['len'] * float(info[5])
+            tbl_dict[gene][parts[0]]['ct'] += float(info[f])
+            tbl_dict[gene][parts[0]]['tct'] += 1
     fh.close()
 
-# no header for gfold output, gene_id\tgene_sym\tcount_chosen\tfaked_gene_len\tcount_chosen
+# no header for gfold output, gene_id\tgene_sym\tcount_chosen\tgeo_mean_gene_len_gene_len\tcount_chosen
 out_fh = {}
 for samp in s_list:
     out_fh[samp] = open(samp + '.read_cnt', 'w')
@@ -72,8 +78,13 @@ for gene in g_list:
     for samp in s_list:
         out_fh[samp].write(gene + '\t' + gene)
         if samp in tbl_dict[gene]:
-            ct = str(int(round(tbl_dict[gene][samp])))
-            out_fh[samp].write('\t' + ct + '\t1\t' + ct + '\n')
+            ct = str(int(round(tbl_dict[gene][samp]['ct'])))
+            length = tbl_dict[gene][samp]['len']
+            tx_ct = tbl_dict[gene][samp]['tct']
+            if tx_ct > 1:
+                length = length**(1/tx_ct)
+            length = str(int(round(length)))
+            out_fh[samp].write('\t' + ct + '\t' + length + '\t' + ct + '\n')
         else:
             out_fh[samp].write('\t0\t1\t0\n')
 

@@ -24,10 +24,10 @@ def lane_express_quant(bams, config_file, ref_mnt):
         loc = wd + root + '.log'
         express_cmd = 'mkdir ' + wd + ';'
         if stranded == 'N':
-            express_cmd += express + ' ' + transcriptome + ' ' + bam + ' --no-update-check -o ' + bam_dir + ' -m '\
+            express_cmd += express + ' ' + transcriptome + ' ' + bam + ' --no-update-check -o ' + wd + ' -m '\
                           + x + ' -s ' + s + ' --logtostderr 2>> ' + loc + ';'
         else:
-            express_cmd += express + ' ' + transcriptome + ' ' + bam + ' --no-update-check -o ' + bam_dir + ' --'\
+            express_cmd += express + ' ' + transcriptome + ' ' + bam + ' --no-update-check -o ' + wd + ' --'\
                           + strand + ' -m ' + x + ' -s ' + s + ' --logtostderr 2>> ' + loc + ';'
 
         express_cmd += 'mv ' + wd + 'results.xprs ' + wd + root + '.express_quantification.txt; mv ' + wd \

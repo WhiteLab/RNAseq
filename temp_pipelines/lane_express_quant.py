@@ -18,7 +18,8 @@ def lane_express_quant(bams, config_file, ref_mnt):
         parts = root.split('_')
         qc_file = 'ALIGN_RNASEQ/' + parts[0] + '/QC/' + root + '.qc_stats.json'
         qc_data = json.loads(open(qc_file, 'r').read())
-        (x, s) = (qc_data['picard_stats']['x_ins_size'], qc_data['picard_stats']['s_ins_size'])
+        (x, s) = (str(int(round(qc_data['picard_stats']['x_ins_size']))),
+                  str(int(round(qc_data['picard_stats']['s_ins_size']))))
         wd = bam_dir + '/' + root + '/'
         loc = wd + root + '.log'
         express_cmd = 'mkdir ' + wd + ';'

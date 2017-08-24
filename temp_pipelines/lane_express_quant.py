@@ -33,8 +33,8 @@ def lane_express_quant(bams, config_file, ref_mnt):
         express_cmd += 'mv ' + wd + 'results.xprs ' + wd + root + '.express_quantification.txt; mv ' + wd \
                        + 'params.xprs ' + wd + root + '.params.xprs;'
         job_list.append(express_cmd)
-        job_manager(job_list, th)
-        return 0
+    job_manager(job_list, th)
+    return 0
 
 if __name__ == "__main__":
     import argparse

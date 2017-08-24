@@ -53,6 +53,4 @@ if __name__ == "__main__":
     bams = inputs.bams
     config_file = inputs.config_file
     ref_mnt = inputs.ref_mnt
-    x = inputs.x
-    s = inputs.s
     lane_express_quant(bams, config_file, ref_mnt)

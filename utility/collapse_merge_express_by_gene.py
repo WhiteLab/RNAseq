@@ -2,12 +2,13 @@
 """
 Combines express output tables, collapsing on gene symbol by effective count
 
-Usage: collapse_merge_express_by_gene.py <ct_list> <type_list> <field>
+Usage: collapse_merge_express_by_gene.py <ct_list> <type_list> <field> <round>
 
 Arguments:
   <ct_list> list of express count files
   <type_list> list of transcript types to accept. Type None not to use one
   <field> name of field to collapse on or default for est_counts
+  <round> \'y\' to round values after collapsing
 
 Options:
   -h
@@ -65,11 +66,21 @@ for report in open(args['<ct_list>']):
     fh.close()
 
 print 'Sample/Gene\t' + '\t'.join(s_list)
-for gene in g_list:
-    sys.stdout.write(gene)
-    for samp in s_list:
-        if samp in tbl_dict[gene]:
-            sys.stdout.write('\t' + str(int(round(tbl_dict[gene][samp]))))
-        else:
-            sys.stdout.write('\t0')
-    print
+if args['<round>'] == 'y':
+    for gene in g_list:
+        sys.stdout.write(gene)
+        for samp in s_list:
+            if samp in tbl_dict[gene]:
+                sys.stdout.write('\t' + str(int(round(tbl_dict[gene][samp]))))
+            else:
+                sys.stdout.write('\t0')
+        print
+else:
+    for gene in g_list:
+        sys.stdout.write(gene)
+        for samp in s_list:
+            if samp in tbl_dict[gene]:
+                sys.stdout.write('\t' + str(tbl_dict[gene][samp]))
+            else:
+                sys.stdout.write('\t0')
+        print

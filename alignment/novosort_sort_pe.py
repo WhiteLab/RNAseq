@@ -1,21 +1,21 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 import sys
-sys.path.append('/home/ubuntu/TOOLS/Scripts/')
+sys.path.append('/cephfs/users/mbrown/RNAseq')
 from utility.date_time import date_time
 import subprocess
 from utility.log import log
 
 
-def novosort_sort_pe(novosort, sample, log_dir, t, mem):
-    novosort_sort_pe_cmd = 'mkdir novosort_tmp;' + novosort + " --threads " + t + " --ram " + mem \
-                           + "G --tmpdir novosort_tmp --output " + sample + ".srt.bam --index  " + sample + ".bam > " \
+def novosort_sort_pe(novosort, sample, log_dir, t, mem, temp):
+    novosort_sort_pe_cmd = 'mkdir ' + temp + ';' + novosort + " --threads " + t + " --ram " + mem \
+                           + "G --tmpdir  " + temp + " --output " + sample + ".srt.bam --index  " + sample + ".bam > " \
                            + log_dir + sample + ".novosort.sort.pe.log 2>&1"
     log(log_dir + sample + ".novosort.sort.pe.log", date_time() + novosort_sort_pe_cmd + "\n")
     f = 0
     try:
         f = subprocess.call(novosort_sort_pe_cmd, shell=True)
-        rm_tmp = 'rm -rf novosort_tmp'
-        subprocess.call(rm_tmp, shell=True)
+        #rm_tmp = 'rm -rf novosort_tmp'
+        #subprocess.call(rm_tmp, shell=True)
     except:
         log(log_dir + sample + ".novosort.sort.pe.log", 'novosort sort failed for sample ' + sample + '\n')
         exit(1)
@@ -31,11 +31,13 @@ if __name__ == "__main__":
     parser.add_argument('-l', '--log', action='store', dest='log_dir', help='LOG directory location')
     parser.add_argument('-t', '--threads', action='store', dest='t', help='Number of threads')
     parser.add_argument('-m', '--memory', action='store', dest='mem', help='Memory - in GB')
+    parser.add_argument('-d', '--temp_dir', action='store', dest='temp', help='temp dir for sort')
 
     if len(sys.argv) == 1:
         parser.print_help()
         sys.exit(1)
 
     inputs = parser.parse_args()
-    (novosort, sample, log_dir, t, mem) = (inputs.novosort, inputs.sample, inputs.log_dir, inputs.t, inputs.mem)
-    novosort_sort_pe(novosort, sample, log_dir, t, mem)
+    (novosort, sample, log_dir, t, mem, temp) = (inputs.novosort, inputs.sample, inputs.log_dir, inputs.t, inputs.mem,
+                                                 inputs.temp)
+    novosort_sort_pe(novosort, sample, log_dir, t, mem, temp)

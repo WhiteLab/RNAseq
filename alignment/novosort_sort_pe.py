@@ -4,12 +4,14 @@ sys.path.append('/cephfs/users/mbrown/RNAseq')
 from utility.date_time import date_time
 import subprocess
 from utility.log import log
+import os
 
 
 def novosort_sort_pe(novosort, sample, log_dir, t, mem, temp):
+    samp_root = os.path.basename(sample)
     novosort_sort_pe_cmd = 'mkdir ' + temp + ';' + novosort + " --threads " + t + " --ram " + mem \
                            + "G --tmpdir  " + temp + " --output " + sample + ".srt.bam --index  " + sample + ".bam > " \
-                           + log_dir + sample + ".novosort.sort.pe.log 2>&1"
+                           + log_dir + samp_root + ".novosort.sort.pe.log 2>&1"
     log(log_dir + sample + ".novosort.sort.pe.log", date_time() + novosort_sort_pe_cmd + "\n")
     f = 0
     try:

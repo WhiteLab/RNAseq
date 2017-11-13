@@ -10,7 +10,7 @@ import os
 def downsample_bams(samtools, bam, frac, out_dir, th):
     out_root = os.path.basename(bam.replace('.bam', ''))
     cmd = samtools + ' view --threads ' + th + ' -b ' + bam + ' -s ' + frac + ' > ' + out_dir + '/' + out_root \
-                                          + '_subsample_ ' + frac + '.bam'
+                                          + '_subsample_' + frac + '.bam'
     sys.stderr.write(date_time() + 'Downsampling ' + bam + '\n' + cmd + '\n')
     subprocess.call(cmd, shell=True)
     sys.stderr.write(date_time() + 'process complete!\n')

@@ -4,10 +4,11 @@ import sys
 sys.path.append('/cephfs/users/mbrown/RNAseq')
 from utility.date_time import date_time
 import subprocess
+import os
 
 
 def downsample_bams(samtools, bam, frac, out_dir, th):
-    out_root = bam.replace('.bam','')
+    out_root = os.path.basename(bam.replace('.bam', ''))
     cmd = samtools + ' view --threads ' + th + ' -b ' + bam + ' -s ' + frac + ' > ' + out_dir + '/' + out_root \
                                           + '_subsample_ ' + frac + '.bam'
     sys.stderr.write(date_time() + 'Downsampling ' + bam + '\n' + cmd + '\n')

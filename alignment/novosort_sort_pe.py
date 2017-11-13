@@ -12,7 +12,7 @@ def novosort_sort_pe(novosort, sample, log_dir, t, mem, temp):
     novosort_sort_pe_cmd = 'mkdir ' + temp + ';' + novosort + " --threads " + t + " --ram " + mem \
                            + "G --tmpdir  " + temp + " --output " + sample + ".srt.bam --index  " + sample + ".bam > " \
                            + log_dir + samp_root + ".novosort.sort.pe.log 2>&1"
-    log(log_dir + sample + ".novosort.sort.pe.log", date_time() + novosort_sort_pe_cmd + "\n")
+    log(log_dir + samp_root + ".novosort.sort.pe.log", date_time() + novosort_sort_pe_cmd + "\n")
     f = 0
     try:
         f = subprocess.call(novosort_sort_pe_cmd, shell=True)

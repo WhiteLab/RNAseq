@@ -17,7 +17,7 @@
     "VEP": "/home/ubuntu/TOOLS/ensembl-tools-release-85/scripts/variant_effect_predictor/variant_effect_predictor.pl",
     "cufflinks": "/home/ubuntu/TOOLS/cufflinks-2.2.1.Linux_x86_64/cufflinks",
     "htseq-count": "htseq-count",
-    "downsample_bams": "/cephfs/users/mbrown/RNAseq/temp_pipelines/downsample_bam.py"
+    "downsample_bam": "/cephfs/users/mbrown/RNAseq/temp_pipelines/downsample_bam.py"
   },
   "refs": {
     "bwt2": "REFS/GENCODE24GRCH37/Transcript_files/gencode.v24lift37.transcripts",

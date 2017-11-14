@@ -7,7 +7,7 @@ import subprocess
 import os
 
 
-def downsample_bams(samtools, bam, frac, out_dir, th):
+def downsample_bam(samtools, bam, frac, out_dir, th):
     out_root = os.path.basename(bam.replace('.bam', ''))
     cmd = samtools + ' view --threads ' + th + ' -b ' + bam + ' -s ' + frac + ' > ' + out_dir + '/' + out_root \
                                           + '_subsample_' + frac + '.bam'
@@ -34,4 +34,4 @@ if __name__ == "__main__":
 
     inputs = parser.parse_args()
     (samtools, bam, frac, out_dir, th) = (inputs.samtools, inputs.bam, inputs.frac, inputs.out_dir, inputs.threads)
-    downsample_bams(samtools, bam, frac, out_dir, th)
+    downsample_bam(samtools, bam, frac, out_dir, th)

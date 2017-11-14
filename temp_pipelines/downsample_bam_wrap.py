@@ -42,7 +42,7 @@ def downsample_pipe(bam_list, config_file, depth):
         subprocess.call(cmd, shell=True)
 
 
-def main():
+if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description='Downsample bams to desired read depth')
     parser.add_argument('-l', '--bam_list', action='store', dest='bam_list', help='List of bam files')

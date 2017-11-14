@@ -37,7 +37,8 @@ def downsample_pipe(bam_list, config_file, depth):
         sys.stderr.write(date_time() + 'Calculating downsample fraction\n')
         frac = get_from_depth(qc_root, depth)
         # submit to job queue
-        cmd = ' '.join(('sbatch', '-c', threads, downsample_bam, '-b ', bam, '-f', frac, '-o ', bam_dir, '-t', threads))
+        cmd = ' '.join(('sbatch', '-c', threads, '--oversubscribe' ,downsample_bam, '-b ', bam, '-f', frac, '-o ',
+                        bam_dir, '-t', threads, '-s', samtools))
         sys.stderr.write(date_time() + 'Submitting to queue ' + cmd + '\n')
         subprocess.call(cmd, shell=True)
 

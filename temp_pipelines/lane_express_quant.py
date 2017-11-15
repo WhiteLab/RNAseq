@@ -3,6 +3,7 @@ import sys
 sys.path.append('/cephfs/users/mbrown/RNAseq')
 import os
 import json
+import re
 from analysis.express_quant import parse_config
 from subprocess import call
 
@@ -11,7 +12,8 @@ def lane_express_quant(bams, config_file):
     (stranded, strand, express, transcriptome) = parse_config(config_file)
     for bam in open(bams):
         bam = bam.rstrip('\n')
-        (bam_dir, root) = (os.path.dirname(bam), os.path.basename(bam.replace('.Aligned.toTranscriptome.out.*', '')))
+        bam_dir =  os.path.dirname(bam)
+        root = os.path.basename(re.sub('.Aligned.toTranscriptome.out.*', '', bam))
         qc_dir = bam_dir.replace('BAMS', 'QC')
         qc_file = qc_dir + '/' + root + '.qc_stats.json'
         qc_data = json.loads(open(qc_file, 'r').read())

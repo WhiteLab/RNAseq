@@ -7,11 +7,15 @@ from utility.log import log
 import os
 
 
-def novosort_sort_pe(novosort, sample, log_dir, t, mem, temp):
+def novosort_sort_pe(novosort, sample, log_dir, t, mem, temp, stype):
     samp_root = os.path.basename(sample)
     novosort_sort_pe_cmd = 'mkdir ' + temp + ';' + novosort + " --threads " + t + " --ram " + mem \
                            + "G --tmpdir  " + temp + " --output " + sample + ".srt.bam --index  " + sample + ".bam > " \
                            + log_dir + samp_root + ".novosort.sort.pe.log 2>&1"
+    if stype == 'name':
+        novosort_sort_pe_cmd = 'mkdir ' + temp + ';' + novosort + " --threads " + t + " --ram " + mem \
+                               + "G --tmpdir  " + temp + " --output " + sample + ".nsrt.bam -n  " + sample + ".bam > " \
+                               + log_dir + samp_root + ".novosort.sort.pe.log 2>&1"
     log(log_dir + samp_root + ".novosort.sort.pe.log", date_time() + novosort_sort_pe_cmd + "\n")
     f = 0
     try:
@@ -34,12 +38,13 @@ if __name__ == "__main__":
     parser.add_argument('-t', '--threads', action='store', dest='t', help='Number of threads')
     parser.add_argument('-m', '--memory', action='store', dest='mem', help='Memory - in GB')
     parser.add_argument('-d', '--temp_dir', action='store', dest='temp', help='temp dir for sort')
+    parser.add_argument('-y', '--sort_type', action='store', dest='stype', help='type of sort, name or coord')
 
     if len(sys.argv) == 1:
         parser.print_help()
         sys.exit(1)
 
     inputs = parser.parse_args()
-    (novosort, sample, log_dir, t, mem, temp) = (inputs.novosort, inputs.sample, inputs.log_dir, inputs.t, inputs.mem,
-                                                 inputs.temp)
-    novosort_sort_pe(novosort, sample, log_dir, t, mem, temp)
+    (novosort, sample, log_dir, t, mem, temp, stype) = (inputs.novosort, inputs.sample, inputs.log_dir, inputs.t, inputs.mem,
+                                                 inputs.temp, inputs.stype)
+    novosort_sort_pe(novosort, sample, log_dir, t, mem, temp, stype)

@@ -9,6 +9,7 @@
     "picard": "/home/ubuntu/TOOLS/picard-tools-2.0.1/dist/picard.jar",
     "novosort": "/cephfs/software/novosort/novosort",
     "express" : "/cephfs/software/express-1.5.1-linux_x86_64/express",
+    "express_sl": "/cephfs/users/mbrown/RNAseq/temp_pipelines/express.sl",
     "mouse_filter": "/home/ubuntu/TOOLS/mouse_filter/filter_bam.py",
     "filter_bam": "/home/ubuntu/utilities/filter_bam_by_transcript.py",
     "star": "/home/ubuntu/TOOLS/STAR-STAR_2.4.2a/bin/Linux_x86_64_static/STAR",

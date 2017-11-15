@@ -4,13 +4,18 @@ sys.path.append('/cephfs/users/mbrown/RNAseq')
 import os
 import json
 import re
-from analysis.express_quant import parse_config
 from subprocess import call
 from utility.date_time import date_time
 
 
+def parse_config(json_config):
+    config_data = json.loads(open(json_config, 'r').read())
+    return config_data['params']['stranded'], config_data['params']['strand'], config_data['tools']['express'],\
+           config_data['tools']['express_sl'], config_data['refs']['express']
+
+
 def lane_express_quant(bams, config_file):
-    (stranded, strand, express, transcriptome) = parse_config(config_file)
+    (stranded, strand, express, transcriptome, express_sl) = parse_config(config_file)
     for bam in open(bams):
         bam = bam.rstrip('\n')
         bam_dir = os.path.dirname(bam)
@@ -29,13 +34,16 @@ def lane_express_quant(bams, config_file):
             express_cmd = express + ' ' + transcriptome + ' ' + bam + ' --no-update-check -o ' + wd + ' -m '\
                           + x + ' -s ' + s + ' --logtostderr 2>> ' + loc + ';'
         else:
-            express_cmd = express + ' ' + transcriptome + ' ' + bam + ' --no-update-check -o ' + wd + ' --'\
-                          + strand + ' -m ' + x + ' -s ' + s + ' --logtostderr 2>> ' + loc + ';'
+            express_cmd = 'sbatch -c 4 export transcriptome="' + transcriptome + '",bam="' + bam + '",wd="' + wd \
+                          + '",strand="' + strand + '",x="' + x + '",s="' + s + '",loc="' + loc + '",root="' + root \
+                          + '"'
+            # express + ' ' + transcriptome + ' ' + bam + ' --no-update-check -o ' + wd + ' --'\
+            #              + strand + ' -m ' + x + ' -s ' + s + ' --logtostderr 2>> ' + loc + ';'
 
-        express_cmd += 'mv ' + wd + 'results.xprs ' + wd + root + '.express_quantification.txt; mv ' + wd \
-                       + 'params.xprs ' + wd + root + '.params.xprs;'
+            # express_cmd += 'mv ' + wd + 'results.xprs ' + wd + root + '.express_quantification.txt; mv ' + wd \
+            #               + 'params.xprs ' + wd + root + '.params.xprs;'
         sys.stderr.write(date_time() + 'Submitting quantification job\n' + express_cmd + '\n')
-        call('sbatch -c 4 sh -c ' + express_cmd, shell=True)
+        call(express_cmd, shell=True)
 
     return 0
 

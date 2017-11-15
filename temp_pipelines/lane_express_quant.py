@@ -6,13 +6,14 @@ import json
 import re
 from analysis.express_quant import parse_config
 from subprocess import call
+from utility.date_time import date_time
 
 
 def lane_express_quant(bams, config_file):
     (stranded, strand, express, transcriptome) = parse_config(config_file)
     for bam in open(bams):
         bam = bam.rstrip('\n')
-        bam_dir =  os.path.dirname(bam)
+        bam_dir = os.path.dirname(bam)
         root = os.path.basename(re.sub('.Aligned.toTranscriptome.out.*', '', bam))
         qc_dir = bam_dir.replace('BAMS', 'QC')
         qc_file = qc_dir + '/' + root + '.qc_stats.json'
@@ -22,16 +23,19 @@ def lane_express_quant(bams, config_file):
         wd = qc_dir + '/' + root + '/'
         loc = wd + root + '.log'
         express_cmd = 'mkdir ' + wd + ';'
+        call(express_cmd, shell=True)
+        sys.stderr.write(date_time() + 'Created dir ' + wd + ' to quantify ' + bam + '\n' + express_cmd + '\n')
         if stranded == 'N':
-            express_cmd += express + ' ' + transcriptome + ' ' + bam + ' --no-update-check -o ' + wd + ' -m '\
+            express_cmd = express + ' ' + transcriptome + ' ' + bam + ' --no-update-check -o ' + wd + ' -m '\
                           + x + ' -s ' + s + ' --logtostderr 2>> ' + loc + ';'
         else:
-            express_cmd += express + ' ' + transcriptome + ' ' + bam + ' --no-update-check -o ' + wd + ' --'\
+            express_cmd = express + ' ' + transcriptome + ' ' + bam + ' --no-update-check -o ' + wd + ' --'\
                           + strand + ' -m ' + x + ' -s ' + s + ' --logtostderr 2>> ' + loc + ';'
 
         express_cmd += 'mv ' + wd + 'results.xprs ' + wd + root + '.express_quantification.txt; mv ' + wd \
                        + 'params.xprs ' + wd + root + '.params.xprs;'
-        call('sbatch -c 4 ' + express_cmd, shell=True)
+        sys.stderr.write(date_time() + 'Submitting quantification job\n' + express_cmd + '\n')
+        call('sbatch -c 4 sh -c ' + express_cmd, shell=True)
 
     return 0
 

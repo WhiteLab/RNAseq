@@ -34,9 +34,9 @@ def lane_express_quant(bams, config_file):
             express_cmd = express + ' ' + transcriptome + ' ' + bam + ' --no-update-check -o ' + wd + ' -m '\
                           + x + ' -s ' + s + ' --logtostderr 2>> ' + loc + ';'
         else:
-            express_cmd = 'sbatch -c 4 export transcriptome="' + transcriptome + '",bam="' + bam + '",wd="' + wd \
+            express_cmd = 'sbatch -c 4 --export transcriptome="' + transcriptome + '",bam="' + bam + '",wd="' + wd \
                           + '",strand="' + strand + '",x="' + x + '",s="' + s + '",loc="' + loc + '",root="' + root \
-                          + '"'
+                          + '" ' + express_sl
             # express + ' ' + transcriptome + ' ' + bam + ' --no-update-check -o ' + wd + ' --'\
             #              + strand + ' -m ' + x + ' -s ' + s + ' --logtostderr 2>> ' + loc + ';'
 

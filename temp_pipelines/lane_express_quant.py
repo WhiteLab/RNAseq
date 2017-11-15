@@ -15,7 +15,7 @@ def parse_config(json_config):
 
 
 def lane_express_quant(bams, config_file):
-    (stranded, strand, express, transcriptome, express_sl) = parse_config(config_file)
+    (stranded, strand, express, express_sl, transcriptome) = parse_config(config_file)
     for bam in open(bams):
         bam = bam.rstrip('\n')
         bam_dir = os.path.dirname(bam)

@@ -3,6 +3,7 @@
 import sys
 sys.path.append('/cephfs/users/mbrown/RNAseq')
 from utility.date_time import date_time
+from temp_pipelines.downsample_bam import downsample_bam
 import subprocess
 import os
 import json
@@ -10,7 +11,7 @@ import json
 
 def parse_config(config_file):
     config_data = json.loads(open(config_file, 'r').read())
-    return config_data['tools']['downsample_bam'], config_data['tools']['samtools'], config_data['params']['threads']
+    return config_data['tools']['samtools'], config_data['params']['threads']
 
 
 def get_from_depth(qc_root, depth):
@@ -24,7 +25,7 @@ def get_from_depth(qc_root, depth):
 
 
 def downsample_pipe(bam_list, config_file, depth):
-    (downsample_bam, samtools, threads) = parse_config(config_file)
+    (samtools, threads) = parse_config(config_file)
     for bam in open(bam_list):
         sys.stderr.write(date_time() + 'Setting up for ' + bam)
         bam = bam.rstrip('\n')
@@ -37,10 +38,11 @@ def downsample_pipe(bam_list, config_file, depth):
         sys.stderr.write(date_time() + 'Calculating downsample fraction\n')
         frac = get_from_depth(qc_root, depth)
         # submit to job queue
-        cmd = ' '.join(('sbatch', '-c', threads, '--oversubscribe' ,downsample_bam, '-b ', bam, '-f', frac, '-o ',
-                        bam_dir, '-t', threads, '-s', samtools))
-        sys.stderr.write(date_time() + 'Submitting to queue ' + cmd + '\n')
-        subprocess.call(cmd, shell=True)
+        downsample_bam(samtools, bam, frac, bam_dir, threads)
+        #cmd = ' '.join(('sbatch', '-c', threads, '--oversubscribe', downsample_bam, '-b ', bam, '-f', frac, '-o ',
+        #                bam_dir, '-t', threads, '-s', samtools))
+        sys.stderr.write(date_time() + 'Submitting to queue ' + bam + '\n')
+        #subprocess.call(cmd, shell=True)
 
 
 if __name__ == "__main__":

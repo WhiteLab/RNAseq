@@ -12,12 +12,12 @@ def lane_express_quant(bams, config_file):
     for bam in open(bams):
         bam = bam.rstrip('\n')
         (bam_dir, root) = (os.path.dirname(bam), os.path.basename(bam.replace('.Aligned.toTranscriptome.out.*', '')))
-        parts = root.split('_')
-        qc_file = 'ALIGN_RNASEQ/' + parts[0] + '/QC/' + root + '.qc_stats.json'
+        qc_dir = bam_dir.replace('BAMS', 'QC')
+        qc_file = qc_dir + '/' + root + '.qc_stats.json'
         qc_data = json.loads(open(qc_file, 'r').read())
         (x, s) = (str(int(round(float(qc_data['picard_stats']['x_ins_size'])))),
                   str(int(round(float(qc_data['picard_stats']['s_ins_size'])))))
-        wd = bam_dir + '/' + root + '/'
+        wd = qc_dir + '/' + root + '/'
         loc = wd + root + '.log'
         express_cmd = 'mkdir ' + wd + ';'
         if stranded == 'N':

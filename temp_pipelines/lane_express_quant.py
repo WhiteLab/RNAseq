@@ -26,7 +26,7 @@ def lane_express_quant(bams, config_file):
         (x, s) = (str(int(round(float(qc_data['picard_stats']['x_ins_size'])))),
                   str(int(round(float(qc_data['picard_stats']['s_ins_size'])))))
         wd = qc_dir + '/' + root + '/'
-        loc = wd + root + '.log'
+        loc = wd + root + '_%j.log'
         express_cmd = 'mkdir ' + wd + ';'
         call(express_cmd, shell=True)
         sys.stderr.write(date_time() + 'Created dir ' + wd + ' to quantify ' + bam + '\n' + express_cmd + '\n')

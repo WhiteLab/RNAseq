@@ -68,7 +68,9 @@ class Pipeline():
         self.pipeline()
 
     def pipeline(self):
-        # CUR POS SCRATCH/RAW/bnid
+        # temp line to source environment variables until compute is restarted
+        src_env = 'source /etc/environment'
+        call(src_env, shell=True)
         log_dir = 'LOGS/'
         if not os.path.isdir(log_dir):
             mk_log_dir = 'mkdir ' + log_dir
@@ -169,22 +171,23 @@ class Pipeline():
             log(self.loc, date_time() + 'bam qc process failure for ' + self.sample + '\n')
             self.status = 1
             exit(1)
-        if self.skip_cut == 'Y':
-            # download old fastqc stats and insert size stats to populate parse qc
-            src_cmd = '. /home/ubuntu/.novarc;'
-            insert = self.sample + '_subset.insert_metrics.hist'
-            fastqc_data = self.sample + '_1_sequence_fastqc/fastqc_data.txt'
-            cut_file = self.sample + '.cutadapt.log'
-            root = self.obj + '/' + self.bid
-            get_fastqc = 'mkdir QC/' + self.sample + '_1_sequence_fastqc;' + src_cmd + 'swift download ' + self.cont \
-                         + ' ' + root + '/QC/' + fastqc_data + ' --output QC/' + fastqc_data
-            subprocess.call(get_fastqc, shell=True)
-            get_cut_file = src_cmd + 'swift download ' + self.cont + ' ' + root + '/LOGS/' \
-                           + cut_file + ' --output LOGS/' + cut_file
-            subprocess.call(get_cut_file, shell=True)
-            get_insert = src_cmd + 'swift download ' + self.cont + ' ' + root + '/QC/' + insert \
-                         + ' --output ' + insert
-            subprocess.call(get_insert, shell=True)
+        # section needs re-writing!
+        # if self.skip_cut == 'Y':
+        #     # download old fastqc stats and insert size stats to populate parse qc
+        #     src_cmd = '. /home/ubuntu/.novarc;'
+        #     insert = self.sample + '_subset.insert_metrics.hist'
+        #     fastqc_data = self.sample + '_1_sequence_fastqc/fastqc_data.txt'
+        #     cut_file = self.sample + '.cutadapt.log'
+        #     root = self.obj + '/' + self.bid
+        #     get_fastqc = 'mkdir QC/' + self.sample + '_1_sequence_fastqc;' + src_cmd + 'swift download ' + self.cont \
+        #                  + ' ' + root + '/QC/' + fastqc_data + ' --output QC/' + fastqc_data
+        #     subprocess.call(get_fastqc, shell=True)
+        #     get_cut_file = src_cmd + 'swift download ' + self.cont + ' ' + root + '/LOGS/' \
+        #                    + cut_file + ' --output LOGS/' + cut_file
+        #     subprocess.call(get_cut_file, shell=True)
+        #     get_insert = src_cmd + 'swift download ' + self.cont + ' ' + root + '/QC/' + insert \
+        #                  + ' --output ' + insert
+        #     subprocess.call(get_insert, shell=True)
 
         check = parse_qc(self.json_config, self.sample)
         if check != 0:

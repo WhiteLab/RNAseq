@@ -1,7 +1,7 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import sys
-sys.path.append('/home/ubuntu/TOOLS/Scripts/')
+sys.path.append('/cephfs/users/mbrown/PIPELINES/DNAseq/')
 import os
 import json
 from utility.date_time import date_time

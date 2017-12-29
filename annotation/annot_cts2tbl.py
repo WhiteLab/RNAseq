@@ -66,12 +66,12 @@ for line in gtf:
         sys.stderr.write('Regex failed, skipping!\n')
         continue
     if gid in ctdict and ctdict[gid]['f'] == 0:
-        for i in xrange(0, len(cout), 1):
+        for i in range(0, len(cout), 1):
             fh[cout[i]].write(tn + '\t' + gid + '\t' + ty)
             for samp in slist:
                 vals = ctdict[gid][samp]['ct'].split('\t')
                 fh[cout[i]].write('\t' + vals[i])
-        for i in xrange(0, len(cout), 1):
+        for i in range(0, len(cout), 1):
             fh[cout[i]].write('\n')
         ctdict[gid]['f'] = 1
     else:
@@ -80,17 +80,17 @@ for line in gtf:
             for samp in slist:
                 vals = ctdict[tid][samp]['ct'].split('\t')
                 fh[cout[i]].write('\t' + vals[i])
-            for i in xrange(0, len(cout), 1):
+            for i in range(0, len(cout), 1):
                 fh[cout[i]].write('\n')
             ctdict[tid]['f'] = 1
 gtf.close()
 for ids in ctdict:
     if ctdict[ids]['f'] == 0:
         # sys.stdout.write('NA\t' + ids + '\tNA\t' + ctdict[ids]['ct'] + '\n')
-        for i in xrange(0, len(cout), 1):
+        for i in range(0, len(cout), 1):
             fh[cout[i]].write('NA\t' + ids + '\tNA')
             for samp in slist:
                 vals = ctdict[ids][samp]['ct'].split('\t')
                 fh[cout[i]].write('\t' + vals[i])
-        for i in xrange(0, len(cout), 1):
+        for i in range(0, len(cout), 1):
             fh[cout[i]].write('\n')

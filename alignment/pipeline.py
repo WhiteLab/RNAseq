@@ -1,23 +1,23 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import sys
-sys.path.append('/home/ubuntu/TOOLS/Scripts/')
+sys.path.append('/cephfs/users/mbrown/PIPELINES/DNAseq/')
 import os
 import re
 from utility.date_time import date_time
 import subprocess
 import json
 from utility.log import log
-from cutadapter import cutadapter
-from fastqc import fastqc
-from bwt2_pe import bwt2_pe
-from novosort_sort_pe import novosort_sort_pe
-from picard_insert_size import picard_insert_size
-from qc_bam import qc_bam
-from filter_wrap import filter_wrap
-from star import star
+from alignment.cutadapter import cutadapter
+from alignment.fastqc import fastqc
+from alignment.bwt2_pe import bwt2_pe
+from alignment.novosort_sort_pe import novosort_sort_pe
+from alignment.picard_insert_size import picard_insert_size
+from alignment.qc_bam import qc_bam
+from alignment.filter_wrap import filter_wrap
+from alignment.star import star
 from utility.upload_to_swift import upload_to_swift
 from subprocess import call
-from parse_qc import parse_qc
+from alignment.parse_qc import parse_qc
 
 
 class Pipeline():
@@ -27,9 +27,6 @@ class Pipeline():
         self.end2 = end2
         self.status = 0
         self.ref_mnt = ref_mnt
-        self.parse_config()
-
-    def parse_config(self):
         self.config_data = json.loads(open(self.json_config, 'r').read())
         s = re.match('^(\S+)_1_sequence\.txt\.gz$', self.end1)
         if s:
@@ -171,23 +168,6 @@ class Pipeline():
             log(self.loc, date_time() + 'bam qc process failure for ' + self.sample + '\n')
             self.status = 1
             exit(1)
-        # section needs re-writing!
-        # if self.skip_cut == 'Y':
-        #     # download old fastqc stats and insert size stats to populate parse qc
-        #     src_cmd = '. /home/ubuntu/.novarc;'
-        #     insert = self.sample + '_subset.insert_metrics.hist'
-        #     fastqc_data = self.sample + '_1_sequence_fastqc/fastqc_data.txt'
-        #     cut_file = self.sample + '.cutadapt.log'
-        #     root = self.obj + '/' + self.bid
-        #     get_fastqc = 'mkdir QC/' + self.sample + '_1_sequence_fastqc;' + src_cmd + 'swift download ' + self.cont \
-        #                  + ' ' + root + '/QC/' + fastqc_data + ' --output QC/' + fastqc_data
-        #     subprocess.call(get_fastqc, shell=True)
-        #     get_cut_file = src_cmd + 'swift download ' + self.cont + ' ' + root + '/LOGS/' \
-        #                    + cut_file + ' --output LOGS/' + cut_file
-        #     subprocess.call(get_cut_file, shell=True)
-        #     get_insert = src_cmd + 'swift download ' + self.cont + ' ' + root + '/QC/' + insert \
-        #                  + ' --output ' + insert
-        #     subprocess.call(get_insert, shell=True)
 
         check = parse_qc(self.json_config, self.sample)
         if check != 0:
@@ -208,7 +188,7 @@ class Pipeline():
         rm_tmp = 'rm -rf *STAR* *subset*'
         call(rm_tmp, shell=True)
 
-        #CUR POS SCRATCH/RAW/
+        # CUR POS SCRATCH/RAW/
         os.chdir('../../')
         sys.stderr.write(date_time() + 'Uploading results for ' + self.sample + '\n')
         check = upload_to_swift(self.cont, self.obj)

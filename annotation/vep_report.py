@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 from pysam import VariantFile
 import sys
 import re
@@ -67,7 +67,7 @@ def gen_report(vcf, sample):
     f_pos_list = []
     desc_list = desc_string.split('|')
     ann_size = len(desc_list)
-    for i in xrange(0, ann_size, 1):
+    for i in range(0, ann_size, 1):
         if desc_list[i] in desired:
             f_pos_list.append(i)
             desired[desc_list[i]] = i

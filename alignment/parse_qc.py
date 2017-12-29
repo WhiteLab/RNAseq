@@ -1,10 +1,10 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import json
 import os
 import re
 import sys
-sys.path.append('/home/ubuntu/TOOLS/Scripts/')
+sys.path.append('/cephfs/users/mbrown/PIPELINES/DNAseq/')
 import time
 from utility.date_time import date_time
 from utility.log import log
@@ -17,7 +17,7 @@ def parse_config(config_file):
 
 
 def skip_lines(fh, stop):
-    for i in xrange(0, stop, 1):
+    for i in range(0, stop, 1):
         next(fh)
 
 
@@ -180,7 +180,7 @@ def parsePICARD(PICARD, loc):
         vals = next(fh)
         vals = vals.rstrip('\n').split('\t')
         qc_dict = {}
-        for i in xrange(0, len(keys), 1):
+        for i in range(0, len(keys), 1):
             qc_dict[keys[i]] = vals[i]
         fh .close()
         return qc_dict

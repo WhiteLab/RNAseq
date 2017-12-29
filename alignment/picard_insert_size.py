@@ -1,6 +1,6 @@
 #!/usr/bin/python
 import sys
-sys.path.append('/home/ubuntu/TOOLS/Scripts/')
+sys.path.append('/cephfs/users/mbrown/PIPELINES/DNAseq/')
 from utility.date_time import date_time
 from subprocess import call
 from utility.log import log
@@ -14,7 +14,7 @@ def picard_insert_size(java_tool, picard_tool, sample, log_dir):
     call(picard_insert_size_cmd, shell=True)
     # open file and return insert size
     fh = open(sample + ".insert_metrics.hist", 'r')
-    for i in xrange(0, 7, 1):
+    for i in range(0, 7, 1):
         skip = next(fh)
     stats = next(fh)
     fh.close()

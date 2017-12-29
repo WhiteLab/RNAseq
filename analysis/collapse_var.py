@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 Collapses tables based on a gene name - can choose to make values binary
 
@@ -37,7 +37,7 @@ for line in fh:
         exit(1)
     if gene not in genes:
         genes[gene] = {}
-    for i in xrange(1, len(data), 1):
+    for i in range(1, len(data), 1):
         if bflag == '1' and int(data[i]) > 0:
             genes[gene][hlist[i]] = 1
         else:
@@ -47,7 +47,7 @@ for line in fh:
 fh.close()
 for gene in sorted(genes.keys()):
     sys.stdout.write(gene)
-    for i in xrange(1, len(hlist), 1):
+    for i in range(1, len(hlist), 1):
         if hlist[i] in genes[gene]:
             sys.stdout.write('\t' + str(genes[gene][hlist[i]]))
         else:

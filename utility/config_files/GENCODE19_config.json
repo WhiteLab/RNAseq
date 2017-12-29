@@ -21,7 +21,7 @@
     "transcriptome": "REFS/GENCODE19/Transcriptome/transcriptome_data/gencode19_custom",
     "cont": "PsychENCODE",
     "obj": "PREQC",
-    "config": "/home/ubuntu/TOOLS/Scripts/utility/config_files/GENCODE19_config.json"
+    "config": "/cephfs/users/mbrown/PIPELINES/DNAseq/utility/config_files/GENCODE19_config.json"
   },
   "params": {
     "r1adapt": "AGATCGGAAGAGCACACGTCTGAACTCCAGTCA",

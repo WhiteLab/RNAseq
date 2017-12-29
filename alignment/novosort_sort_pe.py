@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import sys
 sys.path.append('/cephfs/users/mbrown/RNAseq')
 from utility.date_time import date_time

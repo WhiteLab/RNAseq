@@ -38,8 +38,8 @@ minval = 0.00001
 def transform(mat, norm, zero):
     norm = float(norm)
     zero = float(zero)
-    for i in xrange(0, len(mat), 1):
-        for j in xrange(0, len(mat[i]), 1):
+    for i in range(0, len(mat), 1):
+        for j in range(0, len(mat[i]), 1):
             if mat[i][j] < minval:
                 mat[i][j] = zero
             else:
@@ -89,7 +89,7 @@ def annotate(ann, ccols, ocols, clust, c):
             q = 1
             qdict = {}
             j = 0
-            for i in xrange(0, len(rmap), 1):
+            for i in range(0, len(rmap), 1):
                 if rmap[i] not in qdict:
                     qdict[rmap[i]] = j
                     sys.stderr.write(str(j) + ' ' + rmap[i] + '\n')

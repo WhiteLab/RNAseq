@@ -1,20 +1,20 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import sys
-sys.path.append('/home/ubuntu/TOOLS/Scripts/')
+sys.path.append('/cephfs/users/mbrown/PIPELINES/DNAseq/')
 from utility.date_time import date_time
 from subprocess import check_output
 import subprocess
 
 
 def skip_lines(fh, stop):
-    for i in xrange(0, stop, 1):
+    for i in range(0, stop, 1):
         skip = next(fh)
     return 0
 
 def process_line(fh, stop):
     list_list = []
-    for i in xrange(0,stop,1):
+    for i in range(0,stop,1):
         cur = next(fh)
         cur = cur.rstrip('\n').split()
         list_list.append(cur)

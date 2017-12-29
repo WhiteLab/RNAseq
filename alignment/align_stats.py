@@ -2,7 +2,7 @@
 import sys
 import os
 import re
-sys.path.append('/home/ubuntu/TOOLS/Scripts/')
+sys.path.append('/cephfs/users/mbrown/PIPELINES/DNAseq/')
 from utility.date_time import date_time
 from utility.log import log
 
@@ -19,7 +19,7 @@ def align_stats(sample):
     fo.write(
         'Sample\tMean insert size estimate(10k reads)\tStd dev read insert size estimate(10 k reads)\tStarting left reads\t% mapped\tmultimapped(mm)\tgt 20 mm\tStarting right reads\t% mapped\t% mm\tgt 20 mm\tOverall map rate\tAligned pairs\t% mm\t% discordant\t% condordant\n' + sample + '\t')
     fi = open(sample + '_subset.insert_metrics.hist')
-    for i in xrange(0, 7, 1):
+    for i in range(0, 7, 1):
         skip = next(fi)
     stats = next(fi)
     fi.close()

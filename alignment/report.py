@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 import sys
-sys.path.append('/home/ubuntu/TOOLS/Scripts/')
+sys.path.append('/cephfs/users/mbrown/PIPELINES/DNAseq/')
 import os
 import re
 from utility.date_time import date_time
@@ -59,7 +59,7 @@ def report(sample, ref_gtf, tx_gtf):
         if anno[2] == 'transcript':
             m = re.findall('(\w+) \"(\S+)\";', anno[-1])
             fields = {}
-            for i in xrange(0, len(m), 1):
+            for i in range(0, len(m), 1):
                 fields[m[i][0]] = m[i][1]
             # only print values where fpkm > 0
             if float(fields['FPKM']) > 0.0:
@@ -70,7 +70,7 @@ def report(sample, ref_gtf, tx_gtf):
                     rpt.write(ref[fields['transcript_id']]['name'] + '\t' + ref[fields['transcript_id']]['type'])
                 else:
                     rpt.write('NA\tNA')
-                for i in xrange(0, len(flist), 1):
+                for i in range(0, len(flist), 1):
                     rpt.write('\t' + fields[flist[i]])
                 rpt.write('\n')
     th.close()

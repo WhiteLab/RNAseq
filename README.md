@@ -76,7 +76,7 @@ Resultant lane_list:
 	"cont":"PANCAN", # container
 	"obj":"ALIGN", # object prefix
 
-	"config":"/home/ubuntu/TOOLS/Scripts/utility/config_files/complete_config.json" # this file location
+	"config":"/cephfs/users/mbrown/PIPELINES/DNAseq/utility/config_files/complete_config.json" # this file location
     },
     "params":{
 	"threads":"8",
@@ -90,29 +90,29 @@ Resultant lane_list:
 ##### 4) Pipeline run - QC:
 
 ```
-/home/ubuntu/TOOLS/Scripts/alignment/pipeline_wrapper.py -f lane_list.txt -j modified_config.json -m location_of_volume_mount 2> run.log
+/cephfs/users/mbrown/PIPELINES/DNAseq/alignment/pipeline_wrapper.py -f lane_list.txt -j modified_config.json -m location_of_volume_mount 2> run.log
 ```
 -m clarification:
  -m REF_MNT, --mount REF_MNT
                         Reference drive mount location. Example would be
                         /mnt/cinder/REFS_XXX
 
-The pipeline will iterate throught the list upload files to swift, and delete on the volume for next run.  Logs track most of the steps.  Multiple qc tables can ba concatenated for convenience after run using /home/ubuntu/TOOLS/Scripts/alignment/merge_qc_stats.py:
+The pipeline will iterate throught the list upload files to swift, and delete on the volume for next run.  Logs track most of the steps.  Multiple qc tables can ba concatenated for convenience after run using /cephfs/users/mbrown/PIPELINES/DNAseq/alignment/merge_qc_stats.py:
 ```
-/home/ubuntu/TOOLS/Scripts/alignment/qc2table.py -f <lane_list> -c <swift container> -o <swift object prefix> > qc_table.txt 2> log.txt
+/cephfs/users/mbrown/PIPELINES/DNAseq/alignment/qc2table.py -f <lane_list> -c <swift container> -o <swift object prefix> > qc_table.txt 2> log.txt
 ```
 
 ##### 5) Pipline run - Quantification:
 This will take the same pipeline run files from alignment and run eXpress for transcript-level quantification
 
 ```
-/home/ubuntu/TOOLS/Scripts/analysis/quant_pipe.py -f lane_list.txt -j modified_config.json -m location_of_volume_mount 2> run.log
+/cephfs/users/mbrown/PIPELINES/DNAseq/analysis/quant_pipe.py -f lane_list.txt -j modified_config.json -m location_of_volume_mount 2> run.log
 ```
 
 eXpress output can be collapsed to a gene-level table, choosing RNA biotype and count type, if desired, using the following helper script:
 
 ```
-/home/ubuntu/TOOLS/Scripts/utility/collapse_merge_express_by_gene.py <ct_list> <type_list> <field> > output.txt
+/cephfs/users/mbrown/PIPELINES/DNAseq/utility/collapse_merge_express_by_gene.py <ct_list> <type_list> <field> > output.txt
 ```
 Arguments:
   <ct_list> list of express count files

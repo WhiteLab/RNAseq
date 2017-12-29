@@ -74,11 +74,11 @@ for line in tbl:
     subprocess.call(setproxy, shell=True)
     fao = File(fa, parent=syn_id)
     fuo = File(fu, parent=syn_id)
-    for i in xrange(0, len(fixed_keys), 1):
+    for i in range(0, len(fixed_keys), 1):
         setattr(fao, fixed_keys[i], fixed_vals[i])
         setattr(fuo, fixed_keys[i], fixed_vals[i])
         sys.stderr.write(fixed_keys[i] + '\t' + fixed_vals[i] + '\n')
-    for i in xrange(2, 8, 1):
+    for i in range(2, 8, 1):
         setattr(fao, lbl[i], cols[i])
         setattr(fuo, lbl[i], cols[i])
         sys.stderr.write(lbl[i] + '\t' + cols[i] + '\n')

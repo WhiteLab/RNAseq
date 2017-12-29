@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 Merges tables based on a single column, column denoted array-style. Designed for variant output - will merge gene,
 position, and base change as name for row

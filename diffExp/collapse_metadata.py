@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import sys
 
@@ -27,7 +27,7 @@ cont_file.close()
 head = next(table)
 head = head.rstrip('\n').split('\t')
 new_head = []
-for i in xrange(len(head)):
+for i in range(len(head)):
     if head[i] in cat_dict:
         cat_dict[head[i]] = i
         new_head.append(head[i])
@@ -46,10 +46,10 @@ for line in table:
             meta_dict[info[0]]['cat'].append(info[cat_dict[cat]])
         meta_dict[info[0]]['cont'] = {}
         meta_dict[info[0]]['cont'][cont_list[0]] = 0
-        for i in xrange(1, len(cont_list), 1):
+        for i in range(1, len(cont_list), 1):
             meta_dict[info[0]]['cont'][cont_list[i]] = [0, 0]
     meta_dict[info[0]]['cont'][cont_list[0]] += int(info[cont_dict[cont_list[0]]].replace(',', ''))
-    for i in xrange(1, len(cont_list), 1):
+    for i in range(1, len(cont_list), 1):
         value = info[cont_dict[cont_list[i]]].replace('%', '')
         meta_dict[info[0]]['cont'][cont_list[i]][0] += float(value)
         meta_dict[info[0]]['cont'][cont_list[i]][1] += 1
@@ -58,7 +58,7 @@ table.close()
 for bnid in meta_dict:
     sys.stdout.write('\t'.join(meta_dict[bnid]['cat']) + '\t'
                      + str(meta_dict[bnid]['cont'][cont_list[0]]))
-    for i in xrange(1, len(cont_list), 1):
+    for i in range(1, len(cont_list), 1):
         avg = (meta_dict[bnid]['cont'][cont_list[i]][0]/meta_dict[bnid]['cont'][cont_list[i]][1])
         sys.stdout.write('\t' + str(avg))
     print

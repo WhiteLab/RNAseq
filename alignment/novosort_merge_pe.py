@@ -3,7 +3,7 @@ import json
 import os
 import re
 import sys
-sys.path.append('/home/ubuntu/TOOLS/Scripts/')
+sys.path.append('/cephfs/users/mbrown/PIPELINES/DNAseq/')
 from utility.date_time import date_time
 from subprocess import call
 import subprocess
@@ -61,7 +61,7 @@ def novosort_merge_pe(config_file, sample_list, in_suffix, out_suffix, sort_type
         if mflag == 'Y':
             sys.stderr.write(date_time() + 'Mark duplicates flag given.  Running picard on bams for sample ' + sample
                              + '\n')
-            for i in xrange(0, len(bam_list), 1):
+            for i in range(0, len(bam_list), 1):
                 cur = bam_list[i].replace(in_suffix, '')
                 check = picard_mark_dups(config_file, cur, 'LOGS/', in_suffix)
                 if check != 0:

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # helper script for converting and sorting a table
 
@@ -29,17 +29,17 @@ fh = open(table)
 new_table = {}
 if sort_type == 'row':
     if space_type == 'csv':
-        for i in xrange(start):
+        for i in range(start):
             line = next(fh)
             line = make_csv(line)
             sys.stdout.write(line)
     elif space_type == 'tsv':
-        for i in xrange(start):
+        for i in range(start):
             line = next(fh)
             line = make_tsv(line)
             sys.stdout.write(line)
     else:
-        for i in xrange(start):
+        for i in range(start):
             line = next(fh)
             sys.stdout.writable(line)
     if space_type == 'csv':
@@ -68,7 +68,7 @@ if sort_type == 'col':
         head = head.rstrip('\n').split('\t')
         unsort_head = []
         to_sort_head = head[start:]
-        for i in xrange(start):
+        for i in range(start):
             unsort_head.append(head[i])
         sort_key = sorted(range(len(to_sort_head)), key=lambda k: to_sort_head[k])
         sys.stdout.write(','.join(unsort_head))
@@ -79,7 +79,7 @@ if sort_type == 'col':
             head = line.rstrip('\n').split('\t')
             unsort_head = []
             to_sort_head = head[start:]
-            for i in xrange(start):
+            for i in range(start):
                 unsort_head.append(head[i])
             sys.stdout.write(','.join(unsort_head))
             for i in sort_key:

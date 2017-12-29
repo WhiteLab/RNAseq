@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 Combines express output tables, collapsing on gene symbol by effective count
 
@@ -44,7 +44,7 @@ for report in open(args['<ct_list>']):
     f = 9
     if args['<field>'] != 'default':
         flag = 0
-        for i in xrange(len(head_vals)):
+        for i in range(len(head_vals)):
             if head_vals[i] == args['<field>']:
                 f = i
                 flag = 1

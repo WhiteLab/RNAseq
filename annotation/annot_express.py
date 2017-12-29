@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import sys
 
@@ -33,6 +33,7 @@ def annot_express(index_ref, sample, ref_mnt):
                              + ' no reads!\n')
     table.close()
     return 0
+
 
 if __name__ == "__main__":
     import argparse

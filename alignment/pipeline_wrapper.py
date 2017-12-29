@@ -1,8 +1,8 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 # written by Miguel Brown 2015-Feb-23. Wrapper script to loop through sequencing files and use pipeline
 
 import sys
-sys.path.append('/home/ubuntu/TOOLS/Scripts/')
+sys.path.append('/cephfs/users/mbrown/PIPELINES/DNAseq/')
 import os
 import re
 import argparse
@@ -10,7 +10,7 @@ import json
 from utility.date_time import date_time
 import subprocess
 from utility.download_from_swift import download_from_swift
-from pipeline import Pipeline
+from alignment.pipeline import Pipeline
 from utility.log import log
 
 parser = argparse.ArgumentParser(description='Pipeline wrapper script to process multiple paired end set serially.')
@@ -18,8 +18,6 @@ parser.add_argument('-f', '--file', action='store', dest='fn',
                     help='File with bionimbus ID, seqtype and sample lane list')
 parser.add_argument('-j', '--json', action='store', dest='config_file',
                     help='JSON config file with tools, references, and data storage locations')
-parser.add_argument('-m', '--mount', action='store', dest='ref_mnt',
-                    help='Reference drive mount location.  Example would be /mnt/cinder/REFS_XXX')
 
 if len(sys.argv) == 1:
     parser.print_help()
@@ -27,18 +25,16 @@ if len(sys.argv) == 1:
 
 inputs = parser.parse_args()
 fh = open(inputs.fn, 'r')
-src_cmd = '. ~/.novarc;'
-ref_mnt = inputs.ref_mnt
 
 
 def parse_config(config_file):
     config_data = json.loads(open(config_file, 'r').read())
     # skip pdx flag allows to pick up from post-filtering step to save substantial time of just human align need repeat
-    return (config_data['refs']['cont'], config_data['refs']['obj'], config_data['refs']['config'],
-            config_data['tools']['star'], config_data['refs']['genome'], config_data['params']['skip_cut'])
+    return config_data['refs']['cont'], config_data['refs']['obj'], config_data['refs']['config'], \
+           config_data['tools']['star'], config_data['refs']['genome'], config_data['params']['skip_cut']
 
 
-def download_skip(cont, sf1, sf2, end1, end2, cur_dir, src_cmd):
+def download_skip(cont, sf1, sf2, end1, end2, cur_dir):
     mk_dir_cmd = 'mkdir -p ' + cur_dir + '/TRIMMED_FQ/'
     sys.stderr.write(date_time() + mk_dir_cmd + '\n')
     subprocess.call(mk_dir_cmd, shell=True)
@@ -52,7 +48,6 @@ def download_skip(cont, sf1, sf2, end1, end2, cur_dir, src_cmd):
 
 
 (cont, obj, pipe_cfg, star, genome, skip_cut) = parse_config(inputs.config_file)
-genome = ref_mnt + '/' + genome
 
 for line in fh:
     line = line.rstrip('\n')
@@ -111,7 +106,7 @@ for line in fh:
             else:
                 sys.stderr.write(date_time() + 'Skip PDX flag detected.  Will try to download alread trimmed and '
                                                'filtered fastqs and skip cutadapt, and start from there.\n')
-                download_skip(cont, sf1, sf2, end1, end2, cur_dir, src_cmd)
+                download_skip(cont, sf1, sf2, end1, end2, cur_dir)
         except:
             log(loc, date_time() + 'Getting sequencing files ' + sf1 + ' and ' + sf2 + ' failed.  Moving on\n')
             lane_status[lane] = 'Download failed'

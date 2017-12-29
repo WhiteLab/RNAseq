@@ -33,7 +33,7 @@ ref_mnt = inputs.ref_mnt
 
 def parse_config(config_file):
     config_data = json.loads(open(config_file, 'r').read())
-    return (config_data['refs']['cont'], config_data['refs']['obj'], config_data['refs']['config'])
+    return (config_data['refs']['project'], config_data['refs']['align_dir'], config_data['refs']['config'])
 
 
 (cont, obj, pipe_cfg) = parse_config(inputs.config_file)
@@ -53,7 +53,7 @@ for line in fh:
         exit(1)
     loc = cwd[:-7] + bid + '.run.log'
     log(loc, date_time() + 'Initializing scratch directory for ' + bid + '\n')
-    # All files for current bid to be stored in cwd
+    # All files for current bnid to be stored in cwd
 
     obj1 = 'RAW/' + bid + '/' + bid + '_'
     cur_dir = cwd + '/RAW/' + bid

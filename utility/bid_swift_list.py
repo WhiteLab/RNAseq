@@ -24,8 +24,8 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(description='Helper script to get all files associated with a BID')
-    parser.add_argument('-c', '--container', action='store', dest='cont', help='Swift container name, i.e. PANCAN')
-    parser.add_argument('-o', '--object', action='store', dest='obj', help='Swift object prefix, i.e. RAW/2015-1234')
+    parser.add_argument('-c', '--container', action='store', dest='project', help='Swift container name, i.e. PANCAN')
+    parser.add_argument('-o', '--object', action='store', dest='align_dir', help='Swift object prefix, i.e. RAW/2015-1234')
     parser.add_argument('-l', '--list', action='store', dest='blist', help='Bionimbus ID list, one per line')
 
     if len(sys.argv) == 1:

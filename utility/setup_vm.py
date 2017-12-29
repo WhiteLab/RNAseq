@@ -76,7 +76,7 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(description='VM spawner for pipeline processes')
-    parser.add_argument('-id', '--BID', action='store', dest='bid', help='Project Bionimbus ID')
+    parser.add_argument('-id', '--BID', action='store', dest='bnid', help='Project Bionimbus ID')
     parser.add_argument('-im', '--image', action='store', dest='image', help='Image id to spawn')
     parser.add_argument('-w', '--wait', action='store', dest='wait',
                         help='Wait time before giving up on spawning an image.  Reommended value 300 (in seconds)')

@@ -21,7 +21,7 @@ def batch_qc(fn, cont, obj, t):
     jobs = []
     for line in fh:
         line = line.rstrip('\n')
-        # All files for current bid to be stored in cwd
+        # All files for current bnid to be stored in cwd
         swift_cmd = src_cmd + 'swift list ' + cont + ' --prefix ' + obj + '/' + line
         sys.stderr.write(date_time() + 'Checking for sequence files for sample ' + line + '\n' + swift_cmd + '\n')
         try:
@@ -51,8 +51,8 @@ def batch_qc(fn, cont, obj, t):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Pipeline wrapper script to process multiple paired end set serially.')
     parser.add_argument('-f', '--file', action='store', dest='fn', help='File with bionimbus ID list')
-    parser.add_argument('-c', '--container', action='store', dest='cont', help='Name of swift container')
-    parser.add_argument('-o', '--object', action='store', dest='obj', help='Swift object prefix, like RAW/')
+    parser.add_argument('-c', '--container', action='store', dest='project', help='Name of swift container')
+    parser.add_argument('-o', '--object', action='store', dest='align_dir', help='Swift object prefix, like RAW/')
     parser.add_argument('-t', '--threads', action='store', dest='t',
                         help='Number of simultaneous threads to keep going')
     inputs = parser.parse_args()

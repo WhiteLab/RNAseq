@@ -16,7 +16,7 @@ from statistics import mean
 def parse_config(json_config):
     config_data = json.loads(open(json_config, 'r').read())
     try:
-        return config_data['refs']['cont'], config_data['refs']['obj'], config_data['refs']['tx_index'], \
+        return config_data['refs']['project'], config_data['refs']['align_dir'], config_data['refs']['tx_index'], \
                config_data['params']['capture_flag'], config_data['refs']['cap_targets'],\
                config_data['tools']['samtools'], config_data['tools']['filter_bam']
     except:

@@ -65,8 +65,8 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(description='Uses pipeline lane list to create a summary table of read filter stats')
-    parser.add_argument('-c', '--container', action='store', dest='cont', help='Swift container prefix, i.e. PANCAN')
-    parser.add_argument('-o', '--object', action='store', dest='obj',
+    parser.add_argument('-c', '--container', action='store', dest='project', help='Swift container prefix, i.e. PANCAN')
+    parser.add_argument('-o', '--object', action='store', dest='align_dir',
                         help='Swift object name/prefix, i.e. RAW/2015-1234')
     parser.add_argument('-l', '--lane_list', action='store', dest='lane_list',
                         help='Original lane list used to run pipeline')

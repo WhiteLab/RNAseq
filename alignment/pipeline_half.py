@@ -34,8 +34,8 @@ class Pipeline():
         self.bid = HGACID[0]
         self.fastqc_tool = self.config_data['tools']['fastqc']
         self.java_tool = self.config_data['tools']['java']
-        self.obj = self.config_data['refs']['obj']
-        self.cont = self.config_data['refs']['cont']
+        self.obj = self.config_data['refs']['align_dir']
+        self.cont = self.config_data['refs']['project']
         self.threads = self.config_data['params']['threads']
         self.ram = self.config_data['params']['ram']
         self.pipeline()

@@ -1,12 +1,14 @@
 {
   "tools": {
+    "align_pipe": "/cephfs/users/mbrown/PIPELINES/RNAseq/alignment/pipeline.py",
+    "slurm_wrap": "/cephfs/users/mbrown/PIPELINES/RNAseq/alignment/slurm_squad/pipeline.sl",
     "cutadapt": "cutadapt",
-    "fastqc": "fastqc",
+    "fastqc": "/cephfs/users/mbrown/PIPELINES/TOOLS/FastQC/fastqc",
     "bwt2": "/home/ubuntu/TOOLS/bowtie2-2.2.3/bowtie2",
-    "bedtools": "bedtools",
+    "bedtools": "/cephfs/users/mbrown/PIPELINES/TOOLS/bedtools2/bin/bedtools",
     "samtools": "/cephfs/software/samtools-1.6/samtools",
     "java": "/home/ubuntu/TOOLS/jdk1.8.0_66/bin/java",
-    "picard": "/home/ubuntu/TOOLS/picard-tools-2.0.1/dist/picard.jar",
+    "picard": "/cephfs/users/mbrown/PIPELINES/TOOLS/picard-2.16.0/picard.jar",
     "novosort": "/cephfs/software/novosort/novosort",
     "express" : "/cephfs/software/express-1.5.1-linux_x86_64/express",
     "express_sl": "/cephfs/users/mbrown/RNAseq/temp_pipelines/express.sl",
@@ -14,7 +16,7 @@
     "filter_bam": "/home/ubuntu/utilities/filter_bam_by_transcript.py",
     "star": "/home/ubuntu/TOOLS/STAR-STAR_2.4.2a/bin/Linux_x86_64_static/STAR",
     "gatk": "/home/ubuntu/TOOLS/GATK-3.6/GenomeAnalysisTK.jar",
-    "VEP": "/home/ubuntu/TOOLS/ensembl-tools-release-85/scripts/variant_effect_predictor/variant_effect_predictor.pl"
+    "VEP": "/cephfs/users/mbrown/PIPELINES/TOOLS/ensembl-tools-release-84/scripts/variant_effect_predictor/variant_effect_predictor.pl",
   },
   "refs": {
     "bwt2": "/cephfs/PROJECTS/MB_REFERENCES_PLUS/GENCODE24GRCH37/Transcript_files/gencode.v24lift37.transcripts",
@@ -35,8 +37,9 @@
     "cap_intvl": "/cephfs/PROJECTS/MB_REFERENCES_PLUS/CAPTURE_BED/S03723314_Covered.intervals",
     "cap_targets": "/cephfs/PROJECTS/MB_REFERENCES_PLUS/CAPTURE_BED/S03723314_Targets.txt",
     "dbSnp_vcf": "/cephfs/PROJECTS/MB_REFERENCES_PLUS/GENCODE24GRCH37/GATK/dbSNP_r142.vcf.gz",
-    "cont": "PDX",
-    "obj": "ALIGN_RNASEQ",
+    "project_dir": "/cephfs/PROJECTS",
+    "project": "PANCAN",
+    "align_dir": "ALIGN_RNASEQ",
     "config": "/cephfs/users/mbrown/RNAseq/utility/config_files/slurm_config.json"
   },
   "params": {

@@ -13,7 +13,7 @@ from utility.job_manager import job_manager
 
 def parse_config(config_file):
     config_data = json.load(open(config_file, 'r'))
-    return config_data['tools']['novosort'], config_data['refs']['cont'], config_data['refs']['obj'], \
+    return config_data['tools']['novosort'], config_data['refs']['project'], config_data['refs']['align_dir'], \
            config_data['params']['threads'], config_data['params']['ram'], config_data['params']['mark_dup']
 
 

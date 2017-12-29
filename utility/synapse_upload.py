@@ -54,7 +54,7 @@ for line in tbl:
         sys.stderr.write(date_time() + swift_cmd + '\nDownloading aligned file ' + cols[-2])
         check = subprocess.check_output(swift_cmd, shell=True, stderr=subprocess.PIPE)
     except:
-        sys.stderr.write(date_time() + 'Download for bid ' + cols[0] + ' failed. Skipping!\n')
+        sys.stderr.write(date_time() + 'Download for bnid ' + cols[0] + ' failed. Skipping!\n')
         continue
     swift_cmd = src_cmd + 'swift download ' + cont + ' ' + cols[-1] + ' --output ' + fu
     try:
@@ -62,7 +62,7 @@ for line in tbl:
         sys.stderr.write(date_time() + swift_cmd + '\nDownloading unaligned file ' + cols[-1])
         check = subprocess.check_output(swift_cmd, shell=True, stderr=subprocess.PIPE)
     except:
-        sys.stderr.write(date_time() + 'Download for bid ' + cols[0] + ' failed. Skipping!\n')
+        sys.stderr.write(date_time() + 'Download for bnid ' + cols[0] + ' failed. Skipping!\n')
         continue
     # comment switching betwen using a local file system or ceph
     #    ln_fa='ln -s ' + cols[-2] + ' ' + fa
@@ -87,9 +87,9 @@ for line in tbl:
         fao = syn.store(fao)
         fuo = syn.store(fuo)
     except:
-        sys.stderr.write(date_time() + 'Upload failed for bid ' + cols[0] + '\n')
+        sys.stderr.write(date_time() + 'Upload failed for bnid ' + cols[0] + '\n')
         exit(1)
-    sys.stderr.write(date_time() + 'Uploading data complete for bid ' + cols[0] + '\nRemoving downloaded bam\n')
+    sys.stderr.write(date_time() + 'Uploading data complete for bnid ' + cols[0] + '\nRemoving downloaded bam\n')
     rm_bam = 'rm ' + fa + ' ' + fu
     subprocess.call(rm_bam, shell=True)
 tbl.close()

@@ -8,7 +8,7 @@ import subprocess
 
 def parse_config(config_file):
     config_data = json.loads(open(config_file, 'r').read())
-    return config_data['refs']['cont'], config_data['refs']['obj']
+    return config_data['refs']['project'], config_data['refs']['align_dir']
 
 
 def qc_bam_pipe(sample_list, config_file, ref_mnt):

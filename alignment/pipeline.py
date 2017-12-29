@@ -57,8 +57,8 @@ class Pipeline():
         self.htseq_count = self.config_data['tools']['htseq-count']
         self.gtf_ref = self.ref_mnt + '/' + self.config_data['refs']['gtf']
         self.tx = self.ref_mnt + '/' + self.config_data['refs']['transcriptome']
-        self.obj = self.config_data['refs']['obj']
-        self.cont = self.config_data['refs']['cont']
+        self.obj = self.config_data['refs']['align_dir']
+        self.cont = self.config_data['refs']['project']
         self.threads = self.config_data['params']['threads']
         self.ram = self.config_data['params']['ram']
         self.sf = self.config_data['params']['stranded']
@@ -207,8 +207,7 @@ def main():
     parser.add_argument('-f2', '--file2', action='store', dest='end2', help='Second fastq file')
     parser.add_argument('-j', '--json', action='store', dest='config_file',
                         help='JSON config file containing tool and reference locations')
-    parser.add_argument('-m', '--mount', action='store', dest='ref_mnt',
-                        help='Drive mount location.  Example would be /mnt/cinder/REFS_XXX')
+
     if len(sys.argv) == 1:
         parser.print_help()
         sys.exit(1)
@@ -218,8 +217,7 @@ def main():
     end1 = inputs.end1
     end2 = inputs.end2
     config_file = inputs.config_file
-    ref_mnt = inputs.ref_mnt
-    Pipeline(end1, end2, config_file, ref_mnt)
+    Pipeline(end1, end2, config_file)
 
 
 if __name__ == "__main__":

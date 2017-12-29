@@ -44,22 +44,22 @@ for line in table:
         meta_dict[info[0]]['cat'] = []
         for cat in cat_list:
             meta_dict[info[0]]['cat'].append(info[cat_dict[cat]])
-        meta_dict[info[0]]['cont'] = {}
-        meta_dict[info[0]]['cont'][cont_list[0]] = 0
+        meta_dict[info[0]]['project'] = {}
+        meta_dict[info[0]]['project'][cont_list[0]] = 0
         for i in range(1, len(cont_list), 1):
-            meta_dict[info[0]]['cont'][cont_list[i]] = [0, 0]
-    meta_dict[info[0]]['cont'][cont_list[0]] += int(info[cont_dict[cont_list[0]]].replace(',', ''))
+            meta_dict[info[0]]['project'][cont_list[i]] = [0, 0]
+    meta_dict[info[0]]['project'][cont_list[0]] += int(info[cont_dict[cont_list[0]]].replace(',', ''))
     for i in range(1, len(cont_list), 1):
         value = info[cont_dict[cont_list[i]]].replace('%', '')
-        meta_dict[info[0]]['cont'][cont_list[i]][0] += float(value)
-        meta_dict[info[0]]['cont'][cont_list[i]][1] += 1
+        meta_dict[info[0]]['project'][cont_list[i]][0] += float(value)
+        meta_dict[info[0]]['project'][cont_list[i]][1] += 1
 table.close()
 
 for bnid in meta_dict:
     sys.stdout.write('\t'.join(meta_dict[bnid]['cat']) + '\t'
-                     + str(meta_dict[bnid]['cont'][cont_list[0]]))
+                     + str(meta_dict[bnid]['project'][cont_list[0]]))
     for i in range(1, len(cont_list), 1):
-        avg = (meta_dict[bnid]['cont'][cont_list[i]][0]/meta_dict[bnid]['cont'][cont_list[i]][1])
+        avg = (meta_dict[bnid]['project'][cont_list[i]][0]/meta_dict[bnid]['project'][cont_list[i]][1])
         sys.stdout.write('\t' + str(avg))
     print
 

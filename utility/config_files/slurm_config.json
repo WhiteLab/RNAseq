@@ -43,6 +43,8 @@
     "config": "/cephfs/users/mbrown/RNAseq/utility/config_files/slurm_config.json"
   },
   "params": {
+    "user": "mbrown",
+    "group": "CPCI",
     "r1adapt": "AGATCGGAAGAGCACACGTCTGAACTCCAGTCA",
     "r2adapt": "AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT",
     "r1trim": "0",

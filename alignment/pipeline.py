@@ -21,12 +21,13 @@ from alignment.parse_qc import parse_qc
 
 
 class Pipeline():
-    def __init__(self, end1, end2, json_config, ref_mnt):
+    def __init__(self, end1, end2, json_config):
         self.json_config = json_config
-        self.end1 = end1
-        self.end2 = end2
+        self.sf1 = end1
+        self.sf2 = end2
+        self.end1 = os.path.basename(self.sf1)
+        self.end2 = os.path.basename(self.sf2)
         self.status = 0
-        self.ref_mnt = ref_mnt
         self.config_data = json.loads(open(self.json_config, 'r').read())
         s = re.match('^(\S+)_1_sequence\.txt\.gz$', self.end1)
         if s:
@@ -36,13 +37,13 @@ class Pipeline():
             self.sample = s.group(1)
         self.loc = 'LOGS/' + self.sample + '.pipe.log'
         HGACID = self.sample.split("_")
-        self.bid = HGACID[0]
+        self.bnid = HGACID[0].decode()
         self.fastqc_tool = self.config_data['tools']['fastqc']
         self.java_tool = self.config_data['tools']['java']
         self.picard_tool = self.config_data['tools']['picard']
         self.novosort = self.config_data['tools']['novosort']
         self.bwt2_tool = self.config_data['tools']['bwt2']
-        self.bwt2_ref = self.ref_mnt + '/' + self.config_data['refs']['bwt2']
+        self.bwt2_ref = self.config_data['refs']['bwt2']
         self.samtools_tool = self.config_data['tools']['samtools']
         self.picard_tmp = 'picard_tmp'
         self.star_tool = self.config_data['tools']['star']
@@ -50,15 +51,19 @@ class Pipeline():
         self.skip_cut = self.config_data['params']['skip_cut']
         if self.pdxflag == 'Y':
             self.mmu_filter = self.config_data['tools']['mouse_filter']
-            self.mmu_star_ref = self.ref_mnt + '/' + self.config_data['refs']['mmu_star']
-            self.hsa_star_ref = self.ref_mnt + '/' + self.config_data['refs']['hsa_star']
-        self.genome_ref = self.ref_mnt + '/' + self.config_data['refs']['genome']
-        self.samtools_ref = self.ref_mnt + '/' + self.config_data['refs']['samtools']
+            self.mmu_star_ref = self.config_data['refs']['mmu_star']
+            self.hsa_star_ref =  self.config_data['refs']['hsa_star']
+        self.genome_ref = self.config_data['refs']['genome']
+        self.samtools_ref =  self.config_data['refs']['samtools']
         self.htseq_count = self.config_data['tools']['htseq-count']
-        self.gtf_ref = self.ref_mnt + '/' + self.config_data['refs']['gtf']
-        self.tx = self.ref_mnt + '/' + self.config_data['refs']['transcriptome']
-        self.obj = self.config_data['refs']['align_dir']
-        self.cont = self.config_data['refs']['project']
+        self.gtf_ref = self.config_data['refs']['gtf']
+        self.tx =  self.config_data['refs']['transcriptome']
+        self.align_dir = self.config_data['refs']['align_dir']
+        self.project = self.config_data['refs']['project']
+        self.project_dir = self.config_data['refs']['project_dir']
+        self.cwd = self.project_dir + '/' + self.project + '/' + self.align_dir + '/' + self.bnid + '/' + self.sample
+        self.user = self.config_data['params']['user']
+        self.group = self.config_data['params']['group']
         self.threads = self.config_data['params']['threads']
         self.ram = self.config_data['params']['ram']
         self.sf = self.config_data['params']['stranded']
@@ -66,8 +71,15 @@ class Pipeline():
 
     def pipeline(self):
         # temp line to source environment variables until compute is restarted
-        src_env = 'source /etc/environment'
+        src_env = '. /etc/environment'
         call(src_env, shell=True)
+
+        # create working directory
+        if not os.path.isdir(self.cwd):
+            mk_cwd = 'mkdir -p ' + self.cwd
+            sys.stderr.write(date_time() + 'Creating working directory ' + mk_cwd + '\n')
+            call(mk_cwd, shell=True)
+        os.chdir(self.cwd)
         log_dir = 'LOGS/'
         if not os.path.isdir(log_dir):
             mk_log_dir = 'mkdir ' + log_dir
@@ -191,7 +203,7 @@ class Pipeline():
         # CUR POS SCRATCH/RAW/
         os.chdir('../../')
         sys.stderr.write(date_time() + 'Uploading results for ' + self.sample + '\n')
-        check = upload_to_swift(self.cont, self.obj)
+        check = upload_to_swift(self.project, self.align_dir)
         if check != 0:
             sys.stderr.write(date_time() + 'Upload failure for ' + self.sample + '\n')
             self.status = 1

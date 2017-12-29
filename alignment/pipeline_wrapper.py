@@ -74,5 +74,3 @@ for line in fh:
             sys.stderr.write(date_time() + 'Batch submission for ' + lane + ' failed! Check logs!\n')
 
 sys.stderr.write(date_time() + "Jobs submitted.  Check logs for any errors\n")
-
-sys.stderr.write(date_time() + "Process complete.  Check logs for any errors\n")

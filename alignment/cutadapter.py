@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import sys
-sys.path.append('/cephfs/users/mbrown/PIPELINES/DNAseq/')
+sys.path.append('/cephfs/users/mbrown/PIPELINES/RNAseq/')
 import os
 import json
 from utility.date_time import date_time
@@ -11,11 +11,9 @@ from utility.log import log
 
 def parse_config(config_file):
     config_data = json.loads(open(config_file, 'r').read())
-    (cutadapt_tool, minlen, r1adapt, r2adapt, r1trim, r2trim, qual, mqual) = (
-    config_data['tools']['cutadapt'], config_data['params']['minlen'], config_data['params']['r1adapt'],
-    config_data['params']['r2adapt'], config_data['params']['r1trim'], config_data['params']['r2trim'],
-    config_data['params']['qual'], config_data['params']['mqual'])
-    return (cutadapt_tool, minlen, r1adapt, r2adapt, r1trim, r2trim, qual, mqual)
+    return config_data['tools']['cutadapt'], config_data['params']['threads'], config_data['params']['minlen'], \
+           config_data['params']['r1adapt'], config_data['params']['r2adapt'], config_data['params']['r1trim'], \
+           config_data['params']['r2trim'], config_data['params']['qual'], config_data['params']['mqual']
 
 
 def cutadapter(sample, end1, end2, config_file):
@@ -24,8 +22,14 @@ def cutadapter(sample, end1, end2, config_file):
     if os.path.isdir('LOGS'):
         log_dir = 'LOGS/'
     loc = log_dir + sample + '.cutadapt.log'
-    (cutadapt_tool, minlen, r1adapt, r2adapt, r1trim, r2trim, qual, mqual) = parse_config(config_file)
-    cutadapt_cmd = cutadapt_tool + ' -m ' + minlen + ' --quality-base=' + qual + ' -q ' + mqual + ' -a ' + r1adapt + ' -A ' + r2adapt + ' -u ' + r1trim + ' -U ' + r2trim + ' -o ' + end1 + ' -p ' + end2 + ' ../' + end1 + ' ../' + end2 + ' >> ' + loc + ' 2>> ' + loc
+    (cutadapt_tool, threads, minlen, r1adapt, r2adapt, r1trim, r2trim, qual, mqual) = parse_config(config_file)
+    cut_th = threads
+    if int(cut_th) >= 4:
+        cut_th = str(int(threads) - 2)
+
+    cutadapt_cmd = cutadapt_tool + '-j ' + cut_th + ' -m ' + minlen + ' --quality-base=' + qual + ' -q ' + mqual \
+                   + ' -a ' + r1adapt + ' -A ' + r2adapt + ' -u ' + r1trim + ' -U ' + r2trim + ' -o ' + end1 \
+                   + ' -p ' + end2 + ' ../' + end1 + ' ../' + end2 + ' >> ' + loc + ' 2>> ' + loc
     log(loc, date_time() + cutadapt_cmd + "\n")
     call(cutadapt_cmd, shell=True)
     return 0

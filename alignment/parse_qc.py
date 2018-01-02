@@ -4,7 +4,7 @@ import json
 import os
 import re
 import sys
-sys.path.append('/cephfs/users/mbrown/PIPELINES/DNAseq/')
+sys.path.append('/cephfs/users/mbrown/PIPELINES/RNAseq/')
 import time
 from utility.date_time import date_time
 from utility.log import log

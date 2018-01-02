@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import sys
-sys.path.append('/cephfs/users/mbrown/PIPELINES/DNAseq/')
+sys.path.append('/cephfs/users/mbrown/PIPELINES/RNAseq/')
 from utility.date_time import date_time
 from utility.log import log
 import json

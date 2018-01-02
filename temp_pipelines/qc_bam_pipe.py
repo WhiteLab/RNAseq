@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import sys
-sys.path.append('/cephfs/users/mbrown/PIPELINES/DNAseq/')
+sys.path.append('/cephfs/users/mbrown/PIPELINES/RNAseq/')
 import json
 from utility.job_manager import job_manager
 import subprocess

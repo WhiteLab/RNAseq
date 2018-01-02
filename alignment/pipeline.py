@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import sys
-sys.path.append('/cephfs/users/mbrown/PIPELINES/DNAseq/')
+sys.path.append('/cephfs/users/mbrown/PIPELINES/RNAseq/')
 import os
 import re
 from utility.date_time import date_time
@@ -35,7 +35,7 @@ class Pipeline():
         else:
             s = re.match('(^\S+)_\D*\d\.f\w*q\.gz$', self.end1)
             self.sample = s.group(1)
-        self.loc = 'LOGS/' + self.sample + '.pipe.log'
+
         HGACID = self.sample.split("_")
         self.bnid = HGACID[0].decode()
         self.fastqc_tool = self.config_data['tools']['fastqc']
@@ -67,6 +67,12 @@ class Pipeline():
         self.threads = self.config_data['params']['threads']
         self.ram = self.config_data['params']['ram']
         self.sf = self.config_data['params']['stranded']
+        self.bam_dir = 'BAMS/'
+        self.qc_dir = 'QC/'
+        self.log_dir = 'LOGS/'
+        self.star_dir = 'STAR_OUT/'
+        self.fq_trimmed = 'TRIMMED_FQ/'
+        self.loc = self.log_dir + self.sample + '.pipe.log'
         self.pipeline()
 
     def pipeline(self):
@@ -80,54 +86,40 @@ class Pipeline():
             sys.stderr.write(date_time() + 'Creating working directory ' + mk_cwd + '\n')
             call(mk_cwd, shell=True)
         os.chdir(self.cwd)
-        log_dir = 'LOGS/'
-        if not os.path.isdir(log_dir):
-            mk_log_dir = 'mkdir ' + log_dir
+        if not os.path.isdir(self.log_dir):
+            mk_log_dir = 'mkdir ' + self.log_dir
             call(mk_log_dir, shell=True)
-            log(self.loc, date_time() + 'Made log directory ' + log_dir + "\n")
-        fq_dir = 'TRIMMED_FQ'
-        if not os.path.isdir(fq_dir):
-            mk_fq_dir = 'mkdir ' + fq_dir
+            log(self.loc, date_time() + 'Made log directory ' + self.log_dir + "\n")
+        if not os.path.isdir(self.fq_trimmed):
+            mk_fq_dir = 'mkdir ' + self.fq_trimmed
             call(mk_fq_dir, shell=True)
-            log(self.loc, date_time() + 'Made fastq trimmed directory ' + fq_dir + "\n")
-        # SCRATCH/RAW/bnid/TRIMMED_FQ
-        os.chdir(fq_dir)
-        mv_fq = 'mv ../LOGS .'
+            log(self.loc, date_time() + 'Made fastq trimmed directory ' + self.fq_trimmed + "\n")
+        os.chdir(self.fq_trimmed)
+        mv_fq = 'mv ../ ' + self.log_dir + ' .'
         call(mv_fq, shell=True)
-        log(self.loc, date_time() + 'Changed into ' + fq_dir + " and moved log directory there\n")
-        star_dir = 'STAR_OUT/'
-        bam_dir = 'BAMS/'
-        qc_dir = 'QC/'
-        if not os.path.isdir(star_dir):
-            mk_star_dir = 'mkdir ' + star_dir
+        log(self.loc, date_time() + 'Changed into ' + self.fq_trimmed + " and moved log directory there\n")
+        if not os.path.isdir(self.star_dir):
+            mk_star_dir = 'mkdir ' + self.star_dir
             call(mk_star_dir, shell=True)
-            log(self.loc, date_time() + 'Made star output directory ' + star_dir + "\n")
-        if not os.path.isdir(bam_dir):
-            mk_bam_dir = 'mkdir ' + bam_dir
+            log(self.loc, date_time() + 'Made star output directory ' + self.star_dir + "\n")
+        if not os.path.isdir(self.bam_dir):
+            mk_bam_dir = 'mkdir ' + self.bam_dir
             call(mk_bam_dir, shell=True)
-            log(self.loc, date_time() + 'Made bam output directory ' + bam_dir + "\n")
-        if not os.path.isdir(qc_dir):
-            mk_qc_dir = 'mkdir ' + qc_dir
+            log(self.loc, date_time() + 'Made bam output directory ' + self.bam_dir + "\n")
+        if not os.path.isdir(self.qc_dir):
+            mk_qc_dir = 'mkdir ' + self.qc_dir
             call(mk_qc_dir, shell=True)
-            log(self.loc, date_time() + 'Made qc directory ' + qc_dir + "\n")
+            log(self.loc, date_time() + 'Made qc directory ' + self.qc_dir + "\n")
         log(self.loc,
             date_time() + "Starting alignment qc for paired end sample files " + self.end1 + " and " + self.end2 + "\n")
-        # inputs
 
-        SAMPLES = {}
-        SAMPLES[self.sample] = {}
-        SAMPLES[self.sample]['f1'] = self.end1
-        SAMPLES[self.sample]['f2'] = self.end2
         # remove adapters
         if self.skip_cut == 'N':
             check = cutadapter(self.sample, self.end1, self.end2, self.json_config)
             if check != 0:
                 log(self.loc, date_time() + 'cutadapt failure for ' + self.sample + '\n')
                 exit(1)
-            # remove original fastqs as they are no longer needed
-            rm_fq = 'rm ../' + self.end1 + ' ../' + self.end2
-            log(self.loc, date_time() + 'deleting untrimmed fastqs, no longer needed\n' + rm_fq + '\n')
-            call(rm_fq, shell=True)
+
             # start fastqc, will run while insert size being calculated
 
             end_ss1 = self.sample + '_1.subset.fastq'
@@ -141,33 +133,33 @@ class Pipeline():
             # check certain key processes
 
             check = bwt2_pe(self.bwt2_tool, self.tx, end_ss1, end_ss2, self.samtools_tool, self.samtools_ref, subset,
-                            self.threads, log_dir)
+                            self.threads, self.log_dir)
             if check != 0:
                 log(self.loc, date_time() + 'Bowtie2 failure for ' + self.sample + '\n')
                 self.status = 1
                 exit(1)
-            check = novosort_sort_pe(self.novosort, subset, log_dir, self.threads,
-                                     self.ram)  # rest won't run until completed
+            check = novosort_sort_pe(self.novosort, subset, self.log_dir, self.threads,
+                                     self.ram, 'coord')  # rest won't run until completed
             if check != 0:
                 log(self.loc, date_time() + 'novosort sort failure for ' + self.sample + '\n')
                 self.status = 1
                 exit(1)
-            (self.x, self.s) = picard_insert_size(self.java_tool, self.picard_tool, subset, log_dir)
+            (self.x, self.s) = picard_insert_size(self.java_tool, self.picard_tool, subset, self.log_dir)
             log(self.loc, date_time() + 'Running qc on fastq file\n')
             fastqc(self.fastqc_tool, self.sample, self.end1, self.end2, self.threads)
         if self.pdxflag == 'Y':
             log(self.loc, date_time() + 'Aligning and filtering reads for mouse contamination')
             check = filter_wrap(self.mmu_filter, self.star_tool, self.mmu_star_ref, self.end1, self.end2,
-                                self.sample, log_dir, self.threads, self.novosort)
+                                self.sample, self.log_dir, self.threads, self.novosort)
             if check != 0:
                 log(self.loc, date_time() + 'Read filter failure for ' + self.sample + '\n')
                 exit(1)
             log(self.loc, date_time() + 'Performing star alignment ' + self.sample + '\n')
-            check = star(self.star_tool, self.hsa_star_ref, self.end1, self.end2, self.sample, log_dir, self.threads,
+            check = star(self.star_tool, self.hsa_star_ref, self.end1, self.end2, self.sample, self.log_dir, self.threads,
                      self.sf)
         else:
             log(self.loc, date_time() + 'Starting star align\n')
-            check = star(self.star_tool, self.genome_ref, self.end1, self.end2, self.sample, log_dir, self.threads,
+            check = star(self.star_tool, self.genome_ref, self.end1, self.end2, self.sample, self.log_dir, self.threads,
                      self.sf)
 
         if check != 0:
@@ -188,14 +180,14 @@ class Pipeline():
             exit(1)
         # move outputs to correct directories and upload
         log(self.loc, date_time() + 'Organizing outputs\n')
-        mv_bams = 'mv *Aligned*.bam  ' + bam_dir
+        mv_bams = 'mv *Aligned*.bam  ' + self.bam_dir
         call(mv_bams, shell=True)
-        mv_star = 'mv  *.tab ' + star_dir
+        mv_star = 'mv  *.tab ' + self.star_dir
         call(mv_star, shell=True)
-        mv_sub = 'mv *subset.insert* *.txt *.pdf *.json ' + qc_dir + '; cp ' + self.json_config + ' ' + qc_dir
+        mv_sub = 'mv *subset.insert* *.txt *.pdf *.json ' + self.qc_dir + '; cp ' + self.json_config + ' ' + self.qc_dir
         call(mv_sub, shell=True)
         # mv subdirectories to right place
-        mv_dir = 'mv ' + ' '.join((bam_dir, log_dir, qc_dir, star_dir)) + ' ../'
+        mv_dir = 'mv ' + ' '.join((self.bam_dir, self.log_dir, self.qc_dir, self.star_dir)) + ' ../'
         call(mv_dir, shell=True)
         rm_tmp = 'rm -rf *STAR* *subset*'
         call(rm_tmp, shell=True)

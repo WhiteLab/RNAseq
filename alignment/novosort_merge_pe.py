@@ -3,7 +3,7 @@ import json
 import os
 import re
 import sys
-sys.path.append('/cephfs/users/mbrown/PIPELINES/DNAseq/')
+sys.path.append('/cephfs/users/mbrown/PIPELINES/RNAseq/')
 from utility.date_time import date_time
 from subprocess import call
 import subprocess

@@ -2,7 +2,7 @@
 
 import sys
 import os
-sys.path.append('/cephfs/users/mbrown/PIPELINES/DNAseq/')
+sys.path.append('/cephfs/users/mbrown/PIPELINES/RNAseq/')
 from utility.date_time import date_time
 from utility.log import log
 from utility.job_manager import job_manager

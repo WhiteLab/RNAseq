@@ -19,6 +19,11 @@ def parse_config(config_file):
 def cutadapter(sample, end1, end2, config_file):
     # casual logging - look for a LOGS directory, otherwise assume current dir
     log_dir = './'
+    # designed to be run in a subdirectory, keep original file names
+    sf1 = end1
+    sf2 = end2
+    end1 = os.path.basename(sf1)
+    end2 = os.path.basename(sf2)
     if os.path.isdir('LOGS'):
         log_dir = 'LOGS/'
     loc = log_dir + sample + '.cutadapt.log'
@@ -29,7 +34,7 @@ def cutadapter(sample, end1, end2, config_file):
 
     cutadapt_cmd = cutadapt_tool + '-j ' + cut_th + ' -m ' + minlen + ' --quality-base=' + qual + ' -q ' + mqual \
                    + ' -a ' + r1adapt + ' -A ' + r2adapt + ' -u ' + r1trim + ' -U ' + r2trim + ' -o ' + end1 \
-                   + ' -p ' + end2 + ' ../' + end1 + ' ../' + end2 + ' >> ' + loc + ' 2>> ' + loc
+                   + ' -p ' + end2 + ' ' + sf1 + ' ' + sf2 + ' >> ' + loc + ' 2>> ' + loc
     log(loc, date_time() + cutadapt_cmd + "\n")
     call(cutadapt_cmd, shell=True)
     return 0

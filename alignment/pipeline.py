@@ -15,7 +15,6 @@ from alignment.picard_insert_size import picard_insert_size
 from alignment.qc_bam import qc_bam
 from alignment.filter_wrap import filter_wrap
 from alignment.star import star
-from utility.upload_to_swift import upload_to_swift
 from subprocess import call
 from alignment.parse_qc import parse_qc
 
@@ -115,7 +114,7 @@ class Pipeline():
 
         # remove adapters
         if self.skip_cut == 'N':
-            check = cutadapter(self.sample, self.end1, self.end2, self.json_config)
+            check = cutadapter(self.sample, self.sf1, self.sf2, self.json_config)
             if check != 0:
                 log(self.loc, date_time() + 'cutadapt failure for ' + self.sample + '\n')
                 exit(1)
@@ -144,7 +143,7 @@ class Pipeline():
                 log(self.loc, date_time() + 'novosort sort failure for ' + self.sample + '\n')
                 self.status = 1
                 exit(1)
-            (self.x, self.s) = picard_insert_size(self.java_tool, self.picard_tool, subset, self.log_dir)
+            (x, s) = picard_insert_size(self.java_tool, self.picard_tool, subset, self.log_dir)
             log(self.loc, date_time() + 'Running qc on fastq file\n')
             fastqc(self.fastqc_tool, self.sample, self.end1, self.end2, self.threads)
         if self.pdxflag == 'Y':
@@ -166,8 +165,8 @@ class Pipeline():
             log(self.loc, date_time() + 'star alignment failure for ' + self.sample + '\n')
             self.status = 1
             exit(1)
-        # run QC on bams and get expression
-        check = qc_bam(self.sample, self.json_config, self.ref_mnt)
+        # run QC on bams
+        check = qc_bam(self.sample, self.json_config)
         if check != 0:
             log(self.loc, date_time() + 'bam qc process failure for ' + self.sample + '\n')
             self.status = 1
@@ -194,12 +193,12 @@ class Pipeline():
 
         # CUR POS SCRATCH/RAW/
         os.chdir('../../')
-        sys.stderr.write(date_time() + 'Uploading results for ' + self.sample + '\n')
-        check = upload_to_swift(self.project, self.align_dir)
-        if check != 0:
-            sys.stderr.write(date_time() + 'Upload failure for ' + self.sample + '\n')
-            self.status = 1
-            exit(1)
+        sys.stderr.write(date_time() + 'Moving subsirs out of ' + self.sample + '\n')
+        mv_dirs = 'mv ' + self.sample + '/* .'
+        call(mv_dirs, shell=True)
+        rm_lane = 'rmdir ' + self.sample
+        call(rm_lane, shell=True)
+
         sys.stderr.write(date_time() + 'Pipeline complete for ' + self.sample + '\n')
         self.status = 0
 

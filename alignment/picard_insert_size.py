@@ -20,7 +20,7 @@ def picard_insert_size(java_tool, picard_tool, sample, log_dir):
     fh.close()
     stat = stats.split('\t')
 
-    return (stat[4], stat[5])
+    return stat[4], stat[5]
 
 
 if __name__ == "__main__":

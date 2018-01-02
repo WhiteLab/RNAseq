@@ -34,7 +34,7 @@ def parseFASTQC(FASTQC, loc):
         exit(1)
 
 
-# dumb helper function to remove parans and retun only last part of line
+# dumb helper function to remove parens and return only last part of line
 def process_parens(cur):
     info = cur.rstrip('\n').split()
     data = info[-1].replace('(', '')
@@ -231,6 +231,7 @@ def parse_qc(config_file, sample):
     json_out.close()
 
     return 0
+
 
 if __name__ == "__main__":
     import argparse

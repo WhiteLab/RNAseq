@@ -165,12 +165,13 @@ class Pipeline:
             self.status = 1
             exit(1)
         # run QC on bams
+        log(self.loc, date_time() + 'Running bam QC on ' + self.sample + '\n')
         check = qc_bam(self.sample, self.json_config)
         if check != 0:
             log(self.loc, date_time() + 'bam qc process failure for ' + self.sample + '\n')
             self.status = 1
             exit(1)
-
+        log(self.loc, date_time() + 'Creating QC summary\n')
         check = parse_qc(self.json_config, self.sample)
         if check != 0:
             log(self.loc, date_time() + 'qc summary failure for ' + self.sample + '\n')

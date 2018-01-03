@@ -2,14 +2,11 @@
 
 import json
 import sys
+import os
 sys.path.append('/cephfs/users/mbrown/PIPELINES/RNAseq/')
-from utility.date_time import date_time
-import subprocess
-from subprocess import check_output
 
 
-def download_from_swift(cont, obj, lane_list):
-    src_cmd = ". /home/ubuntu/.novarc;"
+def qc2table(project_dir, project, align_dir, lane_list):
     lanes = open(lane_list, 'r')
     # header doubles as keys for qc stats dicts
     gen_keys = ("BionimbusID", "Date", "Machine", "Run", "BarCode", "Lane", "align_date", "read_length", "strand")
@@ -28,25 +25,21 @@ def download_from_swift(cont, obj, lane_list):
         line = line.rstrip('\n')
         (bid, seqtype, lane_csv) = line.split('\t')
         for lane in lane_csv.split(', '):
-            cur = obj + '/' + bid + '/QC/' + bid + '_' + lane + '.qc_stats.json'
-            swift_cmd = src_cmd + "swift download " + cont + " --skip-identical --prefix " + cur
-            sys.stderr.write(date_time() + swift_cmd + "\n")
-            try:
-                check = check_output(swift_cmd, shell=True, stderr=subprocess.PIPE)
-            except:
-                sys.stderr.write(date_time() + "Download of " + obj + " from " + cont + " failed\n")
-                exit(1)
-            qc_dict = json.loads(open(cur, 'r').read())
-            data = []
-            for entry in gen_keys:
-                data.append(qc_dict[entry])
-            for entry in cutadapt_keys:
-                data.append(qc_dict['cutadapt_stats'][entry])
-            for entry in star_keys:
-                data.append(qc_dict['STAR_stats'][entry])
-            for entry in picard_keys:
-                data.append(qc_dict['picard_stats'][entry])
-            sys.stdout.write('\t'.join(data) + '\n')
+            cur = project_dir + project + '/' + align_dir + '/' + bid + '/QC/' + bid + '_' + lane + '.qc_stats.json'
+            if os.path.isfile(cur):
+                qc_dict = json.loads(open(cur, 'r').read())
+                data = []
+                for entry in gen_keys:
+                    data.append(qc_dict[entry])
+                for entry in cutadapt_keys:
+                    data.append(qc_dict['cutadapt_stats'][entry])
+                for entry in star_keys:
+                    data.append(qc_dict['STAR_stats'][entry])
+                for entry in picard_keys:
+                    data.append(qc_dict['picard_stats'][entry])
+                sys.stdout.write('\t'.join(data) + '\n')
+            else:
+                sys.stderr.write('Could not find ' + cur + ', SKIP!\n')
     lanes.close()
     return 0
 
@@ -55,9 +48,12 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(description='Uses pipeline lane list to create a summary table of qc stats')
-    parser.add_argument('-c', '--container', action='store', dest='project', help='Swift container prefix, i.e. PANCAN')
-    parser.add_argument('-o', '--object', action='store', dest='align_dir',
-                        help='Swift object name/prefix, i.e. RAW/2015-1234')
+    parser.add_argument('-d', '--project-dir', action='store', dest='project_dir',
+                        help='Project dir, i.e. /cephfs/PROJECTS/')
+    parser.add_argument('-p', '--project', action='store', dest='project',
+                        help='project name, i.e. PANCAN')
+    parser.add_argument('-a', '--align-dir', action='store', dest='align_dir',
+                        help='Alignment subdirectory, i.e. ALIGN_RNASEQ')
     parser.add_argument('-l', '--lane_list', action='store', dest='lane_list',
                         help='Original lane list used to run pipeline')
     if len(sys.argv) == 1:
@@ -65,5 +61,6 @@ if __name__ == "__main__":
         sys.exit(1)
 
     inputs = parser.parse_args()
-    (cont, obj, lane_list) = (inputs.cont, inputs.obj, inputs.lane_list)
-    download_from_swift(cont, obj, lane_list)
+    (project_dir, project, align_dir, lane_list) = (inputs.project_dir, inputs.project, inputs.align_dir,
+                                                    inputs.lane_list)
+    qc2table(project_dir, project, align_dir, lane_list)

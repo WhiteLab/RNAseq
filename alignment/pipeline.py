@@ -17,7 +17,6 @@ from alignment.filter_wrap import filter_wrap
 from alignment.star import star
 from subprocess import call
 from alignment.parse_qc import parse_qc
-import pdb
 
 
 class Pipeline:
@@ -114,7 +113,6 @@ class Pipeline:
 
         # remove adapters
         if self.skip_cut == 'N':
-            pdb.set_trace()
             check = cutadapter(self.sample, self.sf1, self.sf2, self.json_config)
             if check != 0:
                 log(self.loc, date_time() + 'cutadapt failure for ' + self.sample + '\n')

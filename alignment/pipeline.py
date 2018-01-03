@@ -55,7 +55,6 @@ class Pipeline:
             self.hsa_star_ref =  self.config_data['refs']['hsa_star']
         self.genome_ref = self.config_data['refs']['genome']
         self.samtools_ref =  self.config_data['refs']['samtools']
-        self.htseq_count = self.config_data['tools']['htseq-count']
         self.gtf_ref = self.config_data['refs']['gtf']
         self.tx =  self.config_data['refs']['transcriptome']
         self.align_dir = self.config_data['refs']['align_dir']

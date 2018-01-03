@@ -37,7 +37,7 @@
     "cap_intvl": "/cephfs/PROJECTS/MB_REFERENCES_PLUS/CAPTURE_BED/S03723314_Covered.intervals",
     "cap_targets": "/cephfs/PROJECTS/MB_REFERENCES_PLUS/CAPTURE_BED/S03723314_Targets.txt",
     "dbSnp_vcf": "/cephfs/PROJECTS/MB_REFERENCES_PLUS/GENCODE24GRCH37/GATK/dbSNP_r142.vcf.gz",
-    "project_dir": "/cephfs/PROJECTS",
+    "project_dir": "/cephfs/PROJECTS/",
     "project": "PANCAN",
     "align_dir": "ALIGN_RNASEQ",
     "config": "/cephfs/users/mbrown/RNAseq/utility/config_files/slurm_config.json"

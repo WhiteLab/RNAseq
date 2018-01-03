@@ -11,7 +11,6 @@ from utility.date_time import date_time
 from utility.find_project_files import find_project_files
 from subprocess import call
 from utility.log import log
-import pdb
 
 parser = argparse.ArgumentParser(description='Pipeline wrapper script to process multiple paired end set serially.')
 parser.add_argument('-f', '--file', action='store', dest='fn',
@@ -70,7 +69,6 @@ for line in fh:
                 + ' --export=pipeline="' + align_pipe + '",f1="' + sf1 + '",f2="' + sf2 + '",j="' + pipe_cfg + '"' \
                 + ' ' + slurm_wrap
         sys.stderr.write(date_time() + 'Submitting job ' + batch + '\n')
-        pdb.set_trace()
         try:
             call(batch, shell=True)
         except:

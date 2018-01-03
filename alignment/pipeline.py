@@ -37,7 +37,7 @@ class Pipeline:
             self.sample = s.group(1)
 
         HGACID = self.sample.split("_")
-        self.bnid = HGACID[0].decode()
+        self.bnid = HGACID[0]
         self.fastqc_tool = self.config_data['tools']['fastqc']
         self.java_tool = self.config_data['tools']['java']
         self.picard_tool = self.config_data['tools']['picard']

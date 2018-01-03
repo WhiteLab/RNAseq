@@ -60,7 +60,7 @@ class Pipeline:
         self.align_dir = self.config_data['refs']['align_dir']
         self.project = self.config_data['refs']['project']
         self.project_dir = self.config_data['refs']['project_dir']
-        self.cwd = self.project_dir + '/' + self.project + '/' + self.align_dir + '/' + self.bnid + '/' + self.sample
+        self.cwd = self.project_dir + self.project + '/' + self.align_dir + '/' + self.bnid + '/' + self.sample
         self.user = self.config_data['params']['user']
         self.group = self.config_data['params']['group']
         self.threads = self.config_data['params']['threads']
@@ -94,7 +94,7 @@ class Pipeline:
             call(mk_fq_dir, shell=True)
             log(self.loc, date_time() + 'Made fastq trimmed directory ' + self.fq_trimmed + "\n")
         os.chdir(self.fq_trimmed)
-        mv_fq = 'mv ../ ' + self.log_dir + ' .'
+        mv_fq = 'mv ../' + self.log_dir + ' .'
         call(mv_fq, shell=True)
         log(self.loc, date_time() + 'Changed into ' + self.fq_trimmed + " and moved log directory there\n")
         if not os.path.isdir(self.star_dir):

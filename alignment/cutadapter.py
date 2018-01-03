@@ -32,7 +32,7 @@ def cutadapter(sample, end1, end2, config_file):
     if int(cut_th) >= 4:
         cut_th = str(int(threads) - 2)
 
-    cutadapt_cmd = cutadapt_tool + '-j ' + cut_th + ' -m ' + minlen + ' --quality-base=' + qual + ' -q ' + mqual \
+    cutadapt_cmd = cutadapt_tool + ' -j ' + cut_th + ' -m ' + minlen + ' --quality-base=' + qual + ' -q ' + mqual \
                    + ' -a ' + r1adapt + ' -A ' + r2adapt + ' -u ' + r1trim + ' -U ' + r2trim + ' -o ' + end1 \
                    + ' -p ' + end2 + ' ' + sf1 + ' ' + sf2 + ' >> ' + loc + ' 2>> ' + loc
     log(loc, date_time() + cutadapt_cmd + "\n")

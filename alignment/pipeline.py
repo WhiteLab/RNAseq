@@ -185,14 +185,15 @@ class Pipeline:
         call(mv_star, shell=True)
         mv_sub = 'mv *subset.insert* *.txt *.pdf *.json ' + self.qc_dir + '; cp ' + self.json_config + ' ' + self.qc_dir
         call(mv_sub, shell=True)
-        # mv subdirectories to right place
+        # set acls and mv subdirectories to right place
+        set_acl = 'chown -R ' + self.user + ':' + self.group + ' ./;'
+        sys.stderr.write(date_time() + 'Setting acls for current directory ' + set_acl + '\n')
+        call(set_acl, shell=True)
         mv_dir = 'mv ' + ' '.join((self.bam_dir, self.log_dir, self.qc_dir, self.star_dir)) + ' ../'
         call(mv_dir, shell=True)
         rm_tmp = 'rm -rf *STAR* *subset*'
         call(rm_tmp, shell=True)
-        set_acl = 'chown -R ' + self.user + ':' + self.group + ' ./;'
-        sys.stderr.write(date_time() + 'Setting acls for current directory ' + set_acl + '\n')
-        call(set_acl, shell=True)
+
         os.chdir('../../')
         sys.stderr.write(date_time() + 'Moving subdirs out of ' + self.sample + '\n')
         mv_dirs = 'mv ' + self.sample + '/* .'

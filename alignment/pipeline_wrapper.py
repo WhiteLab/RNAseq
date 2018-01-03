@@ -11,6 +11,7 @@ from utility.date_time import date_time
 from utility.find_project_files import find_project_files
 from subprocess import call
 from utility.log import log
+import pdb
 
 parser = argparse.ArgumentParser(description='Pipeline wrapper script to process multiple paired end set serially.')
 parser.add_argument('-f', '--file', action='store', dest='fn',
@@ -35,7 +36,7 @@ def parse_config(config_file):
 
 
 (project_dir, project, align_dir, pipe_cfg, cores, mem, align_pipe, slurm_wrap) = parse_config(inputs.config_file)
-cwd = '/cephfs/PROJECTS/' + project
+cwd = project_dir + project
 if not os.path.isdir(cwd):
     sys.stderr.write(date_time() + 'Could not find working directory ' + cwd
                      + '. Ensure correct project was set in config\n')
@@ -66,8 +67,10 @@ for line in fh:
         log(loc, date_time() + 'Running pipeline process for lane ' + lane + '\n')
         # check class status flag
         batch = 'sbatch -c ' + cores + ' --mem ' + mem + ' -o ' + loc \
-                + ' --export=pipeline="' + align_pipe + '",f1="' + sf1 + '",f2="' + sf2 + '",j="' + pipe_cfg + '"' + ' ' + slurm_wrap
+                + ' --export=pipeline="' + align_pipe + '",f1="' + sf1 + '",f2="' + sf2 + '",j="' + pipe_cfg + '"' \
+                + ' ' + slurm_wrap
         sys.stderr.write(date_time() + 'Submitting job ' + batch + '\n')
+        pdb.set_trace()
         try:
             call(batch, shell=True)
         except:

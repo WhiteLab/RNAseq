@@ -17,9 +17,10 @@ from alignment.filter_wrap import filter_wrap
 from alignment.star import star
 from subprocess import call
 from alignment.parse_qc import parse_qc
+import pdb
 
 
-class Pipeline():
+class Pipeline:
     def __init__(self, end1, end2, json_config):
         self.json_config = json_config
         self.sf1 = end1
@@ -114,6 +115,7 @@ class Pipeline():
 
         # remove adapters
         if self.skip_cut == 'N':
+            pdb.set_trace()
             check = cutadapter(self.sample, self.sf1, self.sf2, self.json_config)
             if check != 0:
                 log(self.loc, date_time() + 'cutadapt failure for ' + self.sample + '\n')
@@ -154,8 +156,8 @@ class Pipeline():
                 log(self.loc, date_time() + 'Read filter failure for ' + self.sample + '\n')
                 exit(1)
             log(self.loc, date_time() + 'Performing star alignment ' + self.sample + '\n')
-            check = star(self.star_tool, self.hsa_star_ref, self.end1, self.end2, self.sample, self.log_dir, self.threads,
-                     self.sf)
+            check = star(self.star_tool, self.hsa_star_ref, self.end1, self.end2, self.sample, self.log_dir,
+                         self.threads, self.sf)
         else:
             log(self.loc, date_time() + 'Starting star align\n')
             check = star(self.star_tool, self.genome_ref, self.end1, self.end2, self.sample, self.log_dir, self.threads,
@@ -177,7 +179,7 @@ class Pipeline():
             log(self.loc, date_time() + 'qc summary failure for ' + self.sample + '\n')
             self.status = 1
             exit(1)
-        # move outputs to correct directories and upload
+        # move outputs to correct directories
         log(self.loc, date_time() + 'Organizing outputs\n')
         mv_bams = 'mv *Aligned*.bam  ' + self.bam_dir
         call(mv_bams, shell=True)
@@ -190,10 +192,11 @@ class Pipeline():
         call(mv_dir, shell=True)
         rm_tmp = 'rm -rf *STAR* *subset*'
         call(rm_tmp, shell=True)
-
-        # CUR POS SCRATCH/RAW/
+        set_acl = 'chown -R ' + self.user + ':' + self.group + ' ./;'
+        sys.stderr.write(date_time() + 'Setting acls for current directory ' + set_acl + '\n')
+        call(set_acl, shell=True)
         os.chdir('../../')
-        sys.stderr.write(date_time() + 'Moving subsirs out of ' + self.sample + '\n')
+        sys.stderr.write(date_time() + 'Moving subdirs out of ' + self.sample + '\n')
         mv_dirs = 'mv ' + self.sample + '/* .'
         call(mv_dirs, shell=True)
         rm_lane = 'rmdir ' + self.sample

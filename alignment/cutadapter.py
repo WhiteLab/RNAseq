@@ -30,7 +30,7 @@ def cutadapter(sample, end1, end2, config_file):
     (cutadapt_tool, threads, minlen, r1adapt, r2adapt, r1trim, r2trim, qual, mqual) = parse_config(config_file)
     cut_th = threads
     if int(cut_th) >= 4:
-        cut_th = str(int(threads) - 2)
+        cut_th = str(int((int(threads) - 2) / 2))
 
     cutadapt_cmd = cutadapt_tool + ' -j ' + cut_th + ' -m ' + minlen + ' --quality-base=' + qual + ' -q ' + mqual \
                    + ' -a ' + r1adapt + ' -A ' + r2adapt + ' -u ' + r1trim + ' -U ' + r2trim + ' -o ' + end1 \

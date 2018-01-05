@@ -44,20 +44,17 @@ def run_novosort(config_file, sample_list):
             exit(1)
 
 
-def preprocess_bams(config_file, sample_pairs):
+def preprocess_bams(config_file, lane_list):
     # create sample list
     sample_list = 'sample_list.txt'
-    fh = open(sample_pairs, 'r')
+    fh = open(lane_list, 'r')
     sl = open(sample_list, 'w')
     temp = {}
     for line in fh:
         cur = line.rstrip('\n').split('\t')
-        if cur[1] not in temp:
+        if cur[0] not in temp:
             sl.write(cur[1] + '\n')
             temp[cur[1]] = 1
-        if cur[2] not in temp:
-            sl.write(cur[2] + '\n')
-            temp[cur[2]] = 1
     sl.close()
     fh .close()
     miss_list = check_for_merged_bams(config_file, sample_list)
@@ -77,7 +74,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='Pre-variant calling step to merge all bam files for each sample '
                                                  'before running')
-    parser.add_argument('-sp', '--sample-pairs', action='store', dest='sample_pairs',
+    parser.add_argument('-l', '--lane-list', action='store', dest='lane_list',
                         help='Tumor/normal sample pair list')
     parser.add_argument('-j', '--json', action='store', dest='config_file',
                         help='JSON config file with tool and ref locations')
@@ -87,5 +84,5 @@ if __name__ == "__main__":
         sys.exit(1)
 
     inputs = parser.parse_args()
-    (sample_pairs, config_file) = (inputs.sample_pairs, inputs.config_file)
-    preprocess_bams(config_file, sample_pairs)
+    (lane_list, config_file) = (inputs.lane_list, inputs.config_file)
+    preprocess_bams(config_file, lane_list)

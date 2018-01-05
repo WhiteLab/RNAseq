@@ -16,8 +16,7 @@ def make_index(index_ref):
     return ind
 
 
-def annot_express(index_ref, sample, ref_mnt):
-    index_ref = ref_mnt + '/' + index_ref
+def annot_express(index_ref, sample):
     ind = make_index(index_ref)
     table = open(sample + '.express_quantification.txt', 'r')
     head = next(table)
@@ -40,8 +39,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Quantify transcripts using STAR output bam')
     parser.add_argument('-i', '--index', action='store', dest='index', help='Reference file with RNA gene names,'
                                                                                 ' type and trasncript ids')
-    parser.add_argument('-m', '--mount', action='store', dest='ref_mnt',
-                        help='Drive mount location.  Example would be /mnt/cinder/REFS_XXX')
     parser.add_argument('-sa', '--sample', action='store', dest='sample', help='Sample name prefix')
 
     if len(sys.argv) == 1:
@@ -51,8 +48,7 @@ if __name__ == "__main__":
     inputs = parser.parse_args()
 
     index = inputs.index
-    ref_mnt = inputs.ref_mnt
     sample = inputs.sample
 
-    annot_express(index, sample, ref_mnt)
+    annot_express(index, sample)
 

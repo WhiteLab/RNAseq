@@ -64,8 +64,9 @@ for line in fh:
                              + ' failed.  Moving on\n')
             continue
         log(loc, date_time() + 'Running pipeline process for lane ' + lane + '\n')
+        job_name = 'rnaseq-align-' + file_prefix
         # check class status flag
-        batch = 'sbatch -c ' + cores + ' --mem ' + mem + ' -o ' + loc \
+        batch = 'sbatch -c ' + cores + ' --mem ' + mem + ' -J ' + job_name + ' -o ' + loc \
                 + ' --export=pipeline="' + align_pipe + '",f1="' + sf1 + '",f2="' + sf2 + '",j="' + pipe_cfg + '"' \
                 + ' ' + slurm_wrap
         sys.stderr.write(date_time() + 'Submitting job ' + batch + '\n')

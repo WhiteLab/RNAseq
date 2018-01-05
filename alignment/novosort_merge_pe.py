@@ -1,91 +1,67 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
+
 import json
-import os
-import re
 import sys
+import os
 sys.path.append('/cephfs/users/mbrown/PIPELINES/RNAseq/')
 from utility.date_time import date_time
-from subprocess import call
+from utility.log import log
 import subprocess
-from analysis.picard_mark_dups import picard_mark_dups
-from utility.job_manager import job_manager
 
 
 def parse_config(config_file):
-    config_data = json.load(open(config_file, 'r'))
-    return config_data['tools']['novosort'], config_data['refs']['project'], config_data['refs']['align_dir'], \
-           config_data['params']['threads'], config_data['params']['ram'], config_data['params']['mark_dup']
+    config_data = json.loads(open(config_file, 'r').read())
+    return config_data['tools']['novosort'], config_data['tools']['java'], config_data['tools']['picard'], \
+           config_data['refs']['project'], config_data['refs']['project_dir'], config_data['refs']['align_dir'], \
+           config_data['params']['threads'], config_data['params']['ram'], \
+           config_data['tools']['novo_merge_rmdup_slurm']
 
 
-def list_bam(cont, obj, sample, th, in_suffix):
-    ct = 0
-    list_cmd = '. /home/ubuntu/.novarc;swift list ' + cont + ' --prefix ' + obj + '/' + sample
-    sys.stderr.write(date_time() + list_cmd + '\nGetting BAM list\n')
-    flist = subprocess.check_output(list_cmd, shell=True)
-    # Use to check on download status
-    p = []
-    bam_list = []
-    for fn in re.findall('(.*)\n', flist):
-        if re.match('^\S+_\d+' + in_suffix + '$', fn):
-            sys.stderr.write(date_time() + 'Downloading relevant BAM file ' + fn + '\n')
-            dl_cmd = '. /home/ubuntu/.novarc;swift download ' + cont + ' --skip-identical ' + fn + ' >> LOGS/' \
-                     + sample + '.novosort_merge.log'
-            p.append(dl_cmd)
-            if fn[-3:] == 'bam':
-                bam_list.append(fn)
-                ct += 1
+def list_bam(project, align, sample):
+    bam_dir = '/cephfs/PROJECTS/' + project + '/' + align + '/' + sample + '/BAM/'
+    find_bam_cmd = 'find ' + bam_dir + '*.Aligned.toTranscriptome.out.bam'
+    sys.stderr.write(date_time() + find_bam_cmd + '\nGetting BAM list\n')
+    try:
+        bam_find = subprocess.check_output(find_bam_cmd, shell=True).decode().rstrip('\n')
+        bam_list = bam_find.split('\n')
+        ct = len(bam_list)
 
-    f = job_manager(p, th)
-    if f == 0:
-        sys.stderr.write(date_time() + 'BAM download complete for sample ' + sample + '\n')
         return bam_list, ct
-    else:
-        sys.stderr.write(date_time() + 'BAM download failed for sample ' + sample + '\n')
+    except:
+        sys.stderr.write(date_time() + 'No bams found for ' + sample + '\n')
         exit(1)
 
 
-def novosort_merge_pe(config_file, sample_list, in_suffix, out_suffix, sort_type):
-    (novosort, cont, obj, th, ram, mflag) = parse_config(config_file)
-    # gives some flexibility if giving a list of samples ot just a single one
-    if os.path.isfile(sample_list):
-        fh = open(sample_list, 'r')
-    else:
-        fh = []
-        fh.append(sample_list)
-    # create temp dir for sorting
-    mk_temp = 'mkdir nova_temp'
-    call(mk_temp, shell=True)
+def novosort_merge_pe(config_file, sample_list):
+    fh = open(sample_list, 'r')
+    (novosort, java_tool, picard_tool, project, project_dir, align, threads, ram, novo_merge_rmdup_slurm) \
+        = parse_config(config_file)
+
     for sample in fh:
         sample = sample.rstrip('\n')
-        (bam_list, n) = list_bam(cont, obj, sample, th, in_suffix)
-        if mflag == 'Y':
-            sys.stderr.write(date_time() + 'Mark duplicates flag given.  Running picard on bams for sample ' + sample
-                             + '\n')
-            for i in range(0, len(bam_list), 1):
-                cur = bam_list[i].replace(in_suffix, '')
-                check = picard_mark_dups(config_file, cur, 'LOGS/', in_suffix)
-                if check != 0:
-                    sys.stderr.write('Picard mark dup failed for ' + sample + '\n')
-                    exit(1)
-
-                bam_list[i] = bam_list[i].replace(in_suffix, '.dup_marked.bam')
+        loc = '../LOGS/' + sample + '.novosort_merge.log'
+        job_loc = sample + '.novosort_merge.log'
+        (bam_list, n) = list_bam(project, align, sample)
         bam_string = " ".join(bam_list)
-        final_bam = sample + out_suffix
-        if sort_type == 'name':
-            novosort_merge_pe_cmd = novosort + " -c " + th + " -m " + ram + "G  -o " + final_bam + ' -n -t' \
-                                ' nova_temp ' + bam_string + ' 2>> LOGS/' + sample + '.novosort_merge.log'
+        cur_dir = project_dir + project + '/' + align + '/' + sample + '/BAM/'
+        os.chdir(cur_dir)
+        out_bam = sample + '.merged.transcriptome.bam'
+        if n > 1:
+            batch = 'sbatch -c ' + threads + ' --mem ' + ram + ' -o ' + job_loc + ' --export=novosort="' \
+                    + novosort + '",threads="' + threads + '",ram="' + ram + 'G",out_bam="' + out_bam \
+                    + '",bam_string="' + bam_string + '",loc="' + loc + '"' + ' ' + novo_merge_rmdup_slurm
+            log(loc, date_time() + 'Submitting merge bam job for sample ' + batch + "\n")
+            subprocess.call(batch, shell=True)
+
+
         else:
-            novosort_merge_pe_cmd = novosort + " -c " + th + " -m " + ram + "G  -o " + final_bam + ' -i -t' \
-                                ' nova_temp ' + bam_string + ' 2>> LOGS/' + sample + '.novosort_merge.log'
-        sys.stderr.write(date_time() + novosort_merge_pe_cmd + "\n")
-        try:
-            subprocess.check_output(novosort_merge_pe_cmd, shell=True)
-        except:
-            sys.stderr.write(date_time() + 'novosort failed for sample ' + sample + '\n')
-            exit(1)
-    rm_temp = 'rm -rf nova_temp'
-    call(rm_temp, shell=True)
-    sys.stderr.write(date_time() + 'Merge process complete\n')
+
+                link_bam = 'ln -s ' + bam_list[0] + ' ' + sample + '.merged.transcriptome.bam;'
+                log(loc, date_time() + 'Creating symlink for merged final bam since only one exists\n'
+                    + link_bam + '\n')
+                subprocess.call(link_bam, shell=True)
+
+    sys.stderr.write(date_time() + 'Merged file request submitted and processed, check logs.\n')
     return 0
 
 
@@ -96,15 +72,11 @@ if __name__ == "__main__":
     parser.add_argument('-sl', '--sample_list', action='store', dest='sample_list', help='Sample/project prefix list')
     parser.add_argument('-j', '--json', action='store', dest='config_file',
                         help='JSON config file with tool and ref locations')
-    parser.add_argument('-os', '--out_bam_suffix', action='store', dest='out_suffix', help='Suffix of output bam')
-    parser.add_argument('-is', '--in_bam_suffix', action='store', dest='in_suffix', help='Suffix of input bam')
-    parser.add_argument('-t', '--sort_type', action='store', dest='sort_type', help='Name or coordinate sort')
 
     if len(sys.argv) == 1:
         parser.print_help()
         sys.exit(1)
 
     inputs = parser.parse_args()
-    (sample_list, config_file, in_suffix, out_suffix, sort_type) = (inputs.sample_list, inputs.config_file,
-                                                                inputs.in_suffix, inputs.out_suffix, inputs.sort_type)
-    novosort_merge_pe(sample_list, config_file, in_suffix, out_suffix, sort_type)
+    (sample_list, config_file) = (inputs.sample_list, inputs.config_file)
+    novosort_merge_pe(config_file, sample_list)

@@ -10,6 +10,7 @@
     "java": "/cephfs/users/mbrown/PIPELINES/TOOLS/jdk1.8.0_152/bin/java",
     "picard": "/cephfs/users/mbrown/PIPELINES/TOOLS/picard-2.16.0/picard.jar",
     "novosort": "/cephfs/software/novosort/novosort",
+    "novo_merge_rmdup_slurm": "/cephfs/users/mbrown/PIPELINES/RNAseq/alignment/slurm_squad/novosort_merge_pe.sl",
     "express" : "/cephfs/software/express-1.5.1-linux_x86_64/express",
     "express_sl": "/cephfs/users/mbrown/RNAseq/temp_pipelines/express.sl",
     "mouse_filter": "/cephfs/users/mbrown/PIPELINES/mouse_filter/filter_bam.py",

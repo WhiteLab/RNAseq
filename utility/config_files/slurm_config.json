@@ -17,7 +17,7 @@
     "filter_bam": "/cephfs/users/mbrown/RNAseq/utilities/filter_bam_by_transcript.py",
     "star": "/cephfs/users/mbrown/PIPELINES/TOOLS/STAR-STAR_2.4.2a/bin/Linux_x86_64_static/STAR",
     "quant_slurm_wrap": "/cephfs/users/mbrown/PIPELINES/RNAseq/analysis/slurm_squad/quant_pipe.sl",
-    "quant_pipe": "/cephfs/users/mbrown/PIPELINES/RNAseq/alignment/analysis/quant_pipe.py",
+    "quant_pipe": "/cephfs/users/mbrown/PIPELINES/RNAseq/analysis/quant_pipe.py",
     "gatk": "/home/ubuntu/TOOLS/GATK-3.6/GenomeAnalysisTK.jar",
     "VEP": "/cephfs/users/mbrown/PIPELINES/TOOLS/ensembl-tools-release-84/scripts/variant_effect_predictor/variant_effect_predictor.pl"
   },

@@ -18,7 +18,7 @@ def parse_config(json_config):
         return config_data['refs']['project_dir'], config_data['refs']['project'], config_data['refs']['align_dir'], \
                config_data['refs']['tx_index'], config_data['params']['capture_flag'], \
                config_data['refs']['cap_targets'], config_data['tools']['samtools'], \
-               config_data['tools']['filter_bam'], config_data['params']['user'], config_file['params']['group']
+               config_data['tools']['filter_bam'], config_data['params']['user'], config_data['params']['group']
     except:
         try:
             sys.stderr.write(date_time() + 'Accessing keys failed.  Attempting to output current keys:\n')

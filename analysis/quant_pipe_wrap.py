@@ -40,7 +40,7 @@ def quant_pipe_wrap(lane, config_file):
         s = []
         f = 0
         for cur_lane in lanes:
-            qc_file = project_dir + project + + '/' + align_dir + '/' + bnid + '/QC/' + bnid + '_' + cur_lane \
+            qc_file = project_dir + project + '/' + align_dir + '/' + bnid + '/QC/' + bnid + '_' + cur_lane \
                       + '.qc_stats.json'
             if os.path.isfile(qc_file):
                 qc_data = json.loads(open(qc_file, 'r').read())
@@ -53,11 +53,11 @@ def quant_pipe_wrap(lane, config_file):
         if f == 0:
             cur_mean = int(round(mean(x)))
             cur_std = int(round(mean(s)))
-            job_name = 'rnaseq-quant-' + bnid
+            job_name = 'rnaseq-quant_' + bnid
             job_log = bnid + '.quant.log'
             batch = 'sbatch -J ' + job_name + ' -c ' + cores + ' --mem ' + mem + ' -o ' + job_log \
                     + ' --export=quant="' + quant_pipe + '",bnid="' + bnid + '",j="' + config_file \
-                    + '",x="' + cur_mean + '",s="' + cur_std + '" ' + quant_slurm_wrap
+                    + '",x="' + str(cur_mean) + '",s="' + str(cur_std) + '" ' + quant_slurm_wrap
             sys.stderr.write(date_time() + 'Submitting job ' + batch + '\n')
             try:
                 call(batch, shell=True)

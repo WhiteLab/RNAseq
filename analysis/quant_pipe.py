@@ -9,6 +9,7 @@ from express_quant import express_quant
 from annotation.annot_express import annot_express
 import subprocess
 import json
+from utility.set_acls import set_acls
 
 
 def parse_config(json_config):
@@ -16,7 +17,8 @@ def parse_config(json_config):
     try:
         return config_data['refs']['project_dir'], config_data['refs']['project'], config_data['refs']['align_dir'], \
                config_data['refs']['tx_index'], config_data['params']['capture_flag'], \
-               config_data['refs']['cap_targets'], config_data['tools']['samtools'], config_data['tools']['filter_bam']
+               config_data['refs']['cap_targets'], config_data['tools']['samtools'], \
+               config_data['tools']['filter_bam'], config_data['params']['user'], config_file['params']['group']
     except:
         try:
             sys.stderr.write(date_time() + 'Accessing keys failed.  Attempting to output current keys:\n')
@@ -31,7 +33,8 @@ def parse_config(json_config):
 
 
 def quant_pipe(sample, x, s, config_file):
-    (project_dir, project, align_dir, tx_index, cflag, ctargets, samtools, filter_bam) = parse_config(config_file)
+    (project_dir, project, align_dir, tx_index, cflag, ctargets, samtools, filter_bam, user, group) \
+        = parse_config(config_file)
     cwd = project_dir + project + '/' + align_dir + '/' + sample
     if os.path.isdir(cwd):
         sys.stderr.write(date_time() + 'Changing to working directory ' + cwd)
@@ -71,7 +74,12 @@ def quant_pipe(sample, x, s, config_file):
         log(loc, date_time() + 'Annotation of eXpress file failed.  Please check logs\n')
         exit(1)
     mv_cmd = 'mv *xpr* REPORTS/;'
+    log(loc, date_time() + 'Organizing outputs' + mv_cmd + '\n')
     subprocess.call(mv_cmd, shell=True)
+    set_acls(report_dir, user, group)
+    set_acls(bam_dir, user, group)
+    set_acls(log_dir, user, group)
+    sys.stderr.write('Quant pipe complete for ' + sample + ', check logs\n')
 
 
 if __name__ == "__main__":

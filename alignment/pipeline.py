@@ -17,6 +17,7 @@ from alignment.filter_wrap import filter_wrap
 from alignment.star import star
 from subprocess import call
 from alignment.parse_qc import parse_qc
+from utility.set_acls import set_acls
 
 
 class Pipeline:
@@ -186,9 +187,7 @@ class Pipeline:
         mv_sub = 'mv *subset.insert* *.txt *.pdf *.json ' + self.qc_dir + '; cp ' + self.json_config + ' ' + self.qc_dir
         call(mv_sub, shell=True)
         # set acls and mv subdirectories to right place
-        set_acl = 'chown -R ' + self.user + ':' + self.group + ' ./;'
-        sys.stderr.write(date_time() + 'Setting acls for current directory ' + set_acl + '\n')
-        call(set_acl, shell=True)
+        set_acls('./', self.user, self.group)
         mv_dir = 'mv ' + ' '.join((self.bam_dir, self.log_dir, self.qc_dir, self.star_dir)) + ' ../'
         call(mv_dir, shell=True)
         rm_tmp = 'rm -rf *STAR* *subset*'

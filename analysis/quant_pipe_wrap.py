@@ -80,6 +80,5 @@ if __name__ == "__main__":
 
     lane = inputs.lane
     config_file = inputs.config_file
-    ref_mnt = inputs.ref_mnt
 
     quant_pipe_wrap(lane, config_file)

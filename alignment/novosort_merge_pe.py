@@ -18,7 +18,7 @@ def parse_config(config_file):
 
 
 def list_bam(project, align, sample):
-    bam_dir = '/cephfs/PROJECTS/' + project + '/' + align + '/' + sample + '/BAM/'
+    bam_dir = '/cephfs/PROJECTS/' + project + '/' + align + '/' + sample + '/BAMS/'
     find_bam_cmd = 'find ' + bam_dir + ' -name *.Aligned.toTranscriptome.out.bam'
     sys.stderr.write(date_time() + find_bam_cmd + '\nGetting BAM list\n')
     try:
@@ -43,7 +43,7 @@ def novosort_merge_pe(config_file, sample_list):
         job_loc = sample + '.novosort_merge.log'
         (bam_list, n) = list_bam(project, align, sample)
         bam_string = " ".join(bam_list)
-        cur_dir = project_dir + project + '/' + align + '/' + sample + '/BAM/'
+        cur_dir = project_dir + project + '/' + align + '/' + sample + '/BAMS/'
         os.chdir(cur_dir)
         out_bam = sample + '.merged.transcriptome.bam'
         if n > 1:

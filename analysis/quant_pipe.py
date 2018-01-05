@@ -37,7 +37,7 @@ def quant_pipe(sample, x, s, config_file):
         sys.stderr.write(date_time() + 'Changing to working directory ' + cwd)
         os.chdir(cwd)
     else:
-        sys.stderr.write(date_time() + 'Currnet working dir ' + cwd + ' Doesn\'t exist! Check inputs\n')
+        sys.stderr.write(date_time() + 'Current working dir ' + cwd + ' Doesn\'t exist! Check inputs\n')
     bam_dir = 'BAMS/'
     report_dir = 'REPORTS/'
     if not os.path.isdir(report_dir):
@@ -68,7 +68,7 @@ def quant_pipe(sample, x, s, config_file):
     # annotate with gene symbol and type, ignore 0 values for ease of use
     check = annot_express(tx_index, sample)
     if check != 0:
-        log(loc, date_time() + 'Annotation of eXpress file.  Please check logs\n')
+        log(loc, date_time() + 'Annotation of eXpress file failed.  Please check logs\n')
         exit(1)
     mv_cmd = 'mv *xpr* REPORTS/;'
     subprocess.call(mv_cmd, shell=True)

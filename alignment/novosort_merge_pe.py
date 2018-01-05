@@ -19,7 +19,7 @@ def parse_config(config_file):
 
 def list_bam(project, align, sample):
     bam_dir = '/cephfs/PROJECTS/' + project + '/' + align + '/' + sample + '/BAM/'
-    find_bam_cmd = 'find ' + bam_dir + '*.Aligned.toTranscriptome.out.bam'
+    find_bam_cmd = 'find ' + bam_dir + ' -name *.Aligned.toTranscriptome.out.bam'
     sys.stderr.write(date_time() + find_bam_cmd + '\nGetting BAM list\n')
     try:
         bam_find = subprocess.check_output(find_bam_cmd, shell=True).decode().rstrip('\n')

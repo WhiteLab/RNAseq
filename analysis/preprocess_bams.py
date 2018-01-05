@@ -75,7 +75,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Pre-variant calling step to merge all bam files for each sample '
                                                  'before running')
     parser.add_argument('-l', '--lane-list', action='store', dest='lane_list',
-                        help='LAne list used for alignment')
+                        help='Lane list used for alignment')
     parser.add_argument('-j', '--json', action='store', dest='config_file',
                         help='JSON config file with tool and ref locations')
 

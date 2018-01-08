@@ -37,7 +37,7 @@ def quant_pipe(sample, x, s, config_file):
         = parse_config(config_file)
     cwd = project_dir + project + '/' + align_dir + '/' + sample
     if os.path.isdir(cwd):
-        sys.stderr.write(date_time() + 'Changing to working directory ' + cwd)
+        sys.stderr.write(date_time() + 'Changing to working directory ' + cwd + '\n')
         os.chdir(cwd)
     else:
         sys.stderr.write(date_time() + 'Current working dir ' + cwd + ' Doesn\'t exist! Check inputs\n')
@@ -76,9 +76,7 @@ def quant_pipe(sample, x, s, config_file):
     mv_cmd = 'mv *xpr* REPORTS/;'
     log(loc, date_time() + 'Organizing outputs' + mv_cmd + '\n')
     subprocess.call(mv_cmd, shell=True)
-    set_acls(report_dir, user, group)
-    set_acls(bam_dir, user, group)
-    set_acls(log_dir, user, group)
+    set_acls(cwd, user, group)
     sys.stderr.write('Quant pipe complete for ' + sample + ', check logs\n')
 
 

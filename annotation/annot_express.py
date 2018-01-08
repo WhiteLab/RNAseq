@@ -27,9 +27,10 @@ def annot_express(index_ref, sample):
         info = line.split('\t')
         if float(info[3]) > 0:
             out_fh.write(ind[info[1]]['name'] + '\t ' + ind[info[1]]['type'] + '\t' + line)
-        else:
-            sys.stderr.write('Skipped ' + ind[info[1]]['name'] + ' ' + ind[info[1]]['type'] + ' ' + info[1]
-                             + ' no reads!\n')
+        # skipping this part, ends up being a fat log generator
+        # else:
+        #     sys.stderr.write('Skipped ' + ind[info[1]]['name'] + ' ' + ind[info[1]]['type'] + ' ' + info[1]
+        #                      + ' no reads!\n')
     table.close()
     return 0
 

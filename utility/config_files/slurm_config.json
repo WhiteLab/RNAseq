@@ -56,7 +56,7 @@
     "mqual": "30",
     "minlen": "20",
     "threads": "8",
-    "ram": "30",
+    "ram": "36",
     "pdxflag": "N",
     "skip_cut":"N",
     "capture_flag": "N",

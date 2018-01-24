@@ -47,7 +47,7 @@ def novosort_merge_pe(config_file, sample_list):
         os.chdir(cur_dir)
         out_bam = sample + '.merged.transcriptome.bam'
         if n > 1:
-            batch = 'sbatch -c ' + threads + ' --mem ' + ram + ' -o ' + job_loc + ' --export=novosort="' \
+            batch = 'sbatch -c ' + threads + ' --mem ' + ram + 'G -o ' + job_loc + ' --export=novosort="' \
                     + novosort + '",threads="' + threads + '",ram="' + ram + 'G",out_bam="' + out_bam \
                     + '",bam_string="' + bam_string + '",loc="' + loc + '"' + ' ' + novo_merge_rmdup_slurm
             log(loc, date_time() + 'Submitting merge bam job for sample ' + batch + "\n")

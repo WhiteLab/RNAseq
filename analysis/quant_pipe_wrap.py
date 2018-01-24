@@ -55,7 +55,7 @@ def quant_pipe_wrap(lane, config_file):
             cur_std = int(round(mean(s)))
             job_name = 'rnaseq-quant_' + bnid
             job_log = bnid + '.quant.log'
-            batch = 'sbatch -J ' + job_name + ' -c ' + cores + ' --mem ' + mem + ' -o ' + job_log \
+            batch = 'sbatch -J ' + job_name + ' -c ' + cores + ' --mem ' + mem + 'G -o ' + job_log \
                     + ' --export=quant="' + quant_pipe + '",bnid="' + bnid + '",j="' + config_file \
                     + '",x="' + str(cur_mean) + '",s="' + str(cur_std) + '" ' + quant_slurm_wrap
             sys.stderr.write(date_time() + 'Submitting job ' + batch + '\n')

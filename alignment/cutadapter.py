@@ -35,6 +35,10 @@ def cutadapter(sample, end1, end2, config_file):
     cutadapt_cmd = cutadapt_tool + ' -j ' + cut_th + ' -m ' + minlen + ' --quality-base=' + qual + ' -q ' + mqual \
                    + ' -a ' + r1adapt + ' -A ' + r2adapt + ' -u ' + r1trim + ' -U ' + r2trim + ' -o ' + end1 \
                    + ' -p ' + end2 + ' ' + sf1 + ' ' + sf2 + ' >> ' + loc + ' 2>> ' + loc
+    if r1adapt == '' and r2adapt == '':
+        cutadapt_cmd = cutadapt_tool + ' -j ' + cut_th + ' -m ' + minlen + ' --quality-base=' + qual + ' -q ' + mqual \
+                       + ' -u ' + r1trim + ' -U ' + r2trim + ' -o ' + end1 + ' -p ' + end2 + ' ' + sf1 + ' ' + sf2 \
+                       + ' >> ' + loc + ' 2>> ' + loc
     log(loc, date_time() + cutadapt_cmd + "\n")
     call(cutadapt_cmd, shell=True)
     return 0
@@ -45,7 +49,7 @@ if __name__ == "__main__":
     import sys
 
     parser = argparse.ArgumentParser(
-        description='cutadapt module.  Removes 3\' adapters and trims bases if necessary.Also can enforce minimum '
+        description='cutadapt module.  Removes 3\' adapters and trims bases if necessary. Also can enforce minimum '
                     'read length - 20 recommended for tophat')
     parser.add_argument('-sa', '--sample', action='store', dest='sample', help='Sample/location name prefix')
     parser.add_argument('-f1', '--file1', action='store', dest='end1', help='First of paired-end fastq file')

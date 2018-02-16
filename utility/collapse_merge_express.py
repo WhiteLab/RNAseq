@@ -2,7 +2,7 @@
 """
 Combines express output tables, collapsing on gene symbol by effective count
 
-Usage: collapse_merge_express.py <ct_list> <type_list> <field> <round>
+Usage: collapse_merge_express.py <ct_list> <type_list> <field> <round> <c_flag>
 
 Arguments:
   <ct_list> list of express count files

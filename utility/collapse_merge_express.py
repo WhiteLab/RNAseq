@@ -54,7 +54,7 @@ def by_gene(tbl_dict, g_dict, g_list, ty_flag, ty_dict, fh, f):
 def by_tx(tbl_dict, g_dict, g_list, ty_flag, ty_dict, fh, f):
     for line in fh:
         info = line.rstrip('\n').split()
-        gene = info[0] + '\t' + info[1]
+        gene = info[0] + '\t' + info[3]
         if ty_flag == 'N' or info[1] in ty_dict:
             if gene not in g_dict:
                 g_list.append(gene)

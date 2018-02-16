@@ -91,9 +91,9 @@ for report in open(args['<ct_list>']):
         (tbl_dict, g_dict, g_list) = by_tx(tbl_dict, g_dict, g_list, ty_flag, ty_dict, fh, f)
 
 if args['<c_flag>'] == 'y':
-    print ('Gene\t' + '\t'.join(s_list))
+    print ('Gene\t' + '\t'.join(s_list) + '\n')
 else:
-    print ('Tx_name\ttx_id\t' + '\t'.join(s_list))
+    print ('Tx_name\ttx_id\t' + '\t'.join(s_list) + '\n')
 if args['<round>'] == 'y':
     for gene in g_list:
         sys.stdout.write(gene)
@@ -102,7 +102,7 @@ if args['<round>'] == 'y':
                 sys.stdout.write('\t' + str(int(round(tbl_dict[gene][samp]))))
             else:
                 sys.stdout.write('\t0')
-        print
+        print ('\n')
 else:
     for gene in g_list:
         sys.stdout.write(gene)
@@ -111,4 +111,4 @@ else:
                 sys.stdout.write('\t' + str(tbl_dict[gene][samp]))
             else:
                 sys.stdout.write('\t0')
-        print
+        print ('\n')

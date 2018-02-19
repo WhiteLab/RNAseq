@@ -2,7 +2,7 @@
 """
 Combines express output tables, collapsing on gene symbol by effective count
 
-Usage: collapse_merge_express.py <ct_list> <type_list> <field> <round> <c_flag>
+Usage: collapse_merge_express.py <ct_list> <type_list> <field> <round> <c_flag> <mode>
 
 Arguments:
   <ct_list> list of express count files
@@ -10,11 +10,13 @@ Arguments:
   <field> name of field to collapse on or default for est_counts
   <round> \'y\' to round values after collapsing
   <c_flag> \'y\' to collapse by gene or just merge by transcript and ENSEMBL id
+  <mode> for collapse on gene mode, use \'median\' or \'sum\'
 
 Options:
   -h
 """
 from docopt import docopt
+from statistics import median
 
 args = docopt(__doc__)
 import sys
@@ -45,8 +47,8 @@ def by_gene(tbl_dict, g_dict, g_list, ty_flag, ty_dict, fh, f):
                 g_dict[gene] = 1
                 tbl_dict[gene] = {}
             if parts[0] not in tbl_dict[gene]:
-                tbl_dict[gene][parts[0]] = 0.0
-            tbl_dict[gene][parts[0]] += float(info[f])
+                tbl_dict[gene][parts[0]] = []
+            tbl_dict[gene][parts[0]].append(float(info[f]))
     fh.close()
     return tbl_dict, g_dict, g_list
 
@@ -65,6 +67,69 @@ def by_tx(tbl_dict, g_dict, g_list, ty_flag, ty_dict, fh, f):
             tbl_dict[gene][parts[0]] += float(info[f])
     fh.close()
     return tbl_dict, g_dict, g_list
+
+def output_gene(s_list, g_list, tbl_dict, mode):
+    print ('Gene\t' + '\t'.join(s_list))
+    if mode == 'median':
+        if args['<round>'] == 'y':
+            for gene in g_list:
+                sys.stdout.write(gene)
+                for samp in s_list:
+                    if samp in tbl_dict[gene]:
+                        sys.stdout.write('\t' + str(int(round(median(tbl_dict[gene][samp])))))
+                    else:
+                        sys.stdout.write('\t0')
+                print ()
+        else:
+            for gene in g_list:
+                sys.stdout.write(gene)
+                for samp in s_list:
+                    if samp in tbl_dict[gene]:
+                        sys.stdout.write('\t' + str(median(tbl_dict[gene][samp])))
+                    else:
+                        sys.stdout.write('\t0')
+                print ()
+    else:
+        if args['<round>'] == 'y':
+            for gene in g_list:
+                sys.stdout.write(gene)
+                for samp in s_list:
+                    if samp in tbl_dict[gene]:
+                        sys.stdout.write('\t' + str(int(round(sum(tbl_dict[gene][samp])))))
+                    else:
+                        sys.stdout.write('\t0')
+                print ()
+        else:
+            for gene in g_list:
+                sys.stdout.write(gene)
+                for samp in s_list:
+                    if samp in tbl_dict[gene]:
+                        sys.stdout.write('\t' + str(sum(tbl_dict[gene][samp])))
+                    else:
+                        sys.stdout.write('\t0')
+                print ()
+
+
+def output_tx(s_list, g_list, tbl_dict):
+    print ('Tx_name\ttx_id\t' + '\t'.join(s_list))
+    if args['<round>'] == 'y':
+        for gene in g_list:
+            sys.stdout.write(gene)
+            for samp in s_list:
+                if samp in tbl_dict[gene]:
+                    sys.stdout.write('\t' + str(int(round(tbl_dict[gene][samp]))))
+                else:
+                    sys.stdout.write('\t0')
+            print ()
+    else:
+        for gene in g_list:
+            sys.stdout.write(gene)
+            for samp in s_list:
+                if samp in tbl_dict[gene]:
+                    sys.stdout.write('\t' + str(tbl_dict[gene][samp]))
+                else:
+                    sys.stdout.write('\t0')
+            print ()
 
 
 for report in open(args['<ct_list>']):
@@ -91,24 +156,7 @@ for report in open(args['<ct_list>']):
         (tbl_dict, g_dict, g_list) = by_tx(tbl_dict, g_dict, g_list, ty_flag, ty_dict, fh, f)
 
 if args['<c_flag>'] == 'y':
-    print ('Gene\t' + '\t'.join(s_list))
+    output_gene(s_list, g_list, tbl_dict, args['<mode>'])
+
 else:
-    print ('Tx_name\ttx_id\t' + '\t'.join(s_list))
-if args['<round>'] == 'y':
-    for gene in g_list:
-        sys.stdout.write(gene)
-        for samp in s_list:
-            if samp in tbl_dict[gene]:
-                sys.stdout.write('\t' + str(int(round(tbl_dict[gene][samp]))))
-            else:
-                sys.stdout.write('\t0')
-        print ()
-else:
-    for gene in g_list:
-        sys.stdout.write(gene)
-        for samp in s_list:
-            if samp in tbl_dict[gene]:
-                sys.stdout.write('\t' + str(tbl_dict[gene][samp]))
-            else:
-                sys.stdout.write('\t0')
-        print ()
+    output_tx(s_list, g_list, tbl_dict)

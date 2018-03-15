@@ -15,7 +15,7 @@
     "express_sl": "/cephfs/users/mbrown/RNAseq/temp_pipelines/express.sl",
     "mouse_filter": "/cephfs/users/mbrown/PIPELINES/mouse_filter/filter_bam.py",
     "filter_bam": "/cephfs/users/mbrown/RNAseq/utilities/filter_bam_by_transcript.py",
-    "star": "/cephfs/users/mbrown/PIPELINES/TOOLS/STAR-STAR_2.4.2a/bin/Linux_x86_64_static/STAR",
+    "star": "/cephfs/users/mbrown/PIPELINES/TOOLS/STAR_2.5.3a/bin/Linux_x86_64/STAR",
     "quant_slurm_wrap": "/cephfs/users/mbrown/PIPELINES/RNAseq/analysis/slurm_squad/quant_pipe.sl",
     "quant_pipe": "/cephfs/users/mbrown/PIPELINES/RNAseq/analysis/quant_pipe.py",
     "gatk": "/home/ubuntu/TOOLS/GATK-3.6/GenomeAnalysisTK.jar",

@@ -2,15 +2,15 @@
 
 import sys
 sys.path.append('/cephfs/users/mbrown/PIPELINES/RNAseq/')
+import os
 from utility.date_time import date_time
-from subprocess import check_output
-import subprocess
 
 
 def skip_lines(fh, stop):
     for i in range(0, stop, 1):
         skip = next(fh)
     return 0
+
 
 def process_line(fh, stop):
     list_list = []
@@ -20,8 +20,8 @@ def process_line(fh, stop):
         list_list.append(cur)
     return list_list
 
-def download_from_swift(cont, obj, lane_list):
-    src_cmd = ". /home/ubuntu/.novarc;"
+
+def merge_filter_stats(project_dir, project, align_dir, lane_list):
     lanes = open(lane_list, 'r')
     head = ''
     data = []
@@ -31,28 +31,23 @@ def download_from_swift(cont, obj, lane_list):
         line = line.rstrip('\n')
         (bid, seqtype, lane_csv) = line.split('\t')
         for lane in lane_csv.split(', '):
-            cur = obj + '/' + bid + '/QC/' + bid + '_' + lane + '.runlog.txt'
-            swift_cmd = src_cmd + "swift download " + cont + " --skip-identical --prefix " + cur
-            sys.stderr.write(date_time() + swift_cmd + "\n")
-            try:
-                check = check_output(swift_cmd, shell=True, stderr=subprocess.PIPE)
-            except:
-                sys.stderr.write(date_time() + "Download of " + obj + " from " + cont + " failed\n")
-                exit(1)
-            stat = open(cur, 'r')
-            skip_lines(stat, 4)
-            temp = []
-            group = process_line(stat, 2)
-            # may need to adjust or switch to regex in a case % sign present
-            unamb_pairs_pct = group[0][-1][:-1]
-            amb_pairs_pct = group[1][-1][:-1]
-            filt = str(100-float(unamb_pairs_pct)-float(amb_pairs_pct))
-            kept = str(float(unamb_pairs_pct) + float(amb_pairs_pct))
-            temp.extend((group[0][6], unamb_pairs_pct, amb_pairs_pct, filt, kept))
+            cur = project_dir + project + '/' + align_dir + '/' + bid + '/QC/' + bid + '_' + lane + '.runlog.txt'
+            if os.path.isfile(cur):
+                stat = open(cur, 'r')
+                skip_lines(stat, 4)
+                temp = []
+                group = process_line(stat, 2)
+                # may need to adjust or switch to regex in a case % sign present
+                unamb_pairs_pct = group[0][-1][:-1]
+                amb_pairs_pct = group[1][-1][:-1]
+                filt = str(100-float(unamb_pairs_pct)-float(amb_pairs_pct))
+                kept = str(float(unamb_pairs_pct) + float(amb_pairs_pct))
+                temp.extend((group[0][6], unamb_pairs_pct, amb_pairs_pct, filt, kept))
 
-            print bid + '\t' + lane + '\t' + '\t'.join(temp)
-            stat.close()
-
+                print bid + '\t' + lane + '\t' + '\t'.join(temp)
+                stat.close()
+            else:
+                sys.stderr.write(date_time() + 'Could not find ' + cur + ' SKIP!\n')
 
     lanes.close()
     sys.stdout.write(head)
@@ -65,9 +60,11 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(description='Uses pipeline lane list to create a summary table of read filter stats')
-    parser.add_argument('-c', '--container', action='store', dest='project', help='Swift container prefix, i.e. PANCAN')
-    parser.add_argument('-o', '--object', action='store', dest='align_dir',
-                        help='Swift object name/prefix, i.e. RAW/2015-1234')
+    parser.add_argument('-d', '--project-dir', action='store', dest='project_dir',
+                        help='Project dir, i.e. /cephfs/PROJECTS/')
+    parser.add_argument('-p', '--project', action='store', dest='project', help='Project directory, i.e. PANCAN')
+    parser.add_argument('-a', '--align-dir', action='store', dest='align_dir',
+                        help='Alignment directory location, i.e. ALIGN')
     parser.add_argument('-l', '--lane_list', action='store', dest='lane_list',
                         help='Original lane list used to run pipeline')
     if len(sys.argv) == 1:
@@ -75,5 +72,5 @@ if __name__ == "__main__":
         sys.exit(1)
 
     inputs = parser.parse_args()
-    (cont, obj, lane_list) = (inputs.cont, inputs.obj, inputs.lane_list)
-    download_from_swift(cont, obj, lane_list)
+    (project_dir, project, align_dir, lane_list) = (inputs.project_dir, inputs.project, inputs.align_dir, inputs.lane_list)
+    merge_filter_stats(project_dir, project, align_dir, lane_list)

@@ -68,6 +68,7 @@ def by_tx(tbl_dict, g_dict, g_list, ty_flag, ty_dict, fh, f):
     fh.close()
     return tbl_dict, g_dict, g_list
 
+
 def output_gene(s_list, g_list, tbl_dict, mode):
     print ('Gene\t' + '\t'.join(s_list))
     if mode == 'median':

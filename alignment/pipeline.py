@@ -184,6 +184,9 @@ class Pipeline:
         call(mv_bams, shell=True)
         mv_star = 'mv  *.tab ' + self.star_dir
         call(mv_star, shell=True)
+        if self.pdxflag == 'Y':
+            mv_filt_log = 'mv *.runlog.txt ' + self.qc_dir
+            call(mv_filt_log, shell=True)
         mv_sub = 'mv *subset.insert* *.txt *.pdf *.json ' + self.qc_dir + '; cp ' + self.json_config + ' ' + self.qc_dir
         call(mv_sub, shell=True)
         # set acls and mv subdirectories to right place

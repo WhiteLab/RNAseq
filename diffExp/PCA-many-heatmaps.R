@@ -1,10 +1,10 @@
 # allows for use with Rscript bash functionality
 args <- commandArgs(TRUE)
 # if using half-rack VM, enviromental proxy setting is required
-Sys.setenv(http_proxy="http://cloud-proxy:3128")
-Sys.setenv(https_proxy="http://cloud-proxy:3128")
-options(BioC_mirror="http://master.bioconductor.org")
-source("http://master.bioconductor.org/biocLite.R")
+# Sys.setenv(http_proxy="http://cloud-proxy:3128")
+# Sys.setenv(https_proxy="http://cloud-proxy:3128")
+# options(BioC_mirror="http://master.bioconductor.org")
+# source("http://master.bioconductor.org/biocLite.R")
 
 #prcomp is used instread of princomp here to perform PCA since:
 # 1) princomp is limited to experiments where observations >> variables
@@ -19,7 +19,7 @@ library(gplots)
 # output_file is the name of the PDF the user would like to create and write to
 # the pdf() function actually creates the pdf
 # temp args array to test script
-#args = c("U049MAI_pca.pdf", "U049MAI_gene_eff_cts.csv", "test_metadata.csv", "cat_list.txt", "cont_list.txt", 6)
+args = c("pca_plus_resid.pdf", 'total_tpm_filtered.txt', 'metadata.txt', 'category_list.txt', 'continuous.txt', 10)
 output_file = args[1]
 pdf(file = output_file)
 
@@ -42,8 +42,8 @@ sub_stop = args[6]
 
 # read in gene expression table and metadata row.names needs to be set to the column number where the row names are listed
 # it is important to set check.names=FALSE so that R doesn't try to change any numerical names into odd characters
-total_raw_counts <- read.table(counts_file, header=TRUE, row.names=1, check.names=FALSE, sep=",")
-metadata <- read.table(meta_file, header=TRUE, row.names=1, check.names=FALSE, sep=",")
+total_raw_counts <- read.table(counts_file, header=TRUE, row.names=1, check.names=FALSE, sep="\t")
+metadata <- read.table(meta_file, header=TRUE, row.names=1, check.names=FALSE, sep="\t")
 
 # converts each table into a data frame
 total_raw_read_counts_dataframe <- as.data.frame(total_raw_counts)
@@ -177,6 +177,7 @@ regress_categorical <- function(pca_matrix, metadata_sorted, category){
     for (pc in seq(1,dim(pca_matrix$rotation)[2])){
         linear_model <- lm(pca_matrix$x[,pc] ~ na.omit(as.factor(metadata_sorted[,category])))
         pca_matrix$x[,pc]  <- linear_model$residuals
+        plot(linear_model$fitted.values, linear_model$residuals, main = paste('Versus fit', category), xlab = 'Fitted values', ylab = 'Residuals')
     }
 
     # call function again on regressed out variables
@@ -189,6 +190,7 @@ regress_continuous <- function(pca_matrix, metadata_sorted, continuous){
     for (pc in seq(1,dim(pca_matrix$rotation)[2])){
       linear_model <- lm(pca_matrix$x[,pc] ~ na.omit(metadata_sorted[,continuous]))
       pca_matrix$x[,pc]  <- linear_model$residuals
+      plot(linear_model$fitted.values, linear_model$residuals, main = paste('Versus fit', continuous), xlab = 'Fitted values', ylab = 'Residuals')
   }
 
     # call function again on regressed out variables

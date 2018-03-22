@@ -4,24 +4,45 @@ sys.path.append('/cephfs/users/mbrown/PIPELINES/RNAseq/')
 from utility.date_time import date_time
 from utility.log import log
 import subprocess
+import math
 
 
-def filter_wrap(mmu_filter, star_tool, genome_ref, end1, end2, sample, log_dir, threads, novosort):
+def filter_wrap(mmu_filter, star_tool, genome_ref, end1, end2, sample, log_dir, threads, novosort, mem):
     meta = sample.split('_')
     RGRP = "ID:" + sample + "\tLB:" + meta[0] + "\tPU:" + meta[4] + "\tSM:" + meta[0] + "\tPL:illumina"
     loc = log_dir + sample + ".mmu.star.pe.log"
     mk_srt_tmp = 'mkdir TMP'
     subprocess.call(mk_srt_tmp, shell=True)
-    threads = str(int(threads) - 2)
-    star_cmd = "(" + star_tool + " --runMode alignReads --outSAMattrRGline " + RGRP \
-            + " --outFileNamePrefix " + sample + ".mmu_filt. --runThreadN " + threads + " --genomeDir " + genome_ref\
+    # split threads for star and novosort as well as memory
+    nmem = 2
+    ncpu = 2
+    threads = int(threads)
+    sthreads = threads
+    if threads >= 10:
+        if threads == 10:
+            sthreads = 6
+            ncpu = 4
+        else:
+            if threads % 2.0 == 0.0:
+                sthreads = int(threads/2)
+                ncpu = int(threads/2)
+            else:
+                sthreads = int(math.ceil(threads/2.0))
+                ncpu = int(math.floor(threads/2.0))
+    else:
+        sthreads = int(sthreads) - 2
+    mem = int(mem)
+    if mem > 42:
+        nmem = mem - 40
+    star_cmd = "(" + star_tool + " --runMode alignReads --outSAMattrRGline " + RGRP + " --outFileNamePrefix " \
+            + sample + ".mmu_filt. --runThreadN " + str(sthreads) + " --genomeDir " + genome_ref\
             + " --readFilesIn " + end1 + " " + end2 + " --readFilesCommand zcat --outSAMtype BAM Unsorted --outStd " \
             "BAM_Unsorted --outFilterType BySJout --outFilterMultimapNmax 20 --alignSJoverhangMin 8 " \
             "--alignSJDBoverhangMin 1 --outFilterMismatchNmax 0" + " --alignIntronMin 20 --alignIntronMax 1000000 " \
-            "--alignMatesGapMax 1000000 --outSAMunmapped Within 2>> " + loc + "  | " + novosort + " - -n -c 2 -m 2G -t"\
-            " TMP 2>> " + loc + " | tee " + sample + ".mmu.nsrt.bam | python " + mmu_filter + " -s " + \
-            sample + " -n 0 -t RNA | gzip -4 -c - > " + sample + "_1.filtered.fq.gz;) 2>&1 | gzip -4 -c - > " + sample \
-            + "_2.filtered.fq.gz"
+            "--alignMatesGapMax 1000000 --outSAMunmapped Within 2>> " + loc + "  | " + novosort + " - -n -c " \
+            + str(ncpu) + " -m " + str(nmem) + "G -t TMP 2>> " + loc + " | tee " + sample + ".mmu.nsrt.bam | python " \
+            + mmu_filter + " -s " + sample + " -n 0 -t RNA | gzip -4 -c - > " + sample \
+            + "_1.filtered.fq.gz;) 2>&1 | gzip -4 -c - > " + sample + "_2.filtered.fq.gz"
 
     log(loc, date_time() + star_cmd + '\n')
     try:
@@ -55,6 +76,8 @@ if __name__ == "__main__":
     parser.add_argument('-l', '--log', action='store', dest='log_dir', help='LOG directory location')
     parser.add_argument('-t', '--threads', action='store', dest='threads',
                         help='Number of threads to use.  8 recommended for standard vm')
+    parser.add_argument('-m', '--memory', action='store', dest='mem',
+                        help='Mem in GB.  Recommend at least 40.')
     parser.add_argument('-n', '--novosort', action='store', dest='novosort',
                         help='Location of novosort to name sort read output')
 
@@ -63,7 +86,5 @@ if __name__ == "__main__":
         sys.exit(1)
 
     inputs = parser.parse_args()
-    (mmu_filter, star_tool, genome_ref, end1, end2, sample, log_dir, threads, novosort) = (
-        inputs.mmu_filter, inputs.star_tool, inputs.genome_ref, inputs.end1, inputs.end2, inputs.sample,
-        inputs.log_dir, inputs.threads, inputs.novosort)
-    filter_wrap(mmu_filter, star_tool, genome_ref, end1, end2, sample, log_dir, threads, novosort)
+    filter_wrap(inputs.mmu_filter, inputs.star_tool, inputs.genome_ref, inputs.end1, inputs.end2, inputs.sample,
+        inputs.log_dir, inputs.threads, inputs.novosort, inputs.mem)

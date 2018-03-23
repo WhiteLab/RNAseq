@@ -1,8 +1,6 @@
 # allows for use with Rscript bash functionality
 args <- commandArgs(TRUE)
-# if using half-rack VM, enviromental proxy setting is required
-# Sys.setenv(http_proxy="http://cloud-proxy:3128")
-# Sys.setenv(https_proxy="http://cloud-proxy:3128")
+
 # options(BioC_mirror="http://master.bioconductor.org")
 # source("http://master.bioconductor.org/biocLite.R")
 
@@ -19,7 +17,7 @@ library(gplots)
 # output_file is the name of the PDF the user would like to create and write to
 # the pdf() function actually creates the pdf
 # temp args array to test script
-args = c("pca_plus_resid.pdf", 'total_tpm_filtered.txt', 'metadata.txt', 'category_list.txt', 'continuous.txt', 10)
+args = c("2018-Mar-22_updated_PCA_w_residuals.pdf", 'PDAC_all_tpm_low_filt.txt', 'metadata.txt', 'category_list.txt', 'continuous.txt', 5)
 output_file = args[1]
 pdf(file = output_file)
 
@@ -56,7 +54,7 @@ total_raw_read_counts_dataframe <- total_raw_read_counts_dataframe[rowSums(total
 #add pseudo-count, why??  Because the log(0) = Does not exist, so to address this issue add 1 to all counts
 total_raw_read_counts_dataframe <- total_raw_read_counts_dataframe + 1
 # take the log of the counts data, this will help normalize the data
-transformed_dataframe <- log(total_raw_read_counts_dataframe)
+transformed_dataframe <- log(total_raw_read_counts_dataframe, 2)
 
 # remove BIDs that have missing or strange data
 # transformed_dataframe <- within(transformed_dataframe, rm('nothing'))
@@ -96,25 +94,26 @@ sapply(metadata_dataframe,levels)
 # corr is better if scales of variables are very different
 # center=TRUE uses the centers the data, use centroid/mean
 pca_matrix <- prcomp(t(counts_sorted), center=TRUE, scale. = TRUE)
-
 # plot the PCs againts how much variance each PC contributes to the data set
 # looking to incorporate the min number of PCs before "elbowing-effect" into the model unless
 # a PC is strongly correlated with a variable in the metadata set, in which case,
 # just regress out the variable rather than the PC
 plot(pca_matrix, type ="l")
 
+
+
 #********************************************Model functions***************************************
 # helper function to iterate through desired fields to regress in two modes - categorical and continuous
-build_categorical_model <- function(factors_affecting_pcs, category, metadata_sorted, pca_matrix, pc){
-    linear_model <- lm(pca_matrix$x[,pc] ~ na.omit(as.factor(metadata_sorted[,category])))
+build_categorical_model <- function(factors_affecting_pcs, category, metadata_sorted, pca_matrix_build, pc){
+    linear_model <- lm(pca_matrix_build$x[,pc] ~ na.omit(as.factor(metadata_sorted[,category])))
     factors_affecting_pcs[[category]][[as.character(pc)]]=list()
     factors_affecting_pcs[[category]][[as.character(pc)]][['adj.r.squared']]=summary(linear_model)$adj.r.squared
     factors_affecting_pcs[[category]][[as.character(pc)]][['-log10Pval']]=-log10(anova(linear_model)$Pr[1])
     return(factors_affecting_pcs)
 }
 
-build_continuous_model <- function(factors_affecting_pcs, continuous_variable, metadata_sorted, pca_matrix, pc){
-    linear_model <- lm(pca_matrix$x[,pc] ~ na.omit(metadata_sorted[,continuous_variable]))
+build_continuous_model <- function(factors_affecting_pcs, continuous_variable, metadata_sorted, pca_matrix_build, pc){
+    linear_model <- lm(pca_matrix_build$x[,pc] ~ na.omit(metadata_sorted[,continuous_variable]))
     factors_affecting_pcs[[continuous_variable]][[as.character(pc)]]=list()
     factors_affecting_pcs[[continuous_variable]][[as.character(pc)]][['adj.r.squared']]=summary(linear_model)$adj.r.squared
     factors_affecting_pcs[[continuous_variable]][[as.character(pc)]][['-log10Pval']]=-log10(anova(linear_model)$Pr[1])
@@ -122,22 +121,22 @@ build_continuous_model <- function(factors_affecting_pcs, continuous_variable, m
 }
 # ************************End model functions*****************************************************
 # ***************************Function to correlate PCs with metadata******************************
-model_pcs <- function(pca_matrix){
+model_pcs <- function(pca_matrix_check){
   # this block of code will need to be changed depending on the metadata columns available
   factors_affecting_pcs=list()
   # iterate through all PCs and get -log10(p-value) and adjusted R-squared value to every PC correlated to each
   # metadata column listed
-  for (pc in seq(1,dim(pca_matrix$rotation)[2])){
+  for (pc in seq(1,dim(pca_matrix_check$rotation)[2])){
     # correlation PCs on factor sex
     # lm() is the Limma library function to build a linear model, in this case each PC is being tested against 'Sex'
     # to determine if any PC is strongly correlated to Sex.  If yes, regress sex out in model
     # Note: in the linear model as.factor() should be placed around categorical variables, while it can be omitted
     # in continuous non-discrete variables
     for (category in cat_list){
-        factors_affecting_pcs = build_categorical_model(factors_affecting_pcs, category, metadata_sorted, pca_matrix, pc)
+        factors_affecting_pcs = build_categorical_model(factors_affecting_pcs, category, metadata_sorted, pca_matrix_check, pc)
     }
     for (continuous_variable in cont_list){
-        factors_affecting_pcs = build_continuous_model(factors_affecting_pcs, continuous_variable, metadata_sorted, pca_matrix, pc)
+        factors_affecting_pcs = build_continuous_model(factors_affecting_pcs, continuous_variable, metadata_sorted, pca_matrix_check, pc)
     }
   }
 
@@ -173,30 +172,34 @@ model_pcs <- function(pca_matrix){
 #*********************************************End of function*******************************************
 
 # ********************************************Regression functions**************************************
-regress_categorical <- function(pca_matrix, metadata_sorted, category){
-    for (pc in seq(1,dim(pca_matrix$rotation)[2])){
-        linear_model <- lm(pca_matrix$x[,pc] ~ na.omit(as.factor(metadata_sorted[,category])))
-        pca_matrix$x[,pc]  <- linear_model$residuals
-        plot(linear_model$fitted.values, linear_model$residuals, main = paste('Versus fit', category), xlab = 'Fitted values', ylab = 'Residuals')
+regress_categorical <- function(pca_matrix_test, metadata_sorted, category){
+    for (pc in seq(1,dim(pca_matrix_test$rotation)[2])){
+        linear_model <- lm(pca_matrix_test$x[,pc] ~ na.omit(as.factor(metadata_sorted[,category])))
+        pca_matrix_test$x[,pc]  <- linear_model$residuals
+        # plot(linear_model$fitted.values, linear_model$residuals, main = paste('Versus fit', category), xlab = 'Fitted values', ylab = 'Residuals')
     }
 
     # call function again on regressed out variables
-    model_pcs(pca_matrix)
-    # writes the variables that were regressed out, NOTE this must be changed manually!!!!!!
+    model_pcs(pca_matrix_test)
     mtext(paste0("vars regressed: ", category), side=3, line=0)
+    plot(linear_model$fitted.values, linear_model$residuals, main = paste('Versus fit', category), xlab = 'Fitted values', ylab = 'Residuals')
+    # writes the variables that were regressed out, NOTE this must be changed manually!!!!!!
+   
 
 }
-regress_continuous <- function(pca_matrix, metadata_sorted, continuous){
-    for (pc in seq(1,dim(pca_matrix$rotation)[2])){
-      linear_model <- lm(pca_matrix$x[,pc] ~ na.omit(metadata_sorted[,continuous]))
-      pca_matrix$x[,pc]  <- linear_model$residuals
-      plot(linear_model$fitted.values, linear_model$residuals, main = paste('Versus fit', continuous), xlab = 'Fitted values', ylab = 'Residuals')
+regress_continuous <- function(pca_matrix_test, metadata_sorted, continuous){
+    for (pc in seq(1,dim(pca_matrix_test$rotation)[2])){
+      linear_model <- lm(pca_matrix_test$x[,pc] ~ na.omit(metadata_sorted[,continuous]))
+      pca_matrix_test$x[,pc]  <- linear_model$residuals
+      
   }
 
     # call function again on regressed out variables
-    model_pcs(pca_matrix)
+    model_pcs(pca_matrix_test)
     # writes the variables that were regressed out, NOTE this must be changed manually!!!!!!
     mtext(paste0("vars regressed: ", continuous), side=3, line=0)
+    plot(linear_model$fitted.values, linear_model$residuals, main = paste('Versus fit', continuous), xlab = 'Fitted values', ylab = 'Residuals')
+
 }
 
 # ********************************************End regression functions**********************************

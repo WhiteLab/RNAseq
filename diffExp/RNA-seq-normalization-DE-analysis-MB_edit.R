@@ -21,8 +21,8 @@ library("BiocParallel")
 # NOTE! row.names=<INTEGER> specifies which column in the data sheets have row names listed, this should be changed depending on the location
 # IMPORTANT!  All gene counts MUST BE INTEGERS, no floats, so please round all counts to nearest INT
 
-total_raw_counts <- read.table(args[1], header=TRUE, row.names=1, check.names=FALSE, sep=",")
-metadata <- read.table(args[2], header=TRUE, row.names=1, check.names=FALSE, sep=",")
+total_raw_counts <- read.table(args[1], header=TRUE, row.names=1, check.names=FALSE, sep="\t")
+metadata <- read.table(args[2], header=TRUE, row.names=1, check.names=FALSE, sep="\t")
 patient = args[3]
 # factor_list <- scan(args[4], what="", sep="\n")
 control = args[4]
@@ -33,7 +33,7 @@ metadata_dataframe <- as.data.frame(metadata)
 
 # sorts dataframes so columns and rows are in same BID order for count data and metadata
 counts_sorted <- total_raw_read_counts_dataframe[,order(colnames(total_raw_read_counts_dataframe))]
-metadata_sorted <- metadata_dataframe[order(rownames(metadata_dataframe))]
+metadata_sorted <- metadata_dataframe[order(rownames(metadata_dataframe)),]
 
 # below statement should result in TRUE, else the two dataframes are not properly sorted
 all(rownames(metadata_sorted)==colnames(counts_sorted))
@@ -73,7 +73,7 @@ boxplot(log10(assays(deseq_obj)[["cooks"]]), range=0, las=2)
 # output normalized count data
 # write.csv(file="") Input the FULL Path and file name of the normalized counts matrix
 norm_counts <- counts(deseq_obj, normalized=TRUE)
-write.csv(norm_counts, file=paste(patient, 'norm_counts.csv', sep="_"))
+write.csv(norm_counts, file=paste(patient, 'norm_counts.csv', sep="_"), quote = FALSE)
 
 for (btype in metadata_sorted$Biotype){
     if (btype != control){
@@ -96,7 +96,7 @@ for (btype in metadata_sorted$Biotype){
         # in at least 3 or more biological replicates
         resOrdered_c_bp <- de_results_control_bp[order(de_results_control_bp$padj),]
         summary(de_results_control_bp)
-        write.csv(as.data.frame(resOrdered_c_bp), file=paste(patient, btype, "vs", control, "diff_exp.csv", sep="_"))
+        write.csv(as.data.frame(resOrdered_c_bp), file=paste(patient, btype, "vs", control, "diff_exp.csv", sep="_"), quote = FALSE)
 
     }
 }

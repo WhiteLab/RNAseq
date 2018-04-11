@@ -17,7 +17,7 @@ library(gplots)
 # output_file is the name of the PDF the user would like to create and write to
 # the pdf() function actually creates the pdf
 # temp args array to test script
-args = c("2018-Mar-22_updated_PCA_w_residuals.pdf", 'PDAC_all_tpm_low_filt.txt', 'metadata.txt', 'category_list.txt', 'continuous.txt', 5)
+args = c("2018-Apr-9_PCA_metadata_corrected.pdf", 'est_cts_tmm.txt', 'metadata.txt', 'category_list.txt', 'continuous.txt')
 output_file = args[1]
 pdf(file = output_file)
 
@@ -36,7 +36,7 @@ meta_file = args[3]
 cat_list <- scan(args[4], what="", sep="\n")
 cont_list <- scan(args[5], what="", sep="\n")
 # set stopping point for
-sub_stop = args[6]
+sub_stop = 5
 
 # read in gene expression table and metadata row.names needs to be set to the column number where the row names are listed
 # it is important to set check.names=FALSE so that R doesn't try to change any numerical names into odd characters
@@ -80,9 +80,11 @@ transformed_dataframe <- transformed_dataframe[rowSums(transformed_dataframe)!=0
 # each other between counts matix and metadata matrix.  Note, you will see the word 'TRUE' printed
 # if they are properly match, else you will see 'FALSE' in which case you need to sort
 counts_sorted <- transformed_dataframe[,order(colnames(transformed_dataframe))]
+# removing batch effect may cause some genes to have 0 varaince, need to remove them
+to_rm = apply(counts_sorted, 1, function(x) length(unique(x)) > 1)
+counts_sorted = counts_sorted[to_rm,]
 metadata_sorted <- metadata_dataframe[order(rownames(metadata_dataframe)),]
 all(rownames(metadata_sorted)==colnames(counts_sorted))
-
 # This part is more important if you are removing data from analysis.  It has to extract and collapse missing
 # levels from the dataframe of data that was removed
 print("getting levels")

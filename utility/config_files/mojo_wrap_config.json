@@ -1,0 +1,20 @@
+{
+  "tools": {
+    "mojo_pipe": "/cephfs/users/mbrown/PIPELINES/RNAseq/run_mojo/mojo_pipe.py",
+    "slurm_wrap": "/cephfs/users/mbrown/PIPELINES/RNAseq/run_mojo/run_mojo.sl",
+    "mojo": "/cephfs/users/mbrown/PIPELINES/TOOLS/MOJO/MOJO-v0.0.5-linux-x86_64/bin/MOJO"
+  },
+  "refs":{
+    "project_dir": "/cephfs/PROJECTS/",
+    "project": "PANCAN",
+    "align_dir": "ALIGN_RNASEQ",
+    "mojo_config": "/cephfs/users/mbrown/PIPELINES/RNAseq/run_mojo/default_config.txt",
+    "config": "/cephfs/users/mbrown/PIPELINES/RNAseq/utility/mojo_wrap_config.json"
+  },
+  "params":{
+    "user": "mbrown",
+    "group": "CPCI",
+    "threads": "8",
+    "ram": "36"
+  }
+}

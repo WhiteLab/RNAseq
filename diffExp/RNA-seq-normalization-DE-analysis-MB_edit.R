@@ -47,7 +47,7 @@ all(rownames(metadata_sorted)==colnames(counts_sorted))
 #   4)  Any variable that appears in the design formula must be present as a column in the metadata
 
 # hard code factors for now
-deseq_obj <- DESeqDataSetFromMatrix(countData= counts_sorted, colData=metadata_sorted , design= ~ Biotype)
+deseq_obj <- DESeqDataSetFromMatrix(countData= counts_sorted, colData=metadata_sorted , design= ~ Run + Biotype)
 
 #set comparison reference/control
 # remember to change the relevel when comparing non-controls
@@ -74,8 +74,9 @@ boxplot(log10(assays(deseq_obj)[["cooks"]]), range=0, las=2)
 # write.csv(file="") Input the FULL Path and file name of the normalized counts matrix
 norm_counts <- counts(deseq_obj, normalized=TRUE)
 write.csv(norm_counts, file=paste(patient, 'norm_counts.csv', sep="_"), quote = FALSE)
-
-for (btype in metadata_sorted$Biotype){
+# keep list of biotypes tested so that you don't repeat them over and over again
+t_list = unique(metadata_sorted$Biotype)
+for (btype in t_list){
     if (btype != control){
 
         # At this step the results will be extracted.  Parallel refers to the number of processor that will be used to
@@ -95,6 +96,7 @@ for (btype in metadata_sorted$Biotype){
         # Any gene with NA as p-value and adjusted p-value (FDR) means it is an outlier by Cooks Distance standards
         # in at least 3 or more biological replicates
         resOrdered_c_bp <- de_results_control_bp[order(de_results_control_bp$padj),]
+        assign(paste('de', btype, sep = "_"), resOrdered_c_bp)
         summary(de_results_control_bp)
         write.csv(as.data.frame(resOrdered_c_bp), file=paste(patient, btype, "vs", control, "diff_exp.csv", sep="_"), quote = FALSE)
 

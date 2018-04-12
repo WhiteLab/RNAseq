@@ -31,8 +31,8 @@ def parse_config(json_config):
 
 def mojo_pipe(sample, config_file, fq1, fq2):
     (project_dir, project, align_dir, mojo, m_config, cores, mem, user, group) = parse_config(config_file)
-    fq_dir = project + project + '/' + align_dir + '/' + sample + '/TRIMMED_FQ/'
-    out_dir = project + project + '/' + align_dir + '/' + sample + '/MOJO/'
+    fq_dir = project_dir + project + '/' + align_dir + '/' + sample + '/TRIMMED_FQ/'
+    out_dir = project_dir + project + '/' + align_dir + '/' + sample + '/MOJO/'
     os.mkdir(out_dir)
     loc = out_dir + sample + 'mojo_run.log'
     log(loc, date_time() + 'Made output directory ' + out_dir + '\n')

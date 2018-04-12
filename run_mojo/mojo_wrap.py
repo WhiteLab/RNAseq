@@ -37,7 +37,7 @@ def mojo_wrap(lane, config_file):
             fq1.append(bnid + '_' + lane + '_1_sequence.txt.gz')
             fq2.append(bnid + '_' + lane + '_2_sequence.txt.gz')
         slurm_cmd = 'sbatch -J ' + bnid + '-MOJO -o ' + bnid + '_mojo.log -c ' + cores + ' --mem ' + mem \
-                    + 'G export=mojo="' + mojo_pipe + '",j="' + config_file + '",a="' + ','.join(fq1) + '",b="' \
+                    + 'G --export=mojo="' + mojo_pipe + '",bnid="' + bnid + '",j="' + config_file + '",a="' + ','.join(fq1) + '",b="' \
                     + ','.join(fq2) + '" ' + mojo_wrap
         sys.stderr.write(date_time() + 'Submitting job ' + slurm_cmd + '\n')
         try:

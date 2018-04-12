@@ -34,7 +34,7 @@ def mojo_pipe(sample, config_file, fq1, fq2):
     fq_dir = project_dir + project + '/' + align_dir + '/' + sample + '/TRIMMED_FQ/'
     out_dir = project_dir + project + '/' + align_dir + '/' + sample + '/MOJO/'
     os.mkdir(out_dir)
-    loc = out_dir + sample + 'mojo_run.log'
+    loc = out_dir + sample + '.mojo_run.log'
     log(loc, date_time() + 'Made output directory ' + out_dir + '\n')
     log(loc, date_time() + 'Changing to fastq directory ' + fq_dir + '\n')
     os.chdir(fq_dir)

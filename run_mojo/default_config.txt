@@ -3,7 +3,7 @@
 #########################################
 
 mojo_install_dir               = /cephfs/users/mbrown/PIPELINES/TOOLS/MOJO/MOJO-v0.0.5-linux-x86_64/bin/
-mojo_reference_dir             = /cephfs/users/mbrown/PIPELINES/TOOLS/MOJO/MOJO-v0.0.5-linux-x86_64/reference.hg19.Ensembl/
+mojo_reference_dir             = /cephfs/PROJECTS/MB_REFERENCES_PLUS/MOJO/reference.hg19.GAF3.0
 mojo_tools_dir                 = /cephfs/users/mbrown/PIPELINES/TOOLS/MOJO/MOJO-v0.0.5-linux-x86_64/external/
 
 #####################################################

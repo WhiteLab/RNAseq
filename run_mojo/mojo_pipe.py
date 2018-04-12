@@ -15,7 +15,7 @@ def parse_config(json_config):
     try:
         return config_data['refs']['project_dir'], config_data['refs']['project'], config_data['refs']['align_dir'], \
                config_data['tools']['mojo'], config_data['refs']['mojo_config'], config_data['params']['threads'], \
-               config_data['params']['ram']
+               config_data['params']['ram'], config_data['params']['user'], config_data['params']['group']
     except:
         try:
             sys.stderr.write(date_time() + 'Accessing keys failed.  Attempting to output current keys:\n')
@@ -30,11 +30,28 @@ def parse_config(json_config):
 
 
 def mojo_pipe(sample, config_file, fq1, fq2):
-    (project_dir, project, align_dir, mojo, m_config, cores, mem) = parse_config(config_file)
+    (project_dir, project, align_dir, mojo, m_config, cores, mem, user, group) = parse_config(config_file)
     fq_dir = project + project + '/' + align_dir + '/' + sample + '/TRIMMED_FQ/'
     out_dir = project + project + '/' + align_dir + '/' + sample + '/MOJO/'
-    os.chdir(fq_dir)
     os.mkdir(out_dir)
+    loc = out_dir + sample + 'mojo_run.log'
+    log(loc, date_time() + 'Made output directory ' + out_dir + '\n')
+    log(loc, date_time() + 'Changing to fastq directory ' + fq_dir + '\n')
+    os.chdir(fq_dir)
+    run_mojo = mojo + ' --config ' + m_config + ' --sample_name ' + sample + ' --output_dir ' + out_dir + ' --fq1 ' \
+               + fq1 + ' --fq2 ' + fq2 + ' --cores ' + cores + ' --mem ' + mem
+    log(loc, date_time() + 'Running MOJO with command ' + run_mojo + '\n')
+    try:
+        subprocess.call(run_mojo, shell=True)
+        log(loc, date_time() + 'MOJO complete! Setting acls\n')
+        check = set_acls(out_dir, user, group)
+        if check == 0:
+            log(loc, date_time() + 'Setting acls complete.  Pipeline complete!\n')
+        else:
+            log(loc, date_time() + 'Setting acls failed.  Check logs!\n')
+    except:
+        sys.stderr.write(date_time() + 'MOJO failed!  Check logs in ' + loc + '\n')
+        return 1
 
 
 if __name__ == "__main__":

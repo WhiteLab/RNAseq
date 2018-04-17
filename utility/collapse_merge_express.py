@@ -7,7 +7,7 @@ Usage: collapse_merge_express.py <ct_list> <type_list> <field> <round> <c_flag> 
 Arguments:
   <ct_list> list of express count files
   <type_list> list of transcript types to accept. Type None not to use one
-  <field> name of field to collapse on or default for est_counts
+  <field> name of field to collapse on or default for eff_counts
   <round> \'y\' to round values after collapsing
   <c_flag> \'y\' to collapse by gene or just merge by transcript and ENSEMBL id
   <mode> for collapse on gene mode, use \'median\' or \'sum\'

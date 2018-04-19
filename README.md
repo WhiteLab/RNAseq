@@ -6,12 +6,12 @@ Disclaimer:  There are other modes and tools in progress outside of what's outli
 
 ## Quick Start - (ain't nobody got time for that!)
 ## CRASH COURSE RUN:
-You don't have time to read through what each script does, and you're a BAMF.  However, being familiar with the Linux environment.
+You don't have time to read through what each script does, and you're a BAMF.  However, being familiar with the Linux environment is highly recommended.
 
 ##### 1) Create job run files
 ###### a) Get list of fastq files to process from swift, one file per line, using a new-line separated list of bionimbus ids:
 ```
-cat     <bnids_list> | xargs -IFN find <fastq file home directory>/BN -name '*.gz' > fastq_list 
+cat <bnids_list> | xargs -IFN find <fastq file home directory>/BN -name '*.gz' > fastq_list 
 ```
 ###### b) Use this list to create a run file, in this example for custom capture:
 ```
@@ -55,12 +55,12 @@ See example config in utility/config_files/slurm_config.json
 ##### 2) Pipeline run - QC:
 
 ```
-/cephfs/users/mbrown/PIPELINES/RNAseq/alignment/pipeline_wrapper.py -f lane_list.txt -j modified_config.json 2> run.log
+<RNAseq pipe dir>/alignment/pipeline_wrapper.py -f lane_list.txt -j modified_config.json 2> run.log
 ```
 
-The pipeline will iterate throught the list, Create run directories with the align_dir specified above, trim fastqs, align with start, and qc the fastq and bam files.  Logs track most of the steps.  Multiple qc tables can ba concatenated for convenience after run using /cephfs/users/mbrown/PIPELINES/RNAseq/alignment/merge_qc_stats.py:
+The pipeline will iterate throught the list, Create run directories with the align_dir specified above, trim fastqs, align with start, and qc the fastq and bam files.  Logs track most of the steps.  Multiple qc tables can ba concatenated for convenience after run using:
 ```
-/cephfs/users/mbrown/PIPELINES/RNAseq/alignment/qc2table.py -h
+<RNAseq pipe dir>/alignment/qc2table.py -h
 usage: qc2table.py [-h] [-d PROJECT_DIR] [-p PROJECT] [-a ALIGN_DIR]
                    [-l LANE_LIST]
 
@@ -83,9 +83,9 @@ Resultant files are organized into subdirectories: TRIMMED_FQ, BAMS, LOGS, and Q
 This will take the same pipeline run files from alignment and run eXpress for transcript-level quantification
 
 ```
-/cephfs/users/mbrown/PIPELINES/RNAseq/analysis/quant_pipe_wrap.py -f lane_list.txt -j modified_config.json 2> run.log
+<RNAseq pipe dir>/analysis/quant_pipe_wrap.py -f lane_list.txt -j modified_config.json 2> run.log
 ```
-It is recommended that you lower th ecpu and memory usage as it is less intensive than the alignment pipeline to about half.
+It is recommended that you lower the cpu and memory usage as it is less intensive than the alignment pipeline to about half.
 eXpress output can be collapsed to a gene-level table, choosing RNA biotype and count type, if desired, using the following helper script:
 
 ```

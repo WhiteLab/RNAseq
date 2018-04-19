@@ -1,131 +1,132 @@
 RNAseq Paired End pipeline
 ===========================
-RNAseq analysis pipeline in two parts, alignment QC and qunatification.  Tools featured are cutadapt, STAR, eXpress, picard.
+RNAseq analysis pipeline in two parts, alignment QC and quantification.  Tools featured are cutadapt, STAR, eXpress, picard.
+Designed to run on an hpc with slurm job controller.
 Disclaimer:  There are other modes and tools in progress outside of what's outlined here.  Use at your own risk!
 
 ## Quick Start - (ain't nobody got time for that!)
 ## CRASH COURSE RUN:
-You don't have time to read through what each script does, and you're a BAMF.  However, being familiar with OpenStack 
-is highly recommended.
+You don't have time to read through what each script does, and you're a BAMF.  However, being familiar with the Linux environment.
 
-##### 1) Set up vm - on head node, will give updates on set up
-VMs related to this pipeline have an image with the suffix RNAseqvx.xx and a date prefix.  Best to choose the latest.
-Image list can be viewed using:
+##### 1) Create job run files
+###### a) Get list of fastq files to process from swift, one file per line, using a new-line separated list of bionimbus ids:
 ```
-nova image-list
+cat     <bnids_list> | xargs -IFN find <fastq file home directory>/BN -name '*.gz' > fastq_list 
 ```
-Find the ID of the image and boot a vm from it.  You can get a list of "flavors;" this sets up number of cpus, ram, and
- disk space.  An flavor with 8 cpus, 32GB RAM, and 400GB ephemeral is recommended.  Flavors can be listed using the 
- following:
+###### b) Use this list to create a run file, in this example for custom capture:
 ```
-nova flavor-list
-```
-Boot vm with your open stack key:
-```
-nova boot --image <image-id> --flavor <flavor-id> --key-name your_key DESIRED_VM_NAME
-```
-
-After issuing the command, you'll get an ID for your vm.  You can use this to track boot progress, listing the 
-current servers:
-```
-nova list
-```
-Be sure to transfer your .novarc credential files upon boot.
-
-##### 2) Get reference files from object store
-Most can be found in the container MB_TEST, object prefix GENCODE24GRCH37/ should get most of what is needed for alignment.
-**Be certain not to download to the root drive.  Ephemeral space is in /mnt, recommended to make a working directory
-there**
-```
-sudo mkdir /mnt/WORK; sudo chown ubuntu:ubuntu /mnt/WORK; swift download MB_TEST --prefix GENCODE24GRCH37/; mv GENCODE24GRCH37
-REFS;
-```
-
-##### 3) Create job run files
-##### a) Get list of fastq files to process from swift, one file per line, using a new-line seprated list of bionimbus ids:
-```
-/home/ubuntu/utility/bid_swift_list.py -c <swift container> -o <object prefix> -l <bnids list> > fastq_list 
-```
-##### b) Use this list to create a run file, in this example for custom capture:
-```
-/home/ubuntu/utility/fq2lane.py -f <fastq_list> -s <seq type> > lane_list
+<RNA pipe home dir>/utility/fq2lane.py -f fastq_list -s <seq type> > lane_list
 ```
 Typical fastq list:
 
-RAW/2014-2230/2014-2230_141212_SN1070_0312_BHB5BNADXX_2_1_sequence.txt.gz
-RAW/2014-2230/2014-2230_141212_SN1070_0312_BHB5BNADXX_2_2_sequence.txt.gz
-RAW/2014-2231/2014-2231_141212_SN1070_0312_BHB5BNADXX_2_1_sequence.txt.gz
-RAW/2014-2231/2014-2231_141212_SN1070_0312_BHB5BNADXX_2_2_sequence.txt.gz
-RAW/2014-2232/2014-2232_141212_SN1070_0312_BHB5BNADXX_2_1_sequence.txt.gz
-RAW/2014-2232/2014-2232_141212_SN1070_0312_BHB5BNADXX_2_2_sequence.txt.gz
-RAW/2014-2232/2014-2232_150501_SN1070_0375_AH3L5KBCXX_1_1_sequence.txt.gz
-RAW/2014-2232/2014-2232_150501_SN1070_0375_AH3L5KBCXX_1_2_sequence.txt.gz
-RAW/2014-2233/2014-2233_141212_SN1070_0312_BHB5BNADXX_2_1_sequence.txt.gz
-RAW/2014-2233/2014-2233_141212_SN1070_0312_BHB5BNADXX_2_2_sequence.txt.gz
+2018-254_180309_NB551089_0045_AHJGNFBGX5_1_1_sequence.txt.gz
+2018-254_180309_NB551089_0045_AHJGNFBGX5_1_2_sequence.txt.gz
+2016-2199_180302_K00216R_0042_BHNVTKBBXX_1_1_sequence.txt.gz
+2016-2199_180302_K00216R_0042_BHNVTKBBXX_1_2_sequence.txt.gz
+2016-2209_180302_K00216R_0042_BHNVTKBBXX_1_1_sequence.txt.gz
+2016-2209_180302_K00216R_0042_BHNVTKBBXX_1_2_sequence.txt.gz
 
 Resultant lane_list:
 
-2014-2232	polyA	141212_SN1070_0312_BHB5BNADXX_2, 150501_SN1070_0375_AH3L5KBCXX_1
-2014-2233	polyA	141212_SN1070_0312_BHB5BNADXX_2
-2014-2230	polyA	141212_SN1070_0312_BHB5BNADXX_2
-2014-2231	polyA	141212_SN1070_0312_BHB5BNADXX_2
+2018-254	capture	180309_NB551089_0045_AHJGNFBGX5_1
+2016-2199	capture	180302_K00216R_0042_BHNVTKBBXX_1
+2016-2209	capture	180302_K00216R_0042_BHNVTKBBXX_1
 
-##### c) Check config file - this file is typically in ~/TOOLS/Scripts/utility/config_files/v2.5_config.json, and can be copied and modified.  Fields that are likely to be adjusted:
+##### c) Check config file - this file is typically in <RNA pipe hoe dir>/utility/config_files/v2.5_config.json, and can be copied and modified.  Fields that are likely to be adjusted:
 
     "refs":{
-	"cont":"PANCAN", # container
-	"obj":"ALIGN", # object prefix
+    "project_dir": "/cephfs/PROJECTS/",
+    "project": "PANCAN", # typically as a subdir if the project dir
+    "align_dir": "ALIGN_RNASEQ", # typically as a subdir of project
+    "config": "/cephfs/users/mbrown/RNAseq/utility/config_files/slurm_config.json" # full path to config file being used
 
-	"config":"/cephfs/users/mbrown/PIPELINES/RNAseq/utility/config_files/complete_config.json" # this file location
     },
     "params":{
 	"threads":"8",
-	"ram":"30",
+	"ram":"36",
+	"user": "mbrown", # this and next param to set acls
+    "group": "CPCI",
     "r1adapt": "AGATCGGAAGAGCACACGTCTGAACTCCAGTCA", # adapter to trim from read 1
     "r2adapt": "AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT", # adapter to trim from read2
-     "strand": "rf-stranded", # strandedness for QC and future qunatification.  change to N if not
+    "strand": "rf-stranded", # strandedness for QC and future qunatification.  change to N if not
     "stranded": "Y" # related flag to above, change to N if not
     }
-
-##### 4) Pipeline run - QC:
+See example config in utility/config_files/slurm_config.json
+##### 2) Pipeline run - QC:
 
 ```
-/cephfs/users/mbrown/PIPELINES/RNAseq/alignment/pipeline_wrapper.py -f lane_list.txt -j modified_config.json -m location_of_volume_mount 2> run.log
-```
--m clarification:
- -m REF_MNT, --mount REF_MNT
-                        Reference drive mount location. Example would be
-                        /mnt/cinder/REFS_XXX
-
-The pipeline will iterate throught the list upload files to swift, and delete on the volume for next run.  Logs track most of the steps.  Multiple qc tables can ba concatenated for convenience after run using /cephfs/users/mbrown/PIPELINES/RNAseq/alignment/merge_qc_stats.py:
-```
-/cephfs/users/mbrown/PIPELINES/RNAseq/alignment/qc2table.py -f <lane_list> -c <swift container> -o <swift object prefix> > qc_table.txt 2> log.txt
+/cephfs/users/mbrown/PIPELINES/RNAseq/alignment/pipeline_wrapper.py -f lane_list.txt -j modified_config.json 2> run.log
 ```
 
-##### 5) Pipline run - Quantification:
+The pipeline will iterate throught the list, Create run directories with the align_dir specified above, trim fastqs, align with start, and qc the fastq and bam files.  Logs track most of the steps.  Multiple qc tables can ba concatenated for convenience after run using /cephfs/users/mbrown/PIPELINES/RNAseq/alignment/merge_qc_stats.py:
+```
+/cephfs/users/mbrown/PIPELINES/RNAseq/alignment/qc2table.py -h
+usage: qc2table.py [-h] [-d PROJECT_DIR] [-p PROJECT] [-a ALIGN_DIR]
+                   [-l LANE_LIST]
+
+Uses pipeline lane list to create a summary table of qc stats
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -d PROJECT_DIR, --project-dir PROJECT_DIR
+                        Project dir, i.e. /cephfs/PROJECTS/
+  -p PROJECT, --project PROJECT
+                        project name, i.e. PANCAN
+  -a ALIGN_DIR, --align-dir ALIGN_DIR
+                        Alignment subdirectory, i.e. ALIGN_RNASEQ
+  -l LANE_LIST, --lane_list LANE_LIST
+                        Original lane list used to run pipeline
+```
+Resultant files are organized into subdirectories: TRIMMED_FQ, BAMS, LOGS, and QC
+
+##### 3) Pipeline run - Quantification:
 This will take the same pipeline run files from alignment and run eXpress for transcript-level quantification
 
 ```
-/cephfs/users/mbrown/PIPELINES/RNAseq/analysis/quant_pipe.py -f lane_list.txt -j modified_config.json -m location_of_volume_mount 2> run.log
+/cephfs/users/mbrown/PIPELINES/RNAseq/analysis/quant_pipe_wrap.py -f lane_list.txt -j modified_config.json 2> run.log
 ```
-
+It is recommended that you lower th ecpu and memory usage as it is less intensive than the alignment pipeline to about half.
 eXpress output can be collapsed to a gene-level table, choosing RNA biotype and count type, if desired, using the following helper script:
 
 ```
-/cephfs/users/mbrown/PIPELINES/RNAseq/utility/collapse_merge_express_by_gene.py <ct_list> <type_list> <field> > output.txt
-```
+/cephfs/users/mbrown/PIPELINES/RNAseq/utility/collapse_merge_express.py -h
+Combines express output tables, collapsing on gene symbol by effective count
+
+Usage: collapse_merge_express.py <ct_list> <type_list> <field> <round> <c_flag> <mode>
+
 Arguments:
   <ct_list> list of express count files
   <type_list> list of transcript types to accept. Type None not to use one
   <field> name of field to collapse on or default for est_counts
+  <round> 'y' to round values after collapsing
+  <c_flag> 'y' to collapse by gene or just merge by transcript and ENSEMBL id
+  <mode> for collapse on gene mode, use 'median' or 'sum'
 
+Options:
+  -h 
+ ```
+#### 4) Optional - fusion detection using MOJO
+Ought to be run after alignment QC regardless of the fact that this pipeline uses a completely different set of tools,
+details at author's github here: https://github.com/cband/MOJO
 
-# Software requirements
-If you are starting from scratch, with some modification, this pipeline can be run on a blank vm running linux or a server that does'nt use an object store.  Be aware that new versions of all likely exist now.  You can use them but you'd have to validate the options and functionality in this framework yourself!
+```
+/cephfs/users/mbrown/PIPELINES/RNAseq/run_mojo/mojo_wrap.py 
+usage: mojo_wrap.py [-h] [-l LANE] [-j CONFIG_FILE]
 
+Search for fusion junctions using MOJO
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -l LANE, --lane LANE  Lane list file
+  -j CONFIG_FILE, --json CONFIG_FILE
+                        JSON config file containing tool and reference
+                        locations
+
+```
+See example config in utility/config_files/mojo_wrap_config.json
 ## Current setup:
 
-#### cutadapt v1.8.1
+#### cutadapt v1.15
 Purpose: Adapter and base quality trimming
 can be installed using:
 
@@ -150,7 +151,7 @@ Obtain from http://www.novocraft.com/products/novosort/
 Purpose: Fastq QC metrics
 Download from https://www.bioinformatics.babraham.ac.uk/projects/fastqc/
 
-#### STAR v2.4.2a
+#### STAR v2.5.2a
 Purpose: RNAseq aligner
 Download pre-built binary from https://github.com/alexdobin/STAR
 
